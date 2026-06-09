@@ -12,13 +12,14 @@ const colors = {
     contrastText: '#ffffff',
   },
   secondary: {
-    main: '#3B4CCA', // Muted Royal Blue
-    light: '#5C66E0',
-    dark: '#2F3EA8',
+    main: '#5A431C',
+    light: '#5A431C',
+    dark: '#5A431C',
     contrastText: '#ffffff',
   },
   background: {
-    default: '#5A431C', // Dark Ochre
+    default: 'linear-gradient(135deg, #5A431C 0%, #1f0303ff 100%)',
+    // default: 'linear-gradient(135deg, #5A431C 0%, #E2A847 100%)',
     paper: '#FFFFFF', // white
   },
   text: {

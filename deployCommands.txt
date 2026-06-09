@@ -1,0 +1,6 @@
+npm run build
+Remove-Item -Recurse -Force docs
+Copy-Item -Recurse dist docs
+git add docs
+git commit -m "Publish build to docs for GitHub Pages"
+git push origin dev

@@ -1,5 +1,6 @@
 import { Box, Typography, Button, Stack } from '@mui/material';
-import heroBG from '../../assets/images/hero-bg.png';
+import heroBG from '../../assets/images/hero-bg.jpg';
+import { navbarHeight } from 'src/utils/constants';
 
 const HeroSection = () => {
   return (
@@ -22,7 +23,6 @@ const HeroSection = () => {
         sx={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(0,0,0,0.55)',
         }}
       />
 
