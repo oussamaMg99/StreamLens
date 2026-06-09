@@ -4,6 +4,7 @@ import { navbarHeight } from 'src/utils/constants';
 import { useEffect, useState } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useTranslation } from 'react-i18next';
 // import MovieIcon from '@mui/icons-material/Movie';
 // import LiveTvIcon from '@mui/icons-material/LiveTv';
 // import InfoIcon from '@mui/icons-material/Info';
@@ -12,6 +13,7 @@ const Navbar = () => {
   const [openMenu, setOpenMenu] = useState(false);
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isMdUp && openMenu) setOpenMenu(false);
@@ -43,7 +45,7 @@ const Navbar = () => {
           >
             {/* Logo placeholder */}
             <Typography variant='h4' sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' } }}>
-              StreamLens
+              {t('appName')}
             </Typography>
             {/* nav links (hide on small screens if desired) */}
             <Box
@@ -53,9 +55,9 @@ const Navbar = () => {
                 gap: 2,
               }}
             >
-              <Button variant='text'>{'Movies'}</Button>
-              <Button variant='text'>{'TV Shows'}</Button>
-              <Button variant='text'>{'About'}</Button>
+              <Button variant='text'>{t('movies')}</Button>
+              <Button variant='text'>{t('tvShows')}</Button>
+              <Button variant='text'>{t('about')}</Button>
             </Box>
             {/* Search Bar */}
             <Box
@@ -81,7 +83,7 @@ const Navbar = () => {
                 <MenuIcon color='primary' />
               </IconButton>
 
-              <InputBase placeholder='Search StreamLens' sx={{ ml: 1, flex: 1 }} />
+              <InputBase placeholder={t('searchStreamLens')} sx={{ ml: 1, flex: 1 }} />
               <IconButton type='button' aria-label='search'>
                 <SearchIcon color='primary' />
               </IconButton>

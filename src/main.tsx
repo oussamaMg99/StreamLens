@@ -7,6 +7,7 @@ import colors from './assets/themes/colors';
 import { AppContextProvider } from './core/context/global/AppContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
+import './assets/locales/i18n';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +26,7 @@ createRoot(document.getElementById('root')!).render(
       <AppContextProvider>
         <div style={{ background: colors.background.default }}>
           <ThemeProvider theme={theme}>
-          <App />
+            <App />
           </ThemeProvider>
         </div>
       </AppContextProvider>

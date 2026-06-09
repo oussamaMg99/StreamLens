@@ -8,8 +8,10 @@ import { usePopularMovies } from 'src/core/hooks/usePopularMovies';
 import { usePopularTvShows } from 'src/core/hooks/usePopularTvShows';
 import { Movie } from 'src/core/services/movie.service';
 import { TvShow } from 'src/core/services/tv.service';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
+  const { t } = useTranslation();
   const { alertDialogProps, snackBarProps, setAlertDialogProps, setSnackBarProps } = useContext(AppContext);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<(TvShow & Movie) | null>(null);
@@ -32,27 +34,28 @@ const Home = () => {
 
   useEffect(() => {
     setAlertDialogProps({
-        loadingAnimation: true,
-        open: true,
-        title: 'AlertDialog Title',
-        content: 'Testing if Alert Dialog component works ',
-        confirmLabel: 'OK',
-        closeLabel: 'Close',
-        onConfirm: async () => {
-          try {
-            // Logic for confirm action
-            return true;
-          } catch (error: any) {
-            setSnackBarProps({
-              open: true,
-              severity: 'error',
-              message: error.message ? error.message : 'common.errorOccurred',
-            });
-          } finally {
-            setAlertDialogProps();
-          }
-        },
-      });
+      loadingAnimation: true,
+      open: true,
+      title: 'AlertDialog Title',
+      content: 'Testing if Alert Dialog component works ',
+      confirmLabel: t('ok'),
+      closeLabel: t('close'),
+      onConfirm: async () => {
+        try {
+          // Logic for confirm action
+          console.log('Confirmed!');
+          return true;
+        } catch (error: any) {
+          setSnackBarProps({
+            open: true,
+            severity: 'error',
+            message: error.message ? error.message : t('errorOccurred'),
+          });
+        } finally {
+          setAlertDialogProps();
+        }
+      },
+    });
   }, []);
 
   return (
@@ -60,8 +63,13 @@ const Home = () => {
       <SummaryModal open={isSummaryModalOpen} item={selectedItem ?? undefined} onClose={() => setIsSummaryModalOpen(false)} />
       <NavBar />
       <HeroSection />
-      <PopularSection loading={tvLoading} title='Popular TV Shows' data={popularTvData?.results ?? []} onItemClick={onItemClick} />
-      <PopularSection loading={moviesLoading} title='Popular Movies' data={popularMoviesData?.results ?? []} onItemClick={onItemClick} />
+      <PopularSection loading={tvLoading} title={t('popularTVShows')} data={popularTvData?.results ?? []} onItemClick={onItemClick} />
+      <PopularSection
+        loading={moviesLoading}
+        title={t('popularMovies')}
+        data={popularMoviesData?.results ?? []}
+        onItemClick={onItemClick}
+      />
     </>
   );
 };

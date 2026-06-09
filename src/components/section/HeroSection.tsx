@@ -1,8 +1,9 @@
 import { Box, Typography, Button, Stack } from '@mui/material';
 import heroBG from '../../assets/images/hero-bg.jpg';
-import { navbarHeight } from 'src/utils/constants';
+import { useTranslation } from 'react-i18next';
 
 const HeroSection = () => {
+  const { t } = useTranslation();
   return (
     <Box
       sx={{
@@ -36,7 +37,7 @@ const HeroSection = () => {
             letterSpacing: '0.5px',
           }}
         >
-          Discover Cinematic Stories That Breathe Life
+          {t('heroSectionTitle')}
         </Typography>
 
         <Typography
@@ -47,11 +48,10 @@ const HeroSection = () => {
             fontSize: '1.1rem',
           }}
         >
-          Explore a curated collection of movies and TV shows that transport you beyond the ordinary. Every frame tells a story waiting to
-          be experienced.
+          {t('heroSectionDescription')}
         </Typography>
 
-        <Stack direction='row' spacing={2} justifyContent='center' sx={{ flexWrap: 'wrap' }}>
+        <Stack direction='row' spacing={2} sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
           <Button
             variant='contained'
             color='primary'
@@ -62,7 +62,7 @@ const HeroSection = () => {
               textTransform: 'none',
             }}
           >
-            Explore
+            {t('explore')}
           </Button>
           <Button
             variant='outlined'
@@ -76,7 +76,7 @@ const HeroSection = () => {
               '&:hover': { borderColor: 'primary.main', color: 'primary.main' },
             }}
           >
-            Watch
+            {t('watch')}
           </Button>
         </Stack>
       </Box>
