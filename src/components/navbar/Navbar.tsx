@@ -123,9 +123,40 @@ const Navbar = () => {
               <IconButton type='button' aria-label='language' onClick={handleClick}>
                 <LanguageIcon color='primary' />
               </IconButton>
-              <Menu sx={{ color: colors.primary.main }} anchorEl={anchorEl} open={open} onClose={handleClose}>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      backgroundColor: colors.phantomBlack,
+                      backdropFilter: theme => `blur(${theme.spacing(2)})`,
+                      mt: 1,
+                    },
+                  },
+                }}
+              >
                 {languageOptions.map(option => (
-                  <MenuItem key={option.code} onClick={() => handleLanguageChange(option.code)}>
+                  <MenuItem
+                    key={option.code}
+                    selected={i18n.language === option.code}
+                    onClick={() => handleLanguageChange(option.code)}
+                    sx={{
+                      color: colors.text.primary,
+                      '&.Mui-selected': {
+                        color: colors.primary.main,
+                        backgroundColor: 'rgba(226, 168, 71, 0.15)',
+                      },
+                      '&:hover': {
+                        color: colors.primary.main,
+                        backgroundColor: 'rgba(226, 168, 71, 0.1)',
+                      },
+                      '&.Mui-selected:hover': {
+                        backgroundColor: 'rgba(226, 168, 71, 0.2)',
+                      },
+                    }}
+                  >
                     {option.label}
                   </MenuItem>
                 ))}
