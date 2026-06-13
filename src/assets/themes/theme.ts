@@ -16,10 +16,10 @@ const theme = createTheme({
       dark: '#5A431C',
       contrastText: '#ffffff',
     },
-    // background: {
-    //   default: colors.background.default, // Dark Ochre
-    //   paper: '#FFFFFF', // white
-    // },
+    background: {
+      default: colors.background.default, // Dark Ochre
+      paper: '#FFFFFF', // white
+    },
     text: {
       primary: '#FFFFE3', // Soft Ivory
       secondary: '#1E1E1E', // Graphite
@@ -219,7 +219,7 @@ const theme = createTheme({
       styleOverrides: {
         paper: {
           borderRadius: 10,
-          backgroundColor: colors.secondary.main,
+          background: colors.background.default,
         },
       },
     },

@@ -24,5 +24,13 @@
   "heroSectionDescription": "استكشف مجموعة منتقاة من الأفلام والمسلسلات التي تنقلك إلى ما هو أبعد من المألوف. كل لقطة تحكي قصة تنتظر أن تُعاش.",
   "popularMovies": "الأفلام الشائعة",
   "popularTVShows": "المسلسلات الشائعة",
-  "allRightsReserved": "جميع الحقوق محفوظة."
+  "allRightsReserved": "جميع الحقوق محفوظة.",
+  "releaseDate": "تاريخ الإصدار",
+  "rating": "التقييم",
+  "votes": "تصويت",
+  "noSummaryAvailable": "لا يوجد ملخص متاح.",
+  "saveToWatchList": "حفظ في قائمة المشاهدة",
+  "watchTrailer": "شاهد العرض الدعائي",
+  "runtime": "مدة العرض",
+  "minute(s)": " دقيقة(دقائق)"
 }

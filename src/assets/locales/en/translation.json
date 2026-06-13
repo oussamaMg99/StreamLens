@@ -24,5 +24,13 @@
   "heroSectionDescription": "Explore a curated collection of movies and TV shows that transport you beyond the ordinary. Every frame tells a story waiting to be experienced.",
   "popularMovies": "Popular Movies",
   "popularTVShows": "Popular TV Shows",
-  "allRightsReserved": "All rights reserved."
+  "allRightsReserved": "All rights reserved.",
+  "releaseDate": "Release Date",
+  "rating": "Rating",
+  "votes": "votes",
+  "noSummaryAvailable": "No summary available.",
+  "saveToWatchList": "Save to watch list",
+  "watchTrailer": "Watch trailer",
+  "runtime": "Runtime",
+  "minute(s)": " minute(s)"
 }

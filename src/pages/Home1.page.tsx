@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Box, Typography, Button, Chip, CircularProgress, Stack, Divider, IconButton } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -16,31 +16,24 @@ import { usePopularTvShows } from 'src/core/hooks/usePopularTvShows';
 import { Movie } from 'src/core/services/movie.service';
 import { TvShow } from 'src/core/services/tv.service';
 import NoPoster from 'src/assets/images/no-movie.png';
+import AppContext from 'src/core/context/global/AppContext';
 
 type MediaItem = TvShow & Movie;
 
-const Home = () => {
+const Home1 = () => {
   const { t } = useTranslation();
+  useContext(AppContext);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const { data: popularMoviesData, isLoading: moviesLoading } = usePopularMovies(1);
   const { data: popularTvData, isLoading: tvLoading } = usePopularTvShows(1);
-
-  const enrichedPopularMoviesData = popularMoviesData?.results.map(movie => ({
-    ...movie,
-    media_type: 'movie',
-  }));
-  const enrichedPopularTvData = popularTvData?.results.map(tv => ({
-    ...tv,
-    media_type: 'tv',
-  }));
 
   const onItemClick = (item: MediaItem) => {
     setSelectedItem(item);
     setIsSummaryModalOpen(true);
   };
 
-  const featuredItems = [...(enrichedPopularMoviesData?.slice(0, 3) ?? []), ...(enrichedPopularTvData?.slice(0, 3) ?? [])];
+  const featuredItem = popularMoviesData?.results?.[0];
 
   return (
     <>
@@ -48,8 +41,90 @@ const Home = () => {
       <NavBar />
 
       {/* Hero / Featured */}
-      {featuredItems.length > 0 ? (
-        <HeroCarousel items={featuredItems} onItemClick={onItemClick} t={t} />
+      {featuredItem ? (
+        <Box
+          sx={{
+            position: 'relative',
+            minHeight: { xs: '70vh', md: '85vh' },
+            display: 'flex',
+            alignItems: 'flex-end',
+            backgroundImage: featuredItem.backdrop_path
+              ? `linear-gradient(to top, ${colors.phantomBlack.replace('0.6', '1')} 0%, rgba(20,20,20,0.4) 45%, rgba(20,20,20,0.2) 100%), url(https://image.tmdb.org/t/p/original${featuredItem.backdrop_path})`
+              : `linear-gradient(135deg, #5A431C 0%, #1f0303 100%)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+          }}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 760,
+              px: { xs: 2, md: 6 },
+              pb: { xs: 5, md: 8 },
+              pt: theme => `calc(${navbarHeight} + ${theme.spacing(4)})`,
+            }}
+          >
+            <Chip
+              label={t('popularMovies')}
+              size='small'
+              sx={{
+                mb: 2,
+                fontWeight: 700,
+                backgroundColor: colors.primary.main,
+                color: colors.primary.contrastText,
+              }}
+            />
+            <Typography
+              variant='h2'
+              sx={{
+                fontWeight: 800,
+                mb: 2,
+                lineHeight: 1.15,
+              }}
+            >
+              {featuredItem.title ?? featuredItem.name ?? featuredItem.original_title}
+            </Typography>
+            <Typography
+              variant='body1'
+              sx={{
+                mb: 3,
+                color: 'rgba(255,255,255,0.85)',
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 3,
+                overflow: 'hidden',
+              }}
+            >
+              {featuredItem.overview}
+            </Typography>
+            <Stack direction='row' spacing={2} sx={{ flexWrap: 'wrap', rowGap: 1.5 }}>
+              <Button
+                variant='contained'
+                color='primary'
+                startIcon={<PlayArrowIcon />}
+                onClick={() => onItemClick(featuredItem)}
+                sx={{ px: 4, py: 1, fontWeight: 700 }}
+              >
+                {t('watch')}
+              </Button>
+              <Button
+                variant='outlined'
+                color='inherit'
+                startIcon={<InfoOutlinedIcon />}
+                onClick={() => onItemClick(featuredItem)}
+                sx={{
+                  px: 4,
+                  py: 1,
+                  fontWeight: 700,
+                  borderColor: 'rgba(255,255,255,0.6)',
+                  '&:hover': { borderColor: colors.primary.main, color: colors.primary.main },
+                }}
+              >
+                {t('explore')}
+              </Button>
+            </Stack>
+          </Box>
+        </Box>
       ) : (
         <Box sx={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <CircularProgress color='primary' />
@@ -57,10 +132,10 @@ const Home = () => {
       )}
 
       {/* Trending Movies */}
-      <MediaGridSection title={t('popularMovies')} loading={moviesLoading} items={enrichedPopularMoviesData} onItemClick={onItemClick} />
+      <MediaGridSection title={t('popularMovies')} loading={moviesLoading} items={popularMoviesData?.results} onItemClick={onItemClick} />
 
       {/* Popular TV Shows */}
-      <MediaGridSection title={t('popularTVShows')} loading={tvLoading} items={enrichedPopularTvData} onItemClick={onItemClick} />
+      <MediaGridSection title={t('popularTVShows')} loading={tvLoading} items={popularTvData?.results} onItemClick={onItemClick} />
 
       {/* Footer */}
       <Box
@@ -117,156 +192,6 @@ const Home = () => {
         </Typography>
       </Box>
     </>
-  );
-};
-
-interface HeroCarouselProps {
-  items: MediaItem[];
-  onItemClick: (item: MediaItem) => void;
-  t: (key: string) => string;
-}
-
-const HeroCarousel = ({ items, onItemClick, t }: HeroCarouselProps) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    if (items.length <= 1) return;
-    const timer = setInterval(() => {
-      setActiveIndex(prev => (prev + 1) % items.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [items.length]);
-
-  return (
-    <Box sx={{ position: 'relative', minHeight: { xs: '70vh', md: '85vh' }, overflow: 'hidden' }}>
-      {items.map((item, index) => {
-        const isMovie = Boolean(item.title);
-        const title = item.title ?? item.name ?? item.original_title ?? item.original_name;
-        return (
-          <Box
-            key={`${isMovie ? 'movie' : 'tv'}-${item.id}`}
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'flex-end',
-              opacity: index === activeIndex ? 1 : 0,
-              transition: 'opacity 1s ease-in-out',
-              pointerEvents: index === activeIndex ? 'auto' : 'none',
-              backgroundImage: item.backdrop_path
-                ? `linear-gradient(to top, ${colors.phantomBlack.replace('0.6', '1')} 0%, rgba(20,20,20,0.4) 45%, rgba(20,20,20,0.2) 100%), url(https://image.tmdb.org/t/p/original${item.backdrop_path})`
-                : `linear-gradient(135deg, #5A431C 0%, #1f0303 100%)`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center top',
-            }}
-          >
-            <Box
-              sx={{
-                width: '100%',
-                maxWidth: 760,
-                px: { xs: 2, md: 6 },
-                pb: { xs: 8, md: 10 },
-                pt: theme => `calc(${navbarHeight} + ${theme.spacing(4)})`,
-              }}
-            >
-              <Chip
-                label={isMovie ? t('popularMovies') : t('popularTVShows')}
-                size='small'
-                sx={{
-                  mb: 2,
-                  fontWeight: 700,
-                  backgroundColor: colors.primary.main,
-                  color: colors.primary.contrastText,
-                }}
-              />
-              <Typography
-                variant='h2'
-                sx={{
-                  fontWeight: 800,
-                  mb: 2,
-                  lineHeight: 1.15,
-                }}
-              >
-                {title}
-              </Typography>
-              <Typography
-                variant='body1'
-                sx={{
-                  mb: 3,
-                  color: 'rgba(255,255,255,0.85)',
-                  display: '-webkit-box',
-                  WebkitBoxOrient: 'vertical',
-                  WebkitLineClamp: 3,
-                  overflow: 'hidden',
-                }}
-              >
-                {item.overview}
-              </Typography>
-              <Stack direction='row' spacing={2} sx={{ flexWrap: 'wrap', rowGap: 1.5 }}>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  startIcon={<PlayArrowIcon />}
-                  onClick={() => onItemClick(item)}
-                  sx={{ px: 4, py: 1, fontWeight: 700 }}
-                >
-                  {t('watch')}
-                </Button>
-                <Button
-                  variant='outlined'
-                  color='inherit'
-                  startIcon={<InfoOutlinedIcon />}
-                  onClick={() => onItemClick(item)}
-                  sx={{
-                    px: 4,
-                    py: 1,
-                    fontWeight: 700,
-                    borderColor: 'rgba(255,255,255,0.6)',
-                    '&:hover': { borderColor: colors.primary.main, color: colors.primary.main },
-                  }}
-                >
-                  {t('explore')}
-                </Button>
-              </Stack>
-            </Box>
-          </Box>
-        );
-      })}
-
-      {/* Bullet indicators */}
-      {items.length > 1 && (
-        <Stack
-          direction='row'
-          spacing={1.5}
-          sx={{
-            position: 'absolute',
-            bottom: { xs: 16, md: 24 },
-            left: 0,
-            right: 0,
-            justifyContent: 'center',
-            zIndex: 2,
-          }}
-        >
-          {items.map((_, index) => (
-            <Box
-              key={index}
-              role='button'
-              aria-label={`Show featured item ${index + 1}`}
-              onClick={() => setActiveIndex(index)}
-              sx={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                cursor: 'pointer',
-                backgroundColor: index === activeIndex ? colors.primary.main : 'rgba(255,255,255,0.7)',
-                transform: index === activeIndex ? 'scale(1.2)' : 'scale(1)',
-                transition: 'background-color 0.3s ease, transform 0.3s ease',
-              }}
-            />
-          ))}
-        </Stack>
-      )}
-    </Box>
   );
 };
 
@@ -392,4 +317,4 @@ const MediaCard = ({ item, onClick }: MediaCardProps) => {
   );
 };
 
-export default Home;
+export default Home1;

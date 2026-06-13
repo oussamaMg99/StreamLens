@@ -24,5 +24,13 @@
   "heroSectionDescription": "Explorez une collection soigneusement sélectionnée de films et de séries qui vous transportent au-delà de l'ordinaire. Chaque image raconte une histoire qui n'attend qu'à être vécue.",
   "popularMovies": "Films populaires",
   "popularTVShows": "Séries TV populaires",
-  "allRightsReserved": "Tous droits réservés."
+  "allRightsReserved": "Tous droits réservés.",
+  "releaseDate": "Date de sortie",
+  "rating": "Note",
+  "votes": "votes",
+  "noSummaryAvailable": "Aucun résumé disponible.",
+  "saveToWatchList": "Ajouter à la liste de visionnage",
+  "watchTrailer": "Regarder la bande-annonce",
+  "runtime": "Durée",
+  "minute(s)": " minute(s)"
 }
