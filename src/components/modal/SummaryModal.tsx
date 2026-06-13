@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import { movieService, Movie } from 'src/core/services/movie.service';
 import { tvService, TvShow } from 'src/core/services/tv.service';
 import NoPoster from 'src/assets/images/no-movie.png';
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import colors from 'src/assets/themes/colors';
 import GenreTag from '../tag/GenreTag.component';
@@ -19,6 +19,7 @@ import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { MovieDetails } from 'src/core/models/movieDetails.model';
+import SummaryModalSkeleton from './SummaryModalSkeleton.component';
 
 interface SummaryModalProps {
   // You can add props here if needed
@@ -74,8 +75,8 @@ const SummaryModal = (props: SummaryModalProps) => {
       >
         <CloseIcon />
       </IconButton>
-      {loading ? (
-        <CircularProgress size={50} />
+      {true ? (
+        <SummaryModalSkeleton />
       ) : (
         <DialogContent
           sx={{
