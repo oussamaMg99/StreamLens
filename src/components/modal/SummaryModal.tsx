@@ -7,8 +7,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import StarIcon from '@mui/icons-material/Star';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Typography from '@mui/material/Typography';
-import { movieService, Movie, MovieDetails } from 'src/core/services/movie.service';
-import { TvDetails, tvService, TvShow } from 'src/core/services/tv.service';
+import { movieService, Movie } from 'src/core/services/movie.service';
+import { tvService, TvShow } from 'src/core/services/tv.service';
 import NoPoster from 'src/assets/images/no-movie.png';
 import { Box, CircularProgress } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,8 @@ import GenreTag from '../tag/GenreTag.component';
 import AvTimerIcon from '@mui/icons-material/AvTimer';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
+import { MovieDetails } from 'src/core/models/movieDetails.model';
 
 interface SummaryModalProps {
   // You can add props here if needed
@@ -29,12 +31,13 @@ const SummaryModal = (props: SummaryModalProps) => {
   const { open, item, onClose } = props;
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const [itemDetails, setItemDetails] = useState<MovieDetails & TvDetails>();
+  type detailsType = (MovieDetails & TVShowDetails) | undefined;
+  const [itemDetails, setItemDetails] = useState<detailsType>();
 
   const fetchItemDetails = async () => {
     setLoading(true);
     try {
-      let details: any;
+      let details: detailsType;
       if (item?.media_type === 'movie') {
         details = await movieService.getMovieById(item.id, 'credits,videos,images');
       } else if (item?.media_type === 'tv') {

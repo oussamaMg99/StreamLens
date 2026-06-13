@@ -3,6 +3,8 @@
 import { ApiService } from './api.service';
 import { Movie } from './movie.service';
 
+import { TVShowDetails } from '../models/tvShowDetails.model';
+
 /**
  * Basic TMDB v3 TV result shapes.
  * Expand these interfaces as your UI needs more data.
@@ -30,24 +32,6 @@ export type TvListResponse = {
   results: (TvShow & Movie)[];
   total_pages: number;
   total_results: number;
-};
-
-/**
- * More complete TV details (partial — add fields as needed)
- */
-export type TvDetails = {
-  id: number;
-  name: string;
-  overview?: string;
-  poster_path?: string | null;
-  backdrop_path?: string | null;
-  first_air_date?: string;
-  last_air_date?: string;
-  number_of_seasons?: number;
-  number_of_episodes?: number;
-  genres?: { id: number; name: string }[];
-  episode_run_time?: number[];
-  vote_average?: number;
 };
 
 /**
@@ -144,10 +128,10 @@ export default class TvService extends ApiService {
    * @param appendToResponse - optional comma-separated string to append related data
    *                            (e.g., 'videos,credits,images')
    */
-  public getTVById(tvId: number | string, appendToResponse?: string): Promise<TvDetails> {
+  public getTVById(tvId: number | string, appendToResponse?: string): Promise<TVShowDetails> {
     const params: Record<string, any> = {};
     if (appendToResponse) params.append_to_response = appendToResponse;
-    return this.apiGet<TvDetails>(`/tv/${tvId}`, {
+    return this.apiGet<TVShowDetails>(`/tv/${tvId}`, {
       axiosConfig: { params },
       retry: 0,
     });

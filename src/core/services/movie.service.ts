@@ -1,5 +1,6 @@
 // src/core/services/movie.service.ts
 
+import { MovieDetails } from '../models/movieDetails.model';
 import { ApiService } from './api.service';
 import { TvShow } from './tv.service';
 
@@ -30,23 +31,6 @@ export type MovieListResponse = {
   results: (TvShow & Movie)[];
   total_pages: number;
   total_results: number;
-};
-
-/**
- * More complete Movie details (partial — add fields as needed)
- */
-export type MovieDetails = {
-  id: number;
-  title: string;
-  overview?: string;
-  poster_path?: string | null;
-  backdrop_path?: string | null;
-  release_date?: string;
-  runtime?: number;
-  genres?: { id: number; name: string }[];
-  vote_average?: number;
-  videos?: any;
-  credits?: any;
 };
 
 /**
