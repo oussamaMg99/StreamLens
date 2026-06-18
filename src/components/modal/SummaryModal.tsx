@@ -44,7 +44,7 @@ const SummaryModal = (props: SummaryModalProps) => {
       } else if (item?.media_type === 'tv') {
         details = await tvService.getTVById(item.id, 'credits,videos,images');
       }
-      console.log('Fetched item details:', details);
+
       setItemDetails(details);
     } catch (error) {
       console.error('Error loading item details:', error);
