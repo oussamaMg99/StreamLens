@@ -1,0 +1,1 @@
+import{n as e,t}from"./jsx-runtime-DUXOgzKQ.js";import{t as n}from"./Box-qcOwHeJs.js";import{N as r}from"./index-B8q3mXAx.js";e();var i=t(),a=()=>(0,i.jsx)(n,{sx:{width:`100%`,minHeight:`100vh`,display:`flex`,justifyContent:`center`,alignItems:`center`},children:(0,i.jsx)(r,{color:`primary`})});export{a as default};
