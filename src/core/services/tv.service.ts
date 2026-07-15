@@ -85,7 +85,7 @@ export default class TvService extends ApiService {
     if (query && query.trim().length > 0) {
       params.query = query.trim();
       return this.apiGet<TvListResponse>('/search/tv', {
-        axiosConfig: { params },
+        params,
         retry,
       });
     }
@@ -100,7 +100,7 @@ export default class TvService extends ApiService {
       if (sort_by) params.sort_by = sort_by;
 
       return this.apiGet<TvListResponse>('/discover/tv', {
-        axiosConfig: { params },
+        params,
         retry,
       });
     }
@@ -116,7 +116,7 @@ export default class TvService extends ApiService {
     const { language = 'en-US', retry = 0 } = opts;
     const params = { page, language };
     return this.apiGet<TvListResponse>('/tv/popular', {
-      axiosConfig: { params },
+      params,
       retry,
     });
   }
@@ -132,7 +132,7 @@ export default class TvService extends ApiService {
     const params: Record<string, any> = {};
     if (appendToResponse) params.append_to_response = appendToResponse;
     return this.apiGet<TVShowDetails>(`/tv/${tvId}`, {
-      axiosConfig: { params },
+      params,
       retry: 0,
     });
   }
@@ -148,7 +148,7 @@ export default class TvService extends ApiService {
     const { language = 'en-US', include_adult = false, retry = 0 } = opts;
     const params = { query: query.trim(), page, language, include_adult };
     return this.apiGet<TvListResponse>('/search/tv', {
-      axiosConfig: { params },
+      params,
       retry,
     });
   }
@@ -169,7 +169,7 @@ export default class TvService extends ApiService {
     if (sort_by) params.sort_by = sort_by;
 
     return this.apiGet<TvListResponse>('/discover/tv', {
-      axiosConfig: { params },
+      params,
       retry,
     });
   }

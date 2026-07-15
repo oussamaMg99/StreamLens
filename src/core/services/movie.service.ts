@@ -86,7 +86,7 @@ export default class MovieService extends ApiService {
     if (query && query.trim().length > 0) {
       params.query = query.trim();
       return this.apiGet<MovieListResponse>('/search/movie', {
-        axiosConfig: { params },
+        params,
         retry,
       });
     }
@@ -101,7 +101,7 @@ export default class MovieService extends ApiService {
       if (sort_by) params.sort_by = sort_by;
 
       return this.apiGet<MovieListResponse>('/discover/movie', {
-        axiosConfig: { params },
+        params,
         retry,
       });
     }
@@ -118,7 +118,7 @@ export default class MovieService extends ApiService {
     const params: Record<string, any> = { page, language };
     if (region) params.region = region;
     return this.apiGet<MovieListResponse>('/movie/popular', {
-      axiosConfig: { params },
+      params,
       retry,
     });
   }
@@ -134,7 +134,7 @@ export default class MovieService extends ApiService {
     const params: Record<string, any> = {};
     if (appendToResponse) params.append_to_response = appendToResponse;
     return this.apiGet<MovieDetails>(`/movie/${movieId}`, {
-      axiosConfig: { params },
+      params,
       retry: 0,
     });
   }
@@ -151,7 +151,7 @@ export default class MovieService extends ApiService {
     const params: Record<string, any> = { query: query.trim(), page, language, include_adult };
     if (region) params.region = region;
     return this.apiGet<MovieListResponse>('/search/movie', {
-      axiosConfig: { params },
+      params,
       retry,
     });
   }
@@ -173,7 +173,7 @@ export default class MovieService extends ApiService {
     if (sort_by) params.sort_by = sort_by;
 
     return this.apiGet<MovieListResponse>('/discover/movie', {
-      axiosConfig: { params },
+      params,
       retry,
     });
   }
