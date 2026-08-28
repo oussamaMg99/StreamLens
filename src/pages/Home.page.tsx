@@ -45,7 +45,7 @@ const Home = () => {
   return (
     <>
       <SummaryModal open={isSummaryModalOpen} item={selectedItem ?? undefined} onClose={() => setIsSummaryModalOpen(false)} />
-      <NavBar onSearchResultItemClick={onItemClick} />
+      <NavBar />
 
       {/* Hero / Featured */}
       {featuredItems.length > 0 ? (
