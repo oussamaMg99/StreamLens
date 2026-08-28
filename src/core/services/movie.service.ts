@@ -1,7 +1,8 @@
 // src/core/services/movie.service.ts
 
 import { MovieDetails } from '../models/movieDetails.model';
-import { ApiService } from './api.service';
+import { TmdbListService, TmdbListResponse } from './tmdbList.service';
+import { TMDB_CONFIG } from './tmdb.config';
 import { TvShow } from './tv.service';
 
 /**
@@ -26,12 +27,7 @@ export type Movie = {
   media_type?: 'tv' | 'movie';
 };
 
-export type MovieListResponse = {
-  page: number;
-  results: (TvShow & Movie)[];
-  total_pages: number;
-  total_results: number;
-};
+export type MovieListResponse = TmdbListResponse<TvShow & Movie>;
 
 /**
  * Options for discover & search endpoints
@@ -63,137 +59,42 @@ export type GetMovieOptions = {
  *
  * All requests are authenticated automatically by ApiService via tokenProvider that
  * returns VITE_TMDB_READ_ACCESS_TOKEN (Bearer token).
+ *
+ * The actual endpoint logic (discover-filter detection, param building, etc.) lives in
+ * the shared TmdbListService base — this class just wires up media-type-specific names.
  */
-export default class MovieService extends ApiService {
-  /**
-   * getMovies - flexible method that picks an endpoint:
-   *  - /search/movie when `query` provided
-   *  - /discover/movie when discover-like options provided (with_genres, sort_by)
-   *  - /movie/popular otherwise
-   */
+export default class MovieService extends TmdbListService<TvShow & Movie, MovieDetails> {
+  protected readonly mediaType = 'movie' as const;
+
   public getMovies(options: GetMovieOptions = {}): Promise<MovieListResponse> {
-    const { page = 1, language = 'en-US', query, with_genres, sort_by, include_adult = false, region, retry = 0 } = options;
-
-    const params: Record<string, any> = {
-      page,
-      language,
-      include_adult,
-    };
-
-    if (region) params.region = region;
-
-    // Search endpoint if query provided
-    if (query && query.trim().length > 0) {
-      params.query = query.trim();
-      return this.apiGet<MovieListResponse>('/search/movie', {
-        params,
-        retry,
-      });
-    }
-
-    // Discover endpoint when filters present
-    const hasDiscoverFilters = (Array.isArray(with_genres) && with_genres.length > 0) || typeof with_genres === 'string' || !!sort_by;
-
-    if (hasDiscoverFilters) {
-      if (with_genres) {
-        params.with_genres = Array.isArray(with_genres) ? with_genres.join(',') : with_genres;
-      }
-      if (sort_by) params.sort_by = sort_by;
-
-      return this.apiGet<MovieListResponse>('/discover/movie', {
-        params,
-        retry,
-      });
-    }
-
-    // Default: popular movies
-    return this.getPopularMovie(page, { language, region, retry });
+    return this.list(options);
   }
 
-  /**
-   * getPopularMovie - convenience wrapper for /movie/popular
-   */
   public getPopularMovie(page = 1, opts: { language?: string; region?: string; retry?: number } = {}): Promise<MovieListResponse> {
-    const { language = 'en-US', region, retry = 0 } = opts;
-    const params: Record<string, any> = { page, language };
-    if (region) params.region = region;
-    return this.apiGet<MovieListResponse>('/movie/popular', {
-      params,
-      retry,
-    });
+    return this.popular(page, opts);
   }
 
-  /**
-   * getMovieById - fetch movie details by id
-   *
-   * @param movieId - TMDB movie id
-   * @param appendToResponse - optional comma-separated string to append related data
-   *                            (e.g., 'videos,credits,images')
-   */
   public getMovieById(movieId: number | string, appendToResponse?: string): Promise<MovieDetails> {
-    const params: Record<string, any> = {};
-    if (appendToResponse) params.append_to_response = appendToResponse;
-    return this.apiGet<MovieDetails>(`/movie/${movieId}`, {
-      params,
-      retry: 0,
-    });
+    return this.byId(movieId, appendToResponse);
   }
 
-  /**
-   * searchMovie - direct search convenience wrapper
-   */
   public searchMovie(
     query: string,
     page = 1,
     opts: { language?: string; include_adult?: boolean; region?: string; retry?: number } = {},
   ): Promise<MovieListResponse> {
-    const { language = 'en-US', include_adult = false, region, retry = 0 } = opts;
-    const params: Record<string, any> = { query: query.trim(), page, language, include_adult };
-    if (region) params.region = region;
-    return this.apiGet<MovieListResponse>('/search/movie', {
-      params,
-      retry,
-    });
+    return this.searchDirect(query, page, opts);
   }
 
-  /**
-   * discoverMovies - direct discover wrapper with flexible options
-   */
   public discoverMovies(options: GetMovieOptions = {}): Promise<MovieListResponse> {
-    const { page = 1, language = 'en-US', with_genres, sort_by, include_adult = false, region, retry = 0 } = options;
-
-    const params: Record<string, any> = {
-      page,
-      language,
-      include_adult,
-    };
-
-    if (region) params.region = region;
-    if (with_genres) params.with_genres = Array.isArray(with_genres) ? with_genres.join(',') : with_genres;
-    if (sort_by) params.sort_by = sort_by;
-
-    return this.apiGet<MovieListResponse>('/discover/movie', {
-      params,
-      retry,
-    });
+    return this.discoverDirect(options);
   }
 }
 
 /**
  * Default singleton instance of MovieService.
- *
- * - Uses TMDB v3 base URL.
- * - Authentication handled via tokenProvider -> Authorization: Bearer <VITE_TMDB_READ_ACCESS_TOKEN>
- * - defaultParams remains empty because api_key is not used when using Bearer auth.
  */
-export const movieService = new MovieService({
-  baseURL: 'https://api.themoviedb.org/3',
-  defaultParams: {},
-  tokenProvider: () => {
-    return import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN ?? null;
-  },
-  timeout: 15_000,
-});
+export const movieService = new MovieService(TMDB_CONFIG);
 
 /* ---------------------------------------------------------------------------
    Usage examples

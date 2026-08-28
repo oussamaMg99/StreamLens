@@ -1,14 +1,11 @@
 import { ApiService } from './api.service';
 import { Movie } from './movie.service';
+import { TMDB_CONFIG } from './tmdb.config';
+import { TmdbListResponse } from './tmdbList.service';
 import { TvShow } from './tv.service';
 import { Person } from '../models/person.model';
 
-export type SearchAllResponse = {
-  page: number;
-  results: (TvShow & Movie & Person)[];
-  total_pages: number;
-  total_results: number;
-};
+export type SearchAllResponse = TmdbListResponse<TvShow & Movie & Person>;
 
 type SearchOptions = {
   query: string;
@@ -51,20 +48,9 @@ export default class SearchService extends ApiService {
 
 /**
  * Default singleton instance of SearchService.
- *
- * - Uses TMDB v3 base URL.
- * - Authentication handled via tokenProvider -> Authorization: Bearer <VITE_TMDB_READ_ACCESS_TOKEN>
- * - defaultParams remains empty because api_key is not used when using Bearer auth.
  */
 
-export const searchService = new SearchService({
-  baseURL: 'https://api.themoviedb.org/3',
-  defaultParams: {},
-  tokenProvider: () => {
-    return import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN ?? null;
-  },
-  timeout: 15_000,
-});
+export const searchService = new SearchService(TMDB_CONFIG);
 
 /* ---------------------------------------------------------------------------
    Usage examples

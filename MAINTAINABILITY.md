@@ -22,11 +22,11 @@ This report was generated from a full sweep of `src/` (UI layer + services/hooks
 
 ## 🧬 Duplication that should be factored out
 
-- [ ] `movie.service.ts` and `tv.service.ts` are structurally identical (same 5-method shape, same discover-filter logic, same singleton bootstrap) with only names swapped — a strong candidate for a generic base class (`TmdbListService<TItem, TDetails>`).
-- [ ] Model duplication: `Genre`, `ProductionCompany`, `ProductionCountry`, `SpokenLanguage` are declared byte-for-byte in both `movieDetails.model.ts` and `tvShowDetails.model.ts` — belongs in a shared `common.model.ts`.
-- [ ] Three separate "poster card" implementations (`PopularCard`, and two local `MediaCard`s inside `Home.page.tsx`/`Home1.page.tsx`) doing the same job with different markup.
-- [ ] The TMDB base URL / Bearer `tokenProvider` / `timeout: 15_000` boilerplate is copy-pasted 4 times (movie, tv, search services + the unused `tmdbApi`).
-- [ ] Same hero gradient string (`colors.phantomBlack.replace('0.6','1')` + hardcoded stops) duplicated verbatim in `Home.page.tsx`, `Home1.page.tsx`, and `SummaryModal.tsx`.
+- [x] `movie.service.ts` and `tv.service.ts` are structurally identical (same 5-method shape, same discover-filter logic, same singleton bootstrap) with only names swapped. **Fixed**: extracted an abstract `TmdbListService<TItem, TDetails>` base (`src/core/services/tmdbList.service.ts`) holding the shared discover-filter detection, `with_genres` joining, and param-building logic. `MovieService`/`TvService` are now thin subclasses that just set `mediaType` and delegate; all public method names/signatures (`getMovies`, `getPopularMovie`, etc.) are unchanged, so no consumer had to change. Also dropped `GetTvOptions.timezone`, a dead field that was declared but never read anywhere.
+- [x] Model duplication: `Genre`, `ProductionCompany`, `ProductionCountry`, `SpokenLanguage` were declared byte-for-byte in both `movieDetails.model.ts` and `tvShowDetails.model.ts`. **Fixed**: moved to `src/core/models/common.model.ts`, imported by both.
+- [ ] Three separate "poster card" implementations (`PopularCard`, and two local `MediaCard`s inside `Home.page.tsx`/`Home1.page.tsx`) doing the same job with different markup. (`PopularCard`/`Home1.page.tsx` were deleted as dead code in item 2; the remaining `MediaCard` in `Home.page.tsx` is now the only implementation — nothing left to deduplicate here.)
+- [x] The TMDB base URL / Bearer `tokenProvider` / `timeout: 15_000` boilerplate was copy-pasted across movie/tv/search services (plus the unused `tmdbApi`, removed in item 2). **Fixed**: consolidated into one `TMDB_CONFIG` object in `src/core/services/tmdb.config.ts`, used by all three singletons. The `{ page, results, total_pages, total_results }` response envelope was also deduplicated into a shared `TmdbListResponse<TItem>` type, reused by `MovieListResponse`, `TvListResponse`, and `SearchAllResponse`.
+- [ ] Same hero gradient string (`colors.phantomBlack.replace('0.6','1')` + hardcoded stops) duplicated verbatim in `Home.page.tsx` and `SummaryModal.tsx`.
 
 ## 🔓 Type safety holes
 
@@ -48,6 +48,6 @@ This report was generated from a full sweep of `src/` (UI layer + services/hooks
 
 1. ~~Fix the `clearSession` bug~~ ✅ done
 2. ~~Delete dead code~~ ✅ done (`global.utils.ts` intentionally kept — reserved for future constants)
-3. Extract shared TMDB base service to kill the movie/tv duplication, and a `common.model.ts` for the shared detail types
+3. ~~Extract shared TMDB base service~~ ✅ done (`TmdbListService`, `TMDB_CONFIG`, `common.model.ts`)
 4. Tighten types: real `User` shape, discriminated `media_type` union for list responses, drop the `| any` unions
 5. Consistency pass (suffixes, import style) — lowest urgency, biggest bikeshed risk
