@@ -10,7 +10,7 @@ import { Movie } from 'src/core/services/movie.service';
 import { TvShow } from 'src/core/services/tv.service';
 
 const initialState: AppContextType = {
-  themeMode: JSON.parse(sessionStorage.getItem('_themeMode') ?? '{}'),
+  themeMode: JSON.parse(localStorage.getItem('_themeMode') ?? '{}'),
   user: JSON.parse(sessionStorage.getItem('_user') ?? '{}'),
   alertDialogProps: new AlertDialogProps(),
   snackBarProps: new SnackBarProps(),

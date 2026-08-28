@@ -263,16 +263,3 @@ export class ApiService {
     return this.axios;
   }
 }
-
-/**
- * Example TMDB v3 client using Bearer (v4 Read Access Token)
- *
- * - Bearer token is visible in network requests (client-side)
- * - No api_key is used
- * - All TMDB v3 endpoints accept Bearer token
- */
-export const tmdbApi = new ApiService({
-  baseURL: 'https://api.themoviedb.org/3',
-  defaultParams: {}, // Not used for TMDB v3 + Bearer authentication
-  timeout: 15_000,
-});

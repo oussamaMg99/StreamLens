@@ -60,9 +60,6 @@ const SummaryModal = (props: SummaryModalProps) => {
   }, [open]);
   return (
     <Dialog maxWidth='md' onClose={onClose} open={open}>
-      {/* <DialogTitle sx={{ my: 5, p: 2, textAlign: 'center' }}>
-        
-      </DialogTitle> */}
       <IconButton
         aria-label='close'
         onClick={onClose}

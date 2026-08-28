@@ -21,13 +21,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
 import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from 'react-i18next';
-// import MovieIcon from '@mui/icons-material/Movie';
-// import LiveTvIcon from '@mui/icons-material/LiveTv';
-// import InfoIcon from '@mui/icons-material/Info';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import i18n from 'src/assets/locales/i18n';
-import { searchService } from 'src/core/services/search.service';
 import { useSearchAll } from 'src/core/hooks/useSearchAll';
 import NoPoster from 'src/assets/images/no-movie.png';
 
@@ -314,15 +310,6 @@ const Navbar = (props: NavbarProps) => {
           <Button fullWidth onClick={() => setOpenMenu(prev => !prev)}>
             {'About'}
           </Button>
-          {/* <IconButton type='button' aria-label='search'>
-            <MovieIcon color='primary' />
-          </IconButton>
-          <IconButton type='button' aria-label='search'>
-            <LiveTvIcon color='primary' />
-          </IconButton>
-          <IconButton type='button' aria-label='search'>
-            <InfoIcon color='primary' />
-          </IconButton> */}
         </Box>
       </Drawer>
     </>

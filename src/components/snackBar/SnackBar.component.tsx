@@ -1,4 +1,3 @@
-import React from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert, { AlertColor } from '@mui/material/Alert';
 import Slide, { SlideProps } from '@mui/material/Slide';

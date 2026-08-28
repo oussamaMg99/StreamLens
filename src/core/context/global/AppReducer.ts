@@ -1,17 +1,16 @@
-import { act } from 'react';
-import theme from 'src/assets/themes/theme';
 import { AlertDialogProps } from 'src/core/models/alertDialog.model';
 import { SnackBarProps } from 'src/core/models/snackbar.model';
 
 export default function AppReducer(state: any, action: any) {
   switch (action.type) {
     case 'CLEAR_SESSION':
+      // Wipe the persisted user session (auth) and any theme/UI preferences.
+      sessionStorage.clear();
       localStorage.clear();
       return {
+        ...state,
         themeMode: 'default',
         user: {},
-        popularMovies: [],
-        popularTVShows: [],
         alertDialogProps: new AlertDialogProps(),
         snackBarProps: new SnackBarProps(),
       };
@@ -24,7 +23,7 @@ export default function AppReducer(state: any, action: any) {
       };
 
     case 'SET_USER':
-      localStorage.setItem('_user', JSON.stringify({ ...state.user, ...action.payload }));
+      sessionStorage.setItem('_user', JSON.stringify({ ...state.user, ...action.payload }));
       return {
         ...state,
         user: action.payload,
