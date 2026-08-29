@@ -24,7 +24,7 @@ import SummaryModalSkeleton from './SummaryModalSkeleton.component';
 interface SummaryModalProps {
   // You can add props here if needed
   open: boolean;
-  item?: TvShow & Movie;
+  item?: (TvShow & Movie) | TvShow | Movie;
   onClose: () => void;
 }
 

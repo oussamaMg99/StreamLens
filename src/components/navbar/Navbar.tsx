@@ -1,6 +1,7 @@
 import { AppBar, Toolbar, Box, Button, IconButton, Typography, Drawer, useTheme, useMediaQuery } from '@mui/material';
+import { NavLink } from 'react-router';
 import colors from 'src/assets/themes/colors';
-import { navbarHeight } from 'src/utils/constants';
+import { languageOptions, navbarHeight } from 'src/utils/constants';
 import { useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -8,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import i18n from 'src/assets/locales/i18n';
+import { RoutePaths } from 'src/types/Routes.type';
 
 const Navbar = () => {
   const [openMenu, setOpenMenu] = useState(false);
@@ -30,12 +32,6 @@ const Navbar = () => {
     i18n.changeLanguage(code);
     setAnchorEl(null);
   };
-
-  const languageOptions = [
-    { code: 'en', label: 'English' },
-    { code: 'fr', label: 'Français' },
-    { code: 'ar', label: 'العربية' },
-  ];
 
   useEffect(() => {
     if (isMdUp && openMenu) setOpenMenu(false);
@@ -66,7 +62,13 @@ const Navbar = () => {
             }}
           >
             {/* Logo placeholder */}
-            <Typography variant='h4' sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' } }}>
+            <Typography
+              variant='h4'
+              component={NavLink}
+              to={RoutePaths.Default}
+              end
+              sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' }, textDecoration: 'none', color: 'inherit' }}
+            >
               {t('appName')}
             </Typography>
             {/* nav links (hide on small screens if desired) */}
@@ -77,9 +79,15 @@ const Navbar = () => {
                 gap: 2,
               }}
             >
-              <Button variant='text'>{t('movies')}</Button>
-              <Button variant='text'>{t('tvShows')}</Button>
-              <Button variant='text'>{t('about')}</Button>
+              <Button variant='text' component={NavLink} to={RoutePaths.MOVIES} end>
+                {t('movies')}
+              </Button>
+              <Button variant='text' component={NavLink} to={RoutePaths.TV_SHOWS} end>
+                {t('tvShows')}
+              </Button>
+              <Button variant='text' component={NavLink} to={RoutePaths.ABOUT} end>
+                {t('about')}
+              </Button>
             </Box>
             <Box
               sx={{
@@ -150,14 +158,17 @@ const Navbar = () => {
         slotProps={{ paper: { sx: { backgroundColor: colors.phantomBlack } } }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', p: 2, gap: 1 }}>
-          <Button fullWidth onClick={() => setOpenMenu(prev => !prev)}>
-            {'Movies'}
+          <Button fullWidth component={NavLink} to={RoutePaths.Default} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('home')}
           </Button>
-          <Button fullWidth onClick={() => setOpenMenu(prev => !prev)}>
-            {'TV Shows'}
+          <Button fullWidth component={NavLink} to={RoutePaths.MOVIES} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('movies')}
           </Button>
-          <Button fullWidth onClick={() => setOpenMenu(prev => !prev)}>
-            {'About'}
+          <Button fullWidth component={NavLink} to={RoutePaths.TV_SHOWS} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('tvShows')}
+          </Button>
+          <Button fullWidth component={NavLink} to={RoutePaths.ABOUT} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('about')}
           </Button>
         </Box>
       </Drawer>

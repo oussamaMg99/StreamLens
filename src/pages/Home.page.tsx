@@ -17,7 +17,7 @@ import { Movie } from 'src/core/services/movie.service';
 import { TvShow } from 'src/core/services/tv.service';
 import NoPoster from 'src/assets/images/no-movie.png';
 
-type MediaItem = TvShow & Movie;
+export type MediaItem = TvShow & Movie;
 
 const Home = () => {
   const { t } = useTranslation();
