@@ -1,38 +1,49 @@
 import { useEffect, useState } from 'react';
 import { Box, Typography, Button, Chip, CircularProgress, Stack, Divider, IconButton } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import XIcon from '@mui/icons-material/X';
 import { useTranslation } from 'react-i18next';
+import { NavLink } from 'react-router';
 import SummaryModal from 'src/components/modal/SummaryModal';
 import NavBar from 'src/components/navbar/Navbar';
+import MediaGrid from 'src/components/mediaGrid/MediaGrid.component';
 import colors from 'src/assets/themes/colors';
 import { navbarHeight } from 'src/utils/constants';
-import { usePopularMovies } from 'src/core/hooks/usePopularMovies';
-import { usePopularTvShows } from 'src/core/hooks/usePopularTvShows';
+import { useMovies } from 'src/core/hooks/useMovies';
+import { useTvShows } from 'src/core/hooks/useTvShows';
 import { Movie } from 'src/core/services/movie.service';
 import { TvShow } from 'src/core/services/tv.service';
-import NoPoster from 'src/assets/images/no-movie.png';
+import { RoutePaths } from 'src/types/Routes.type';
 
 export type MediaItem = TvShow & Movie;
+
+const TEASER_COUNT = 6;
 
 const Home = () => {
   const { t } = useTranslation();
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
-  const { data: popularMoviesData, isLoading: moviesLoading } = usePopularMovies(1);
-  const { data: popularTvData, isLoading: tvLoading } = usePopularTvShows(1);
+  const { data: popularMoviesData, isLoading: moviesLoading } = useMovies({});
+  const { data: popularTvData, isLoading: tvLoading } = useTvShows({});
 
-  const enrichedPopularMoviesData = popularMoviesData?.results.map(movie => ({
+  const displayMovies = popularMoviesData?.results.map(movie => ({
     ...movie,
     media_type: 'movie',
+    title: movie.title,
+    posterPath: movie.poster_path,
+    year: movie.release_date?.slice(0, 4),
+    rating: movie.vote_average ? movie.vote_average.toFixed(1) : undefined,
   }));
-  const enrichedPopularTvData = popularTvData?.results.map(tv => ({
+  const displayTv = popularTvData?.results.map(tv => ({
     ...tv,
     media_type: 'tv',
+    title: tv.name,
+    posterPath: tv.poster_path,
+    year: tv.first_air_date?.slice(0, 4),
+    rating: tv.vote_average ? tv.vote_average.toFixed(1) : undefined,
   }));
 
   const onItemClick = (item: MediaItem) => {
@@ -40,7 +51,7 @@ const Home = () => {
     setIsSummaryModalOpen(true);
   };
 
-  const featuredItems = [...(enrichedPopularMoviesData?.slice(0, 3) ?? []), ...(enrichedPopularTvData?.slice(0, 3) ?? [])];
+  const featuredItems = [...(displayMovies?.slice(0, 3) ?? []), ...(displayTv?.slice(0, 3) ?? [])];
 
   return (
     <>
@@ -57,10 +68,30 @@ const Home = () => {
       )}
 
       {/* Trending Movies */}
-      <MediaGridSection title={t('popularMovies')} loading={moviesLoading} items={enrichedPopularMoviesData} onItemClick={onItemClick} />
+      <MediaGrid
+        title={t('popularMovies')}
+        titleAction={
+          <Button component={NavLink} to={RoutePaths.MOVIES} end color='primary'>
+            {t('seeAll')}
+          </Button>
+        }
+        loading={moviesLoading}
+        items={displayMovies?.slice(0, TEASER_COUNT)}
+        onItemClick={onItemClick}
+      />
 
       {/* Popular TV Shows */}
-      <MediaGridSection title={t('popularTVShows')} loading={tvLoading} items={enrichedPopularTvData} onItemClick={onItemClick} />
+      <MediaGrid
+        title={t('popularTVShows')}
+        titleAction={
+          <Button component={NavLink} to={RoutePaths.TV_SHOWS} end color='primary'>
+            {t('seeAll')}
+          </Button>
+        }
+        loading={tvLoading}
+        items={displayTv?.slice(0, TEASER_COUNT)}
+        onItemClick={onItemClick}
+      />
 
       {/* Footer */}
       <Box
@@ -266,128 +297,6 @@ const HeroCarousel = ({ items, onItemClick, t }: HeroCarouselProps) => {
           ))}
         </Stack>
       )}
-    </Box>
-  );
-};
-
-interface MediaGridSectionProps {
-  title: string;
-  loading?: boolean;
-  items?: MediaItem[];
-  onItemClick: (item: MediaItem) => void;
-}
-
-const MediaGridSection = ({ title, loading, items, onItemClick }: MediaGridSectionProps) => {
-  if (loading) {
-    return (
-      <Box sx={{ width: '100%', minHeight: '30vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <CircularProgress color='primary' />
-      </Box>
-    );
-  }
-
-  return (
-    <Box component='section' sx={{ px: { xs: 2, md: 6 }, py: { xs: 3, md: 5 } }}>
-      <Typography variant='h3' sx={{ fontWeight: 700, mb: 3, textTransform: 'uppercase' }}>
-        {title}
-      </Typography>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: 'repeat(2, 1fr)',
-            sm: 'repeat(3, 1fr)',
-            md: 'repeat(4, 1fr)',
-            lg: 'repeat(6, 1fr)',
-          },
-          gap: { xs: 1.5, md: 2 },
-        }}
-      >
-        {items?.map(item => (
-          <MediaCard key={item.id} item={item} onClick={onItemClick} />
-        ))}
-      </Box>
-    </Box>
-  );
-};
-
-interface MediaCardProps {
-  item: MediaItem;
-  onClick: (item: MediaItem) => void;
-}
-
-const MediaCard = ({ item, onClick }: MediaCardProps) => {
-  const title = item.title ?? item.name ?? item.original_title ?? item.original_name;
-  const year = (item.release_date ?? item.first_air_date)?.slice(0, 4);
-  const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
-
-  return (
-    <Box
-      onClick={() => onClick(item)}
-      sx={{
-        position: 'relative',
-        borderRadius: 2,
-        overflow: 'hidden',
-        cursor: 'pointer',
-        aspectRatio: '2 / 3',
-        backgroundColor: colors.phantomBlack,
-        boxShadow: '0px 4px 12px rgba(0,0,0,0.2)',
-        transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-        '&:hover': {
-          transform: 'translateY(-4px) scale(1.02)',
-          boxShadow: '0px 8px 20px rgba(0,0,0,0.35)',
-          '& .media-overlay': { opacity: 1 },
-        },
-      }}
-    >
-      <Box
-        component='img'
-        src={item.poster_path ? `https://image.tmdb.org/t/p/w300${item.poster_path}` : NoPoster}
-        alt={title}
-        loading='lazy'
-        sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-      />
-
-      {rating && (
-        <Chip
-          icon={<StarIcon sx={{ fontSize: 16, color: colors.primary.main }} />}
-          label={rating}
-          size='small'
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            color: colors.text.primary,
-            fontWeight: 700,
-            '& .MuiChip-icon': { ml: '6px' },
-          }}
-        />
-      )}
-
-      <Box
-        className='media-overlay'
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          p: 1.5,
-          opacity: { xs: 1, md: 0 },
-          transition: 'opacity 0.25s ease',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)',
-        }}
-      >
-        <Typography variant='subtitle2' color='text.primary' noWrap sx={{ fontWeight: 700 }}>
-          {title}
-        </Typography>
-        {year && (
-          <Typography variant='caption' sx={{ color: 'rgba(255,255,255,0.7)' }}>
-            {year}
-          </Typography>
-        )}
-      </Box>
     </Box>
   );
 };
