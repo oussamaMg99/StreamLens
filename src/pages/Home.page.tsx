@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Chip, CircularProgress, Stack, Divider, IconButton } from '@mui/material';
+import { Box, Typography, Button, Chip, CircularProgress, Stack } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import XIcon from '@mui/icons-material/X';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import SummaryModal from 'src/components/modal/SummaryModal';
@@ -17,6 +14,7 @@ import { useTvShows } from 'src/core/hooks/useTvShows';
 import { Movie } from 'src/core/services/movie.service';
 import { TvShow } from 'src/core/services/tv.service';
 import { RoutePaths } from 'src/types/Routes.type';
+import Footer from 'src/components/footer/Footer.component';
 
 export type MediaItem = TvShow & Movie;
 
@@ -94,59 +92,7 @@ const Home = () => {
       />
 
       {/* Footer */}
-      <Box
-        component='footer'
-        sx={{
-          mt: 6,
-          px: { xs: 2, md: 6 },
-          py: 4,
-          borderTop: '1px solid rgba(255,255,255,0.1)',
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 2,
-          }}
-        >
-          <Typography variant='h4' sx={{ fontWeight: 800, color: colors.primary.main }}>
-            {t('appName')}
-          </Typography>
-
-          <Stack direction='row' spacing={3}>
-            <Typography variant='body2' sx={{ cursor: 'pointer', '&:hover': { color: colors.primary.main } }}>
-              {t('movies')}
-            </Typography>
-            <Typography variant='body2' sx={{ cursor: 'pointer', '&:hover': { color: colors.primary.main } }}>
-              {t('tvShows')}
-            </Typography>
-            <Typography variant='body2' sx={{ cursor: 'pointer', '&:hover': { color: colors.primary.main } }}>
-              {t('about')}
-            </Typography>
-          </Stack>
-
-          <Stack direction='row' spacing={1}>
-            <IconButton size='small' aria-label='facebook'>
-              <FacebookIcon fontSize='small' color='primary' />
-            </IconButton>
-            <IconButton size='small' aria-label='instagram'>
-              <InstagramIcon fontSize='small' color='primary' />
-            </IconButton>
-            <IconButton size='small' aria-label='x'>
-              <XIcon fontSize='small' color='primary' />
-            </IconButton>
-          </Stack>
-        </Box>
-
-        <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.1)' }} />
-
-        <Typography variant='body2' sx={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>
-          {`© ${new Date().getFullYear()} ${t('appName')}. ${t('allRightsReserved')}`}
-        </Typography>
-      </Box>
+      <Footer />
     </>
   );
 };

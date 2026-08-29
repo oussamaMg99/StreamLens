@@ -7,6 +7,7 @@ import MediaGrid from 'src/components/mediaGrid/MediaGrid.component';
 import { navbarHeight } from 'src/utils/constants';
 import { useTvShows } from 'src/core/hooks/useTvShows';
 import { TvShow } from 'src/core/services/tv.service';
+import Footer from 'src/components/footer/Footer.component';
 
 const TVShows = () => {
   const { t } = useTranslation();
@@ -46,6 +47,7 @@ const TVShows = () => {
           <Pagination count={Math.min(data.total_pages, 500)} page={page} onChange={(_, value) => setPage(value)} color='primary' />
         </Box>
       )}
+      <Footer />
     </>
   );
 };

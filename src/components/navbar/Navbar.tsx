@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Box, Button, IconButton, Typography, Drawer, useTheme, useMediaQuery } from '@mui/material';
+import { AppBar, Toolbar, Box, Button, IconButton, Typography, Drawer, useTheme, useMediaQuery, Link } from '@mui/material';
 import { NavLink } from 'react-router';
 import colors from 'src/assets/themes/colors';
 import { languageOptions, navbarHeight } from 'src/utils/constants';
@@ -62,15 +62,18 @@ const Navbar = () => {
             }}
           >
             {/* Logo placeholder */}
-            <Typography
-              variant='h4'
+            <Link
               component={NavLink}
               to={RoutePaths.Default}
               end
-              sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' }, textDecoration: 'none', color: 'inherit' }}
+              underline='none'
+              color='inherit'
+              variant='h4'
+              sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' }, fontWeight: 800, color: colors.primary.main }}
             >
               {t('appName')}
-            </Typography>
+            </Link>
+
             {/* nav links (hide on small screens if desired) */}
             <Box
               sx={{
