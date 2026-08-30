@@ -39,8 +39,7 @@ const TVShows = () => {
   // /search/tv responses don't carry media_type either — tag them the same way so a
   // selected search result can be handed to SummaryModal just like a browse-grid item.
   const searchResults: TaggedTvShow[] | undefined = searchData?.results.map(tv => ({ ...tv, media_type: 'tv' as const }));
-  const searchResultItems: SearchResultItem[] =
-    searchResults?.map(tv => ({ id: tv.id, title: tv.name, posterPath: tv.poster_path })) ?? [];
+  const searchResultItems: SearchResultItem[] = searchResults?.map(tv => ({ id: tv.id, title: tv.name, posterPath: tv.poster_path })) ?? [];
 
   const handleItemClick = (item: TvShow) => {
     setSelectedItem({ ...item, media_type: 'tv' });
@@ -54,6 +53,12 @@ const TVShows = () => {
     setSelectedItem(found ?? null);
     setIsSummaryModalOpen(true);
   };
+
+  const pagination = data && data.total_pages > 1 && (
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Pagination count={Math.min(data.total_pages, 500)} page={page} onChange={(_, value) => setPage(value)} color='primary' />
+    </Box>
+  );
 
   return (
     <>
@@ -71,12 +76,9 @@ const TVShows = () => {
           {t('tvShows')}
         </Typography>
       </Box>
+      {pagination}
       <MediaGrid loading={isLoading} items={items} onItemClick={handleItemClick} />
-      {data && data.total_pages > 1 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', pb: 6 }}>
-          <Pagination count={Math.min(data.total_pages, 500)} page={page} onChange={(_, value) => setPage(value)} color='primary' />
-        </Box>
-      )}
+      {pagination && <Box sx={{ pb: 6 }}>{pagination}</Box>}
       <Footer />
     </>
   );

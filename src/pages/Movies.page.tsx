@@ -55,6 +55,12 @@ const Movies = () => {
     setIsSummaryModalOpen(true);
   };
 
+  const pagination = data && data.total_pages > 1 && (
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Pagination count={Math.min(data.total_pages, 500)} page={page} onChange={(_, value) => setPage(value)} color='primary' />
+    </Box>
+  );
+
   return (
     <>
       <SummaryModal open={isSummaryModalOpen} item={selectedItem ?? undefined} onClose={() => setIsSummaryModalOpen(false)} />
@@ -71,12 +77,9 @@ const Movies = () => {
           {t('movies')}
         </Typography>
       </Box>
+      {pagination}
       <MediaGrid loading={isLoading} items={items} onItemClick={handleItemClick} />
-      {data && data.total_pages > 1 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', pb: 6 }}>
-          <Pagination count={Math.min(data.total_pages, 500)} page={page} onChange={(_, value) => setPage(value)} color='primary' />
-        </Box>
-      )}
+      {pagination && <Box sx={{ pb: 6 }}>{pagination}</Box>}
       <Footer />
     </>
   );

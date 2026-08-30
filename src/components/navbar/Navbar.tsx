@@ -122,7 +122,7 @@ const Navbar = (props: NavbarProps) => {
               {/* Language Selector */}
               {enableSearch && (
                 <SearchBar
-                  placeholder={t('searchPlaceholder')}
+                  placeholder={t('search')}
                   onSubmit={onSearch}
                   results={searchResults}
                   loading={searchLoading}
