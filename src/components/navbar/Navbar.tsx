@@ -10,8 +10,19 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import i18n from 'src/assets/locales/i18n';
 import { RoutePaths } from 'src/types/Routes.type';
+import SearchBar, { SearchResultItem } from '../search/SearchBar.component';
 
-const Navbar = () => {
+interface NavbarProps {
+  enableSearch?: boolean;
+  onSearch?: (query: string) => void;
+  searchResults?: SearchResultItem[];
+  searchLoading?: boolean;
+  searchError?: boolean;
+  onSelectSearchResult?: (item: SearchResultItem) => void;
+}
+
+const Navbar = (props: NavbarProps) => {
+  const { enableSearch, onSearch, searchResults, searchLoading, searchError, onSelectSearchResult } = props;
   const [openMenu, setOpenMenu] = useState(false);
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
@@ -109,6 +120,17 @@ const Navbar = () => {
                 <MenuIcon color='primary' />
               </IconButton>
               {/* Language Selector */}
+              {enableSearch && (
+                <SearchBar
+                  placeholder={t('searchPlaceholder')}
+                  onSubmit={onSearch}
+                  results={searchResults}
+                  loading={searchLoading}
+                  error={searchError}
+                  onSelectResult={onSelectSearchResult}
+                />
+              )}
+
               <IconButton type='button' aria-label='language' onClick={handleClick}>
                 <LanguageIcon color='primary' />
               </IconButton>

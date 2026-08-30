@@ -17,13 +17,11 @@ export interface SearchResultItem {
 
 interface SearchBarProps {
   placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit?: () => void;
+  onSubmit?: (value: string) => void;
   loading?: boolean;
   error?: boolean;
   results?: SearchResultItem[];
-  onSelectResult: (item: SearchResultItem) => void;
+  onSelectResult?: (item: SearchResultItem) => void;
 }
 
 /**
@@ -34,17 +32,22 @@ interface SearchBarProps {
  * each page owns its own data-fetching hook and just passes the results down.
  */
 const SearchBar = (props: SearchBarProps) => {
-  const { placeholder, value, onChange, onSubmit, loading, error, results, onSelectResult } = props;
+  const { placeholder, onSubmit, loading, error, results, onSelectResult } = props;
+  const [value, setValue] = useState('');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const onChange = (newValue: string) => {
+    setValue(newValue);
+  };
+
   const handleSubmit = () => {
-    if (!value.trim()) {
+    if (loading || !value.trim()) {
       return;
     }
     setAnchorEl(containerRef.current);
-    onSubmit?.();
+    onSubmit?.(value);
   };
 
   const handleClose = () => {
@@ -142,7 +145,7 @@ const SearchBar = (props: SearchBarProps) => {
               key={item.id}
               sx={{ display: 'flex', flexDirection: 'row', borderBottom: `1px solid ${colors.primary.main}`, cursor: 'pointer' }}
               onClick={() => {
-                onSelectResult(item);
+                onSelectResult?.(item);
                 handleClose();
               }}
             >

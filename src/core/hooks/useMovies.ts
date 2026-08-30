@@ -10,10 +10,11 @@ import { movieService, MovieListResponse, GetMovieOptions } from 'src/core/servi
  * Callers on the same page (a default browse view and a search bar) share one
  * queryKey shape here instead of each hand-rolling their own useQuery call.
  */
-export function useMovies(options: GetMovieOptions = {}) {
+export function useMovies(options: GetMovieOptions = {}, queryOptions?: { enabled?: boolean }) {
   return useQuery<MovieListResponse>({
     queryKey: ['movies', options],
     queryFn: (): Promise<MovieListResponse> => movieService.getMovies(options),
     staleTime: 1000 * 60 * 5,
+    enabled: queryOptions?.enabled,
   });
 }
