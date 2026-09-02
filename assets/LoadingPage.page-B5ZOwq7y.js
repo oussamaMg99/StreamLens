@@ -1,0 +1,1 @@
+import{G as e,t}from"./CircularProgress-7U-6QQyl.js";import{t as n}from"./Box-Bv7oBCRA.js";var r=e(),i=()=>(0,r.jsx)(n,{sx:{width:`100%`,minHeight:`100vh`,display:`flex`,justifyContent:`center`,alignItems:`center`},children:(0,r.jsx)(t,{color:`primary`})});export{i as default};
