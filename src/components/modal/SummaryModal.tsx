@@ -1,11 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import StarIcon from '@mui/icons-material/Star';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import Typography from '@mui/material/Typography';
 import { movieService, Movie } from 'src/core/services/movie.service';
 import { tvService, TvShow } from 'src/core/services/tv.service';
@@ -13,15 +11,12 @@ import NoPoster from 'src/assets/images/no-movie.png';
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import colors from 'src/assets/themes/colors';
-import GenreTag from '../tag/GenreTag.component';
-import AvTimerIcon from '@mui/icons-material/AvTimer';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { MovieDetails } from 'src/core/models/movieDetails.model';
 import SummaryModalSkeleton from './SummaryModalSkeleton.component';
+import SummaryModalInfoBar from './SummaryModalInfoBar.component';
 import { YouTubePlayer } from '../player/YouTubePlayer.component';
-import AppContext from 'src/core/context/global/AppContext';
 
 interface SummaryModalProps {
   // You can add props here if needed
@@ -36,7 +31,6 @@ const SummaryModal = (props: SummaryModalProps) => {
   const [loading, setLoading] = useState(false);
   type detailsType = (MovieDetails & TVShowDetails) | undefined;
   const [itemDetails, setItemDetails] = useState<detailsType>();
-  const [openTrailer, setOpenTrailer] = useState(false);
   const [trailerVideoId, setTrailerVideoId] = useState<string | null>(null);
 
   const fetchItemDetails = async () => {
@@ -97,30 +91,15 @@ const SummaryModal = (props: SummaryModalProps) => {
           <Typography sx={{ my: 2, py: 2, textAlign: 'center' }} color='primary' variant='h1'>
             {itemDetails?.name ?? itemDetails?.title ?? 'Untitled'}
           </Typography>
-          {/* Info bar */}
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'center', mb: 2, gap: 2 }}>
-            {item?.media_type == 'movie' && (
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                <AvTimerIcon />
-                <Typography variant='h5'>{itemDetails?.runtime ? `${itemDetails.runtime} ${t('minute(s)')}` : 'N/A'}</Typography>
-              </Box>
-            )}
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-              <CalendarMonthIcon />
-              <Typography variant='h5'>{itemDetails?.release_date ?? itemDetails?.first_air_date ?? 'N/A'}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-              <StarIcon />
-              <Typography variant='h5'>
-                {`${itemDetails?.vote_average ?? 'N/A'} / 10 (${itemDetails?.vote_count ?? 0} ${t('votes')})`}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-              {itemDetails?.genres?.map(genre => (
-                <GenreTag key={genre.id} tagName={t(genre.name)} />
-              ))}
-            </Box>
-          </Box>
+          <SummaryModalInfoBar
+            mediaType={item?.media_type}
+            runtime={itemDetails?.runtime}
+            releaseDate={itemDetails?.release_date}
+            firstAirDate={itemDetails?.first_air_date}
+            voteAverage={itemDetails?.vote_average}
+            voteCount={itemDetails?.vote_count}
+            genres={itemDetails?.genres}
+          />
           {/* Poster and overview */}
           <Box
             sx={{
