@@ -20,6 +20,8 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { MovieDetails } from 'src/core/models/movieDetails.model';
 import SummaryModalSkeleton from './SummaryModalSkeleton.component';
+import { YouTubePlayer } from '../player/YouTubePlayer.component';
+import AppContext from 'src/core/context/global/AppContext';
 
 interface SummaryModalProps {
   // You can add props here if needed
@@ -34,6 +36,8 @@ const SummaryModal = (props: SummaryModalProps) => {
   const [loading, setLoading] = useState(false);
   type detailsType = (MovieDetails & TVShowDetails) | undefined;
   const [itemDetails, setItemDetails] = useState<detailsType>();
+  const [openTrailer, setOpenTrailer] = useState(false);
+  const [trailerVideoId, setTrailerVideoId] = useState<string | null>(null);
 
   const fetchItemDetails = async () => {
     setLoading(true);
@@ -46,6 +50,12 @@ const SummaryModal = (props: SummaryModalProps) => {
       }
 
       setItemDetails(details);
+      if (details?.videos?.results) {
+        const trailer = details.videos.results.find(video => video.type === 'Trailer' && video.site === 'YouTube');
+        if (trailer) {
+          setTrailerVideoId(trailer.key);
+        }
+      }
     } catch (error) {
       console.error('Error loading item details:', error);
     } finally {
@@ -117,7 +127,7 @@ const SummaryModal = (props: SummaryModalProps) => {
               display: 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
               mb: 2,
-              justifyContent: 'center',
+              justifyContent: 'space-evenly',
               alignItems: 'center',
             }}
           >
@@ -132,13 +142,11 @@ const SummaryModal = (props: SummaryModalProps) => {
             <Box sx={{ ml: { xs: 0, sm: 4 }, mt: { xs: 2, sm: 0 }, width: { xs: '100%', sm: '48%' } }}>
               <Typography gutterBottom>{itemDetails?.overview ?? t('noSummaryAvailable')}</Typography>
               <Box sx={{ my: 4, display: 'flex', flexDirection: 'row', gap: 2, mt: 2, justifyContent: 'center' }}>
-                <Button variant='contained' startIcon={<PlayArrowIcon />} onClick={onClose}>
-                  {t('watchTrailer')}
-                </Button>
                 <Button variant='contained' startIcon={<BookmarkAddIcon />} onClick={onClose}>
                   {t('saveToWatchList')}
                 </Button>
               </Box>
+              {trailerVideoId && <YouTubePlayer videoId={trailerVideoId} sx={{ display: 'flex', justifyContent: 'center' }} />}
             </Box>
           </Box>
         </DialogContent>
