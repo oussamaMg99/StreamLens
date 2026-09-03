@@ -1,1 +1,0 @@
-import{a as e,r as t}from"./MediaGrid.component-Cry76edc.js";function n(n={},r){return e({queryKey:[`tv-shows`,n],queryFn:()=>t.getTvShows(n),staleTime:3e5,enabled:r?.enabled})}export{n as t};
