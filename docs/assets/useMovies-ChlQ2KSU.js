@@ -1,0 +1,1 @@
+import{a as e,i as t}from"./MediaGrid.component-DmU_p96A.js";function n(n={},r){return e({queryKey:[`movies`,n],queryFn:()=>t.getMovies(n),staleTime:3e5,enabled:r?.enabled})}export{n as t};
