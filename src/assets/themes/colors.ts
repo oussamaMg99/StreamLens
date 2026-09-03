@@ -24,7 +24,7 @@ const colors = {
   },
   text: {
     primary: '#FFFFE3', // Soft Ivory
-    secondary: '#1E1E1E', // Graphite
+    secondary: 'rgba(255,255,255,0.6)', // muted white
   },
   error: {
     main: '#E85D5D', // Coral Red
