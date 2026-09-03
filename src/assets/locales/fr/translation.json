@@ -34,5 +34,13 @@
   "watchTrailer": "Regarder la bande-annonce",
   "runtime": "Durée",
   "minute(s)": " minute(s)",
-  "errorLoadingItemDetails": "Erreur lors du chargement des détails. Veuillez réessayer plus tard."
+  "errorLoadingItemDetails": "Erreur lors du chargement des détails. Veuillez réessayer plus tard.",
+  "overview": "Aperçu",
+  "episodes": "Épisodes",
+  "browseEpisodes": "Parcourir les épisodes",
+  "returningSeries": "Série en cours",
+  "inProduction": "En production",
+  "ended": "Terminé(e)",
+  "canceled": "Annulé(e)",
+  "seasonsCount": " {{ count }} Saison(s)"
 }

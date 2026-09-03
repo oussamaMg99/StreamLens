@@ -34,5 +34,13 @@
   "watchTrailer": "شاهد العرض الدعائي",
   "runtime": "مدة العرض",
   "minute(s)": " دقيقة(دقائق)",
-  "errorLoadingItemDetails": "حدث خطأ أثناء تحميل تفاصيل العمل. يرجى المحاولة مرة أخرى لاحقًا."
+  "errorLoadingItemDetails": "حدث خطأ أثناء تحميل تفاصيل العمل. يرجى المحاولة مرة أخرى لاحقًا.",
+  "overview": "نظرة عامة",
+  "episodes": "الحلقات",
+  "browseEpisodes": "تصفح الحلقات",
+  "returningSeries": "مسلسل مستمر",
+  "inProduction": "قيد الإنتاج",
+  "ended": "انتهى",
+  "canceled": "أُلغي",
+  "seasonsCount": " {{ count }} موسم(مواسم)"
 }

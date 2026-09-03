@@ -28,7 +28,7 @@ const SummaryModalInfoBar = (props: SummaryModalInfoBarProps) => {
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'center', mb: 2, gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'center', gap: 2 }}>
       {mediaType === 'movie' && (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
           <AvTimerIcon />

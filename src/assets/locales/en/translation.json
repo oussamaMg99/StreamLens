@@ -34,5 +34,13 @@
   "watchTrailer": "Watch trailer",
   "runtime": "Runtime",
   "minute(s)": " minute(s)",
-  "errorLoadingItemDetails": "Error loading the details. Please try again later."
+  "errorLoadingItemDetails": "Error loading the details. Please try again later.",
+  "overview": "Overview",
+  "episodes": "Episodes",
+  "browseEpisodes": "Browse Episodes",
+  "returningSeries": "Returning Series",
+  "inProduction": "In Production",
+  "ended": "Ended",
+  "canceled": "Canceled",
+  "seasonsCount": " {{ count }} Season(s)"
 }
