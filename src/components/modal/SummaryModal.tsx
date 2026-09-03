@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -14,9 +14,11 @@ import colors from 'src/assets/themes/colors';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { MovieDetails } from 'src/core/models/movieDetails.model';
+import { Result } from 'src/core/models/common.model';
 import SummaryModalSkeleton from './SummaryModalSkeleton.component';
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
 import { YouTubePlayer } from '../player/YouTubePlayer.component';
+import AppContext from 'src/core/context/global/AppContext';
 
 interface SummaryModalProps {
   // You can add props here if needed
@@ -27,11 +29,16 @@ interface SummaryModalProps {
 
 const SummaryModal = (props: SummaryModalProps) => {
   const { open, item, onClose } = props;
+  const { setSnackBarProps } = useContext(AppContext);
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   type detailsType = (MovieDetails & TVShowDetails) | undefined;
   const [itemDetails, setItemDetails] = useState<detailsType>();
   const [trailerVideoId, setTrailerVideoId] = useState<string | null>(null);
+
+  const isOfficialYoutubeTrailer = (video: Result) => {
+    return video.type === 'Trailer' && video.official && video.site === 'YouTube';
+  };
 
   const fetchItemDetails = async () => {
     setLoading(true);
@@ -45,13 +52,19 @@ const SummaryModal = (props: SummaryModalProps) => {
 
       setItemDetails(details);
       if (details?.videos?.results) {
-        const trailer = details.videos.results.find(video => video.type === 'Trailer' && video.site === 'YouTube');
+        const trailer = details.videos.results.find(isOfficialYoutubeTrailer);
         if (trailer) {
           setTrailerVideoId(trailer.key);
+        } else {
+          setTrailerVideoId(null);
         }
       }
-    } catch (error) {
-      console.error('Error loading item details:', error);
+    } catch {
+      setSnackBarProps({
+        open: true,
+        message: t('errorLoadingItemDetails'),
+        severity: 'error',
+      });
     } finally {
       setLoading(false);
     }

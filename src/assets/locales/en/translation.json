@@ -33,5 +33,6 @@
   "saveToWatchList": "Save to watch list",
   "watchTrailer": "Watch trailer",
   "runtime": "Runtime",
-  "minute(s)": " minute(s)"
+  "minute(s)": " minute(s)",
+  "errorLoadingItemDetails": "Error loading the details. Please try again later."
 }

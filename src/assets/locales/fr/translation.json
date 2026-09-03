@@ -33,5 +33,6 @@
   "saveToWatchList": "Ajouter à la liste de visionnage",
   "watchTrailer": "Regarder la bande-annonce",
   "runtime": "Durée",
-  "minute(s)": " minute(s)"
+  "minute(s)": " minute(s)",
+  "errorLoadingItemDetails": "Erreur lors du chargement des détails. Veuillez réessayer plus tard."
 }
