@@ -34,15 +34,7 @@ const SummaryModalOverviewTab = ({ itemDetails, item }: SummaryModalOverviewTabP
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 0, m: 0 }}>
-      <SummaryModalInfoBar
-        mediaType={item?.media_type}
-        runtime={itemDetails?.runtime}
-        releaseDate={itemDetails?.release_date}
-        firstAirDate={itemDetails?.first_air_date}
-        voteAverage={itemDetails?.vote_average}
-        voteCount={itemDetails?.vote_count}
-        genres={itemDetails?.genres}
-      />
+      <SummaryModalInfoBar item={item} itemDetails={itemDetails} />
       {/* Poster and overview */}
       <Box
         sx={{

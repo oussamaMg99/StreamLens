@@ -90,7 +90,7 @@ const SummaryModal = (props: SummaryModalProps) => {
             display: 'flex',
             flexDirection: 'column',
             gap: 2,
-            backgroundImage: itemDetails?.backdrop_path
+            backgroundImage: /* itemDetails?.backdrop_path */ false
               ? `linear-gradient(to top, ${colors.phantomBlack.replace('0.6', '1')} 0%, rgba(20,20,20,0.4) 45%, rgba(20,20,20,0.2) 100%), url(https://image.tmdb.org/t/p/original${itemDetails.backdrop_path})`
               : `linear-gradient(135deg, #5A431C 0%, #1f0303 100%)`,
             backgroundSize: 'cover',
@@ -109,7 +109,7 @@ const SummaryModal = (props: SummaryModalProps) => {
               centered
               aria-label='lab tabs'
               indicatorColor='primary'
-              sx={{ borderBottom: 1, borderColor: 'divider' }}
+              sx={{ borderBottom: 1, borderColor: 'rgba(226, 168, 71, 0.25)' }}
               onChange={handleTabChange}
             >
               <Tab label={t('overview')} value='1' />
@@ -118,11 +118,12 @@ const SummaryModal = (props: SummaryModalProps) => {
                 value='2'
               />
             </TabList>
+
             <TabPanel sx={{ p: 0 }} value='1' tabIndex={0}>
               <SummaryModalOverviewTab itemDetails={itemDetails} item={item} />
             </TabPanel>
             <TabPanel sx={{ p: 0 }} value='2' tabIndex={0}>
-              {itemDetails?.seasons && <SummaryModalEpisodesTab seasons={itemDetails.seasons} />}
+              {itemDetails?.seasons && <SummaryModalEpisodesTab item={item} itemDetails={itemDetails} />}
             </TabPanel>
           </TabContext>
         </DialogContent>
