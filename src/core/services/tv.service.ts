@@ -4,6 +4,7 @@ import { Movie } from './movie.service';
 import { TMDB_CONFIG } from './tmdb.config';
 import { TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TVShowDetails } from '../models/tvShowDetails.model';
+import { SeasonDetails } from '../models/seasonDetails.model';
 
 /**
  * Basic TMDB v3 TV result shapes.
@@ -88,6 +89,20 @@ export default class TvService extends TmdbListService<TvShow & Movie, TVShowDet
 
   public discoverTV(options: GetTvOptions = {}): Promise<TvListResponse> {
     return this.discoverDirect(options);
+  }
+
+  /**
+   * getSeasonDetails - /tv/{tv_id}/season/{season_number}, TV-only (movies have no
+   * seasons), so this lives directly on TvService rather than the shared TmdbListService
+   * base.
+   */
+  public getSeasonDetails(
+    tvId: number | string,
+    seasonNumber: number,
+    opts: { language?: string; retry?: number } = {},
+  ): Promise<SeasonDetails> {
+    const { language = 'en-US', retry = 0 } = opts;
+    return this.apiGet<SeasonDetails>(`/tv/${tvId}/season/${seasonNumber}`, { params: { language }, retry });
   }
 }
 

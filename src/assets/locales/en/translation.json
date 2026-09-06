@@ -42,5 +42,6 @@
   "inProduction": "In Production",
   "ended": "Ended",
   "canceled": "Canceled",
-  "seasonsCount": " {{ count }} Season(s)"
+  "seasonsCount": " {{ count }} Season(s)",
+  "errorLoadingEpisodes": "Error loading episodes. Please try again later."
 }

@@ -42,5 +42,6 @@
   "inProduction": "قيد الإنتاج",
   "ended": "انتهى",
   "canceled": "أُلغي",
-  "seasonsCount": " {{ count }} موسم(مواسم)"
+  "seasonsCount": " {{ count }} موسم(مواسم)",
+  "errorLoadingEpisodes": "حدث خطأ أثناء تحميل الحلقات. يرجى المحاولة مرة أخرى لاحقًا."
 }
