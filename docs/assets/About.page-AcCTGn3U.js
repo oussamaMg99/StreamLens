@@ -1,0 +1,1 @@
+import{q as e}from"./CircularProgress-Ci9C2_VZ.js";import{i as t,t as n}from"./Navbar-C8XV5VnL.js";var r=e(),i=()=>(0,r.jsxs)(r.Fragment,{children:[(0,r.jsx)(n,{}),(0,r.jsx)(t,{})]});export{i as default};
