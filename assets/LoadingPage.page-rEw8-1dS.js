@@ -1,0 +1,1 @@
+import{q as e,t}from"./CircularProgress-Ci9C2_VZ.js";import{t as n}from"./Box-p-ecfANE.js";var r=e(),i=()=>(0,r.jsx)(n,{sx:{width:`100%`,minHeight:`100vh`,display:`flex`,justifyContent:`center`,alignItems:`center`},children:(0,r.jsx)(t,{color:`primary`})});export{i as default};
