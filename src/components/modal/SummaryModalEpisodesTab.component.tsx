@@ -3,13 +3,15 @@ import { TvShow } from 'src/core/services/tv.service';
 import {
   Avatar,
   Box,
+  Button,
   CircularProgress,
+  Divider,
   LinearProgress,
   List,
   ListItemAvatar,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
+  Rating,
   Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +20,8 @@ import { Season, TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { Episode } from 'src/core/models/seasonDetails.model';
 import { useTvSeasonDetails } from 'src/core/hooks/useTvSeasonDetails';
 import NoPoster from 'src/assets/images/no-movie.png';
-
+import CheckIcon from '@mui/icons-material/Check';
+import Checkbox from '@mui/material/Checkbox';
 interface SummaryModalEpisodesTabProps {
   item?: TvShow;
   itemDetails?: TVShowDetails;
@@ -47,12 +50,32 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
           flexDirection: 'row',
           alignItems: 'flex-start',
           gap: 2,
+          maxHeight: '430px',
+          overflowY: 'clip',
         }}
       >
         {/*  Seasons List */}
         <SeasonsList selectedSeason={selectedSeason} seasons={itemDetails?.seasons} onSeasonClick={handleSeasonClick} />
         {/* Episodes List */}
-        <EpisodesList episodes={seasonDetails?.episodes} loading={episodesLoading} error={!!episodesError} />
+        <Box sx={{ width: '65%', backgroundColor: 'rgba(20, 20, 20, 0.45)', borderRadius: '10px', p: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 1, p: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Typography variant='h4'>
+                {t('season')} {selectedSeasonNumber}
+              </Typography>
+              <Typography variant='body2' color='textSecondary'>
+                {seasonDetails?.episodes?.length ?? 0} {t('episodes')} •{' '}
+                {seasonDetails?.air_date ? `${seasonDetails.air_date?.split('-')[0]}` : t('airDateUnknown')} •{' '}
+                {0 /* Placeholder for watched episodes count */} {t('watched')}
+              </Typography>
+            </Box>
+            <Button size='small' variant='outlined' startIcon={<CheckIcon />}>
+              {'Mark Season Watched'}
+            </Button>
+          </Box>
+          <Divider sx={{ borderColor: 'rgba(226, 168, 71, 0.25)' }} />
+          <EpisodesList episodes={seasonDetails?.episodes} loading={episodesLoading} error={!!episodesError} />
+        </Box>
       </Box>
     </Box>
   );
@@ -86,7 +109,7 @@ const SeasonItem = (props: { selected: boolean; season: Season; index: number; o
       <Box sx={{ width: '100%' }}>
         <ListItemText
           primary={`${season.name}`}
-          secondary={`${season.episode_count} episodes • ${season.air_date || 'Unknown air date'}`}
+          secondary={`${season.episode_count} episodes • ${season.air_date?.split('-')[0] || 'Unknown air date'}`}
         />
         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1 }}>
           <LinearProgress variant='determinate' min={0} max={100} value={25} sx={{ width: '50%' }} />
@@ -103,7 +126,10 @@ const SeasonsList = (props: { selectedSeason: number; seasons?: Season[]; onSeas
   const { selectedSeason, seasons, onSeasonClick } = props;
 
   return (
-    <List component='nav' sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '50%' }}>
+    <List
+      component='nav'
+      sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '35%', p: 0, maxHeight: 'inherit', overflowY: 'auto' }}
+    >
       {seasons?.map((season, index) => (
         <SeasonItem selected={index === selectedSeason} key={index} season={season} index={index} onSeasonClick={onSeasonClick} />
       ))}
@@ -112,12 +138,17 @@ const SeasonsList = (props: { selectedSeason: number; seasons?: Season[]; onSeas
 };
 
 const EpisodeItem = ({ episode }: { episode: Episode }) => {
+  const [watched, setWatched] = useState(false);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setWatched(event.target.checked);
+  };
   return (
     <ListItemButton
       sx={{
         gap: 1,
-        backgroundColor: 'rgba(20, 20, 20, 0.45)',
-        border: '1px solid rgba(255, 255, 255, 0.10)',
+        backgroundColor: 'inherit',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.10)',
         borderRadius: '10px',
       }}
     >
@@ -129,10 +160,15 @@ const EpisodeItem = ({ episode }: { episode: Episode }) => {
           sx={{ width: 56, height: '100%' }}
         />
       </ListItemAvatar>
+      <Typography variant='h5' color='primary'>
+        {episode.episode_number}
+      </Typography>
       <ListItemText
-        primary={`${episode.episode_number}. ${episode.name}`}
+        primary={`${episode.name}`}
         secondary={`${episode.runtime ? `${episode.runtime} min • ` : ''}${episode.air_date || 'Unknown air date'}`}
       />
+      <Rating name='read-only' value={episode.vote_average / 2} precision={0.5} readOnly size='small' />
+      <Checkbox checked={watched} onChange={handleChange} />
     </ListItemButton>
   );
 };
@@ -142,7 +178,7 @@ const EpisodesList = ({ episodes, loading, error }: { episodes?: Episode[]; load
 
   if (loading) {
     return (
-      <Box sx={{ width: '50%', display: 'flex', justifyContent: 'center', p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
         <CircularProgress size={24} />
       </Box>
     );
@@ -150,14 +186,14 @@ const EpisodesList = ({ episodes, loading, error }: { episodes?: Episode[]; load
 
   if (error) {
     return (
-      <Box sx={{ width: '50%', p: 2 }}>
+      <Box sx={{ p: 2 }}>
         <Typography color='error'>{t('errorLoadingEpisodes')}</Typography>
       </Box>
     );
   }
 
   return (
-    <List component='nav' sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '50%' }}>
+    <List component='nav' sx={{ display: 'flex', flexDirection: 'column', maxHeight: '350px', overflowY: 'auto' }}>
       {episodes?.map(episode => (
         <EpisodeItem key={episode.id} episode={episode} />
       ))}

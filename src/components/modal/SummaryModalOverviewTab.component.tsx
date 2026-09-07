@@ -49,13 +49,13 @@ const SummaryModalOverviewTab = ({ itemDetails, item }: SummaryModalOverviewTabP
         <img
           width={200}
           height={300}
-          style={{ borderRadius: 10, marginBottom: 8 }}
+          style={{ borderRadius: 10 }}
           src={itemDetails?.poster_path ? `https://image.tmdb.org/t/p/w200${itemDetails.poster_path}` : NoPoster}
           alt={itemDetails?.name ?? itemDetails?.title ?? 'Untitled'}
         />
-        <Box sx={{ ml: { xs: 0, sm: 4 }, mt: { xs: 2, sm: 0 }, width: { xs: '100%', sm: '48%' } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, width: { xs: '100%', sm: '48%' } }}>
           <Typography gutterBottom>{itemDetails?.overview ?? t('noSummaryAvailable')}</Typography>
-          <Box sx={{ my: 4, display: 'flex', flexDirection: 'row', gap: 2, mt: 2, justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, justifyContent: 'center' }}>
             <Button variant='contained' startIcon={<BookmarkAddIcon />} onClick={() => {}}>
               {t('saveToWatchList')}
             </Button>

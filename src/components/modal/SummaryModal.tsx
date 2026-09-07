@@ -69,7 +69,7 @@ const SummaryModal = (props: SummaryModalProps) => {
     // You can perform side effects here if needed
   }, [open]);
   return (
-    <Dialog maxWidth='md' onClose={onClose} open={open}>
+    <Dialog maxWidth='md' fullWidth onClose={onClose} open={open}>
       <IconButton
         aria-label='close'
         onClick={onClose}
@@ -89,7 +89,7 @@ const SummaryModal = (props: SummaryModalProps) => {
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 2,
+            gap: 1,
             backgroundImage: /* itemDetails?.backdrop_path */ false
               ? `linear-gradient(to top, ${colors.phantomBlack.replace('0.6', '1')} 0%, rgba(20,20,20,0.4) 45%, rgba(20,20,20,0.2) 100%), url(https://image.tmdb.org/t/p/original${itemDetails.backdrop_path})`
               : `linear-gradient(135deg, #5A431C 0%, #1f0303 100%)`,
