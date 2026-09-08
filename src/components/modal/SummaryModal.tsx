@@ -19,6 +19,7 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
+import { isTvShow } from 'src/utils/global.utils';
 
 export type SummaryModalDetails = (MovieDetails & TVShowDetails) | undefined;
 interface SummaryModalProps {
@@ -113,18 +114,22 @@ const SummaryModal = (props: SummaryModalProps) => {
               onChange={handleTabChange}
             >
               <Tab label={t('overview')} value='1' />
-              <Tab
-                label={t('episodes') + (itemDetails?.seasons ? ` • ${t('seasonsCount', { count: itemDetails.seasons.length })}` : '')}
-                value='2'
-              />
+              {isTvShow(item) && (
+                <Tab
+                  label={t('episodes') + (itemDetails?.seasons ? ` • ${t('seasonsCount', { count: itemDetails.seasons.length })}` : '')}
+                  value='2'
+                />
+              )}
             </TabList>
 
-            <TabPanel sx={{ p: 0 }} value='1' tabIndex={0}>
+            <TabPanel sx={{ p: 0 }} value='1'>
               <SummaryModalOverviewTab itemDetails={itemDetails} item={item} />
             </TabPanel>
-            <TabPanel sx={{ p: 0 }} value='2' tabIndex={0}>
-              {itemDetails?.seasons && <SummaryModalEpisodesTab item={item} itemDetails={itemDetails} />}
-            </TabPanel>
+            {isTvShow(item) && (
+              <TabPanel sx={{ p: 0 }} value='2'>
+                {itemDetails?.seasons && <SummaryModalEpisodesTab item={item} itemDetails={itemDetails} />}
+              </TabPanel>
+            )}
           </TabContext>
         </DialogContent>
       )}

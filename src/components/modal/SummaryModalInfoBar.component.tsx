@@ -9,6 +9,8 @@ import { TvShow } from 'src/core/services/tv.service';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { MovieDetails } from 'src/core/models/movieDetails.model';
 import { Movie } from 'src/core/services/movie.service';
+import { isMovie, isTvShow } from 'src/utils/global.utils';
+import LayersIcon from '@mui/icons-material/Layers';
 
 interface SummaryModalInfoBarProps {
   item?: (TvShow & Movie) | TvShow | Movie;
@@ -27,7 +29,7 @@ const SummaryModalInfoBar = (props: SummaryModalInfoBarProps) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'center', gap: 2 }}>
-      {item?.media_type === 'movie' && (
+      {isMovie(item) && (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
           <AvTimerIcon />
           <Typography variant='h5'>{itemDetails?.runtime ? `${itemDetails.runtime} ${t('minute(s)')}` : 'N/A'}</Typography>
@@ -41,6 +43,18 @@ const SummaryModalInfoBar = (props: SummaryModalInfoBarProps) => {
         <StarIcon />
         <Typography variant='h5'>{`${itemDetails?.vote_average ?? 'N/A'} / 10 (${itemDetails?.vote_count ?? 0} ${t('votes')})`}</Typography>
       </Box>
+      {isTvShow(item) && (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+          <LayersIcon />
+          <Typography variant='h5'>
+            {itemDetails?.number_of_seasons ? `${itemDetails.number_of_seasons} ${t('seasons')}` : 'N/A'}
+          </Typography>{' '}
+          {'•'}
+          <Typography variant='h5'>
+            {itemDetails?.number_of_episodes ? `${itemDetails.number_of_episodes} ${t('episodes')}` : 'N/A'}
+          </Typography>
+        </Box>
+      )}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
         {itemDetails?.genres?.map(genre => (
           <GenreTag key={genre.id} tagName={t(genre.name)} />
