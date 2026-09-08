@@ -2,10 +2,10 @@ FROM node:22.14.0-alpine
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY package*.json .npmrc ./
 
-# Install all dependencies including devDependencies
-RUN npm install
+# Install all dependencies including devDependencies, from the lockfile
+RUN npm ci
 
 COPY . .
 
