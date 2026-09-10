@@ -1,11 +1,10 @@
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
+import SummaryModalSeasonOverview from './SummaryModalSeasonOverview.component';
 import { TvShow } from 'src/core/services/tv.service';
 import {
   Avatar,
   Box,
-  Button,
   CircularProgress,
-  Divider,
   LinearProgress,
   List,
   ListItemAvatar,
@@ -20,7 +19,6 @@ import { Season, TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { Episode } from 'src/core/models/seasonDetails.model';
 import { useTvSeasonDetails } from 'src/core/hooks/useTvSeasonDetails';
 import NoPoster from 'src/assets/images/no-movie.png';
-import CheckIcon from '@mui/icons-material/Check';
 import Checkbox from '@mui/material/Checkbox';
 interface SummaryModalEpisodesTabProps {
   item?: TvShow;
@@ -29,7 +27,6 @@ interface SummaryModalEpisodesTabProps {
 
 const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
   const { itemDetails, item } = props;
-  const { t } = useTranslation();
   const [selectedSeason, setSelectedSeason] = useState(0);
 
   const handleSeasonClick = (seasonIndex: number) => {
@@ -57,25 +54,12 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
         {/*  Seasons List */}
         <SeasonsList selectedSeason={selectedSeason} seasons={itemDetails?.seasons} onSeasonClick={handleSeasonClick} />
         {/* Episodes List */}
-        <Box sx={{ width: '65%', backgroundColor: 'rgba(20, 20, 20, 0.45)', borderRadius: '10px', p: 1 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 1, p: 1 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <Typography variant='h4'>
-                {t('season')} {selectedSeasonNumber}
-              </Typography>
-              <Typography variant='body2' color='textSecondary'>
-                {seasonDetails?.episodes?.length ?? 0} {t('episodes')} •{' '}
-                {seasonDetails?.air_date ? `${seasonDetails.air_date?.split('-')[0]}` : t('airDateUnknown')} •{' '}
-                {0 /* Placeholder for watched episodes count */} {t('watched')}
-              </Typography>
-            </Box>
-            <Button size='small' variant='outlined' startIcon={<CheckIcon />}>
-              {'Mark Season Watched'}
-            </Button>
-          </Box>
-          <Divider sx={{ borderColor: 'rgba(226, 168, 71, 0.25)' }} />
-          <EpisodesList episodes={seasonDetails?.episodes} loading={episodesLoading} error={!!episodesError} />
-        </Box>
+        <SummaryModalSeasonOverview
+          seasonNumber={selectedSeasonNumber}
+          seasonDetails={seasonDetails}
+          loading={episodesLoading}
+          error={!!episodesError}
+        />
       </Box>
     </Box>
   );
@@ -173,7 +157,7 @@ const EpisodeItem = ({ episode }: { episode: Episode }) => {
   );
 };
 
-const EpisodesList = ({ episodes, loading, error }: { episodes?: Episode[]; loading?: boolean; error?: boolean }) => {
+export const EpisodesList = ({ episodes, loading, error }: { episodes?: Episode[]; loading?: boolean; error?: boolean }) => {
   const { t } = useTranslation();
 
   if (loading) {
