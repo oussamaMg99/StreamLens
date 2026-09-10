@@ -1,4 +1,4 @@
-import { Genre, ProductionCompany, ProductionCountry, SpokenLanguage, Videos, Crew, Images } from './common.model';
+import { Crew, MediaDetails } from './common.model';
 
 export interface CreatedBy {
   id: number;
@@ -60,17 +60,15 @@ export interface Season {
 }
 
 /**
- * Fields always present on a plain `/tv/{id}` response, with no `append_to_response`.
+ * Full `/tv/{id}` response shape. Shared fields (including `videos`/`images`, only
+ * present when requested via `append_to_response`) live on MediaDetails; `credits` stays
+ * tv-specific here since TV Cast lacks the `cast_id` movie Cast has.
  */
-export interface TVShowDetailsBase {
-  adult: boolean;
-  backdrop_path: string;
+export interface TVShowDetails extends MediaDetails {
+  media_type: 'tv';
   created_by: CreatedBy[];
   episode_run_time: any[];
   first_air_date: string;
-  genres: Genre[];
-  homepage: string;
-  id: number;
   in_production: boolean;
   languages: string[];
   last_air_date: string;
@@ -80,35 +78,10 @@ export interface TVShowDetailsBase {
   networks: Network[];
   number_of_episodes: number;
   number_of_seasons: number;
-  origin_country: string[];
-  original_language: string;
   original_name: string;
-  overview: string;
-  popularity: number;
-  poster_path: string;
-  production_companies: ProductionCompany[];
-  production_countries: ProductionCountry[];
   seasons: Season[];
-  softcore: boolean;
-  spoken_languages: SpokenLanguage[];
-  status: string;
-  tagline: string;
   type: string;
-  vote_average: number;
-  vote_count: number;
-}
-
-/**
- * Full `/tv/{id}` response shape. `videos`/`credits`/`images` are each only present
- * when their name is included in the `append_to_response` query param (see
- * TvService.getTVById / TmdbListService.byId, where it's an optional argument) —
- * marked optional here so a call made without requesting them doesn't get typed as if
- * they were guaranteed.
- */
-export interface TVShowDetails extends TVShowDetailsBase {
-  videos?: Videos;
   credits?: Credits;
-  images?: Images;
 }
 
 // TV-specific: TMDB's TV cast entries don't carry a `cast_id` the way movie cast entries

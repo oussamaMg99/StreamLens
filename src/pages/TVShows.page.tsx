@@ -10,13 +10,11 @@ import { TvShow } from 'src/core/services/tv.service';
 import Footer from 'src/components/footer/Footer.component';
 import { SearchResultItem } from 'src/components/search/SearchBar.component';
 
-type TaggedTvShow = TvShow & { media_type: 'tv' };
-
 const TVShows = () => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<TaggedTvShow | null>(null);
+  const [selectedItem, setSelectedItem] = useState<TvShow | null>(null);
   const [submittedQuery, setSubmittedQuery] = useState('');
   const { data, isLoading } = useTvShows({ page }, { enabled: !submittedQuery });
   const {
@@ -25,24 +23,21 @@ const TVShows = () => {
     error: searchError,
   } = useTvShows({ query: submittedQuery }, { enabled: submittedQuery.trim().length > 0 });
 
-  // /tv/popular (and /discover/tv) responses don't include media_type — tag it
-  // ourselves, same as Home.page.tsx does, so SummaryModal knows which details endpoint to call.
+  // tvService (via TmdbListService) already tags every result with media_type, so this
+  // mapping is purely about the MediaCardData shape MediaGrid expects.
   const items = data?.results.map(tv => ({
     ...tv,
-    media_type: 'tv' as const,
     title: tv.name,
     posterPath: tv.poster_path,
     year: tv.first_air_date?.slice(0, 4),
     rating: tv.vote_average ? tv.vote_average.toFixed(1) : undefined,
   }));
 
-  // /search/tv responses don't carry media_type either — tag them the same way so a
-  // selected search result can be handed to SummaryModal just like a browse-grid item.
-  const searchResults: TaggedTvShow[] | undefined = searchData?.results.map(tv => ({ ...tv, media_type: 'tv' as const }));
+  const searchResults = searchData?.results;
   const searchResultItems: SearchResultItem[] = searchResults?.map(tv => ({ id: tv.id, title: tv.name, posterPath: tv.poster_path })) ?? [];
 
   const handleItemClick = (item: TvShow) => {
-    setSelectedItem({ ...item, media_type: 'tv' });
+    setSelectedItem(item);
     setIsSummaryModalOpen(true);
   };
 

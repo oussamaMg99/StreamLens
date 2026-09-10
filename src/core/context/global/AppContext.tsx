@@ -6,8 +6,6 @@ import { User } from 'src/core/models/user.model';
 import { Theme } from '@emotion/react';
 import { AlertDialogProps } from 'src/core/models/alertDialog.model';
 import { SnackBarProps } from 'src/core/models/snackbar.model';
-import { Movie } from 'src/core/services/movie.service';
-import { TvShow } from 'src/core/services/tv.service';
 
 const initialState: AppContextType = {
   themeMode: JSON.parse(localStorage.getItem('_themeMode') ?? '{}'),

@@ -6,8 +6,6 @@ import { useTranslation } from 'react-i18next';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import NoPoster from 'src/assets/images/no-movie.png';
-import { Movie } from 'src/core/services/movie.service';
-import { TvShow } from 'src/core/services/tv.service';
 import { Result } from 'src/core/models/common.model';
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
 import { YouTubePlayer } from '../player/YouTubePlayer.component';
@@ -15,10 +13,9 @@ import { SummaryModalDetails } from './SummaryModal';
 
 interface SummaryModalOverviewTabProps {
   itemDetails?: SummaryModalDetails;
-  item?: (TvShow & Movie) | TvShow | Movie;
 }
 
-const SummaryModalOverviewTab = ({ itemDetails, item }: SummaryModalOverviewTabProps) => {
+const SummaryModalOverviewTab = ({ itemDetails }: SummaryModalOverviewTabProps) => {
   const { t } = useTranslation();
   const [trailerVideoId, setTrailerVideoId] = useState<string | null>(null);
   const isOfficialYoutubeTrailer = (video: Result) => {
@@ -32,9 +29,11 @@ const SummaryModalOverviewTab = ({ itemDetails, item }: SummaryModalOverviewTabP
     }
   }, [itemDetails]);
 
+  const title = itemDetails?.media_type === 'movie' ? itemDetails.title : itemDetails?.media_type === 'tv' ? itemDetails.name : 'Untitled';
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 0, m: 0 }}>
-      <SummaryModalInfoBar item={item} itemDetails={itemDetails} />
+      <SummaryModalInfoBar itemDetails={itemDetails} />
       {/* Poster and overview */}
       <Box
         sx={{
@@ -51,7 +50,7 @@ const SummaryModalOverviewTab = ({ itemDetails, item }: SummaryModalOverviewTabP
           height={300}
           style={{ borderRadius: 10 }}
           src={itemDetails?.poster_path ? `https://image.tmdb.org/t/p/w200${itemDetails.poster_path}` : NoPoster}
-          alt={itemDetails?.name ?? itemDetails?.title ?? 'Untitled'}
+          alt={title}
         />
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, width: { xs: '100%', sm: '48%' } }}>
           <Typography gutterBottom>{itemDetails?.overview ?? t('noSummaryAvailable')}</Typography>

@@ -23,6 +23,53 @@ export interface SpokenLanguage {
   name: string;
 }
 
+// --- Shared discriminated-union bases for the movie/tv split. `media_type` is declared
+// here as the wide union and narrowed to a single literal by each concrete subtype
+// (Movie/TvShow, MovieDetails/TVShowDetails) — that's what makes it a real discriminant
+// TS can narrow on (`x.media_type === 'movie'`), instead of the old `TvShow & Movie` /
+// `MovieDetails & TVShowDetails` intersections that claimed every field from both shapes
+// always existed at once.
+
+export interface Media {
+  media_type: 'movie' | 'tv';
+  id: number;
+  adult: boolean;
+  backdrop_path?: string;
+  genre_ids: number[];
+  original_language: string;
+  overview: string;
+  popularity: number;
+  poster_path: string;
+  vote_average: number;
+  vote_count: number;
+}
+
+export interface MediaDetails {
+  media_type: 'movie' | 'tv';
+  id: number;
+  adult: boolean;
+  backdrop_path: string;
+  genres: Genre[];
+  homepage: string;
+  origin_country: string[];
+  original_language: string;
+  overview: string;
+  popularity: number;
+  poster_path: string;
+  production_companies: ProductionCompany[];
+  production_countries: ProductionCountry[];
+  softcore: boolean;
+  spoken_languages: SpokenLanguage[];
+  status: string;
+  tagline: string;
+  vote_average: number;
+  vote_count: number;
+  videos?: Videos;
+  images?: Images;
+  // credits is deliberately NOT here: movie Cast carries cast_id/optional profile_path
+  // that TV Cast doesn't, so each subtype keeps declaring its own credits?: Credits.
+}
+
 // --- append_to_response fragments (videos/credits/images), identical between movie and
 // TV details. Cast is NOT here: TMDB's movie cast entries carry a `cast_id` and an
 // optional `profile_path` that TV cast entries don't, so Cast (and, by extension,

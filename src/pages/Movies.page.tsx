@@ -10,13 +10,11 @@ import { Movie } from 'src/core/services/movie.service';
 import Footer from 'src/components/footer/Footer.component';
 import { SearchResultItem } from 'src/components/search/SearchBar.component';
 
-type TaggedMovie = Movie & { media_type: 'movie' };
-
 const Movies = () => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<TaggedMovie | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Movie | null>(null);
   const [submittedQuery, setSubmittedQuery] = useState('');
   const { data, isLoading } = useMovies({ page }, { enabled: !submittedQuery });
   const {
@@ -25,25 +23,22 @@ const Movies = () => {
     error: searchError,
   } = useMovies({ query: submittedQuery }, { enabled: submittedQuery.trim().length > 0 });
 
-  // /movie/popular (and /discover/movie) responses don't include media_type — tag it
-  // ourselves, same as Home.page.tsx does, so SummaryModal knows which details endpoint to call.
+  // movieService (via TmdbListService) already tags every result with media_type, so
+  // this mapping is purely about the MediaCardData shape MediaGrid expects.
   const items = data?.results.map(movie => ({
     ...movie,
-    media_type: 'movie' as const,
     title: movie.title,
     posterPath: movie.poster_path,
     year: movie.release_date?.slice(0, 4),
     rating: movie.vote_average ? movie.vote_average.toFixed(1) : undefined,
   }));
 
-  // /search/movie responses don't carry media_type either — tag them the same way so a
-  // selected search result can be handed to SummaryModal just like a browse-grid item.
-  const searchResults: TaggedMovie[] | undefined = searchData?.results.map(movie => ({ ...movie, media_type: 'movie' as const }));
+  const searchResults = searchData?.results;
   const searchResultItems: SearchResultItem[] =
     searchResults?.map(movie => ({ id: movie.id, title: movie.title, posterPath: movie.poster_path })) ?? [];
 
   const handleItemClick = (item: Movie) => {
-    setSelectedItem({ ...item, media_type: 'movie' });
+    setSelectedItem(item);
     setIsSummaryModalOpen(true);
   };
 

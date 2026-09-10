@@ -16,7 +16,7 @@ import { TvShow } from 'src/core/services/tv.service';
 import { RoutePaths } from 'src/types/Routes.type';
 import Footer from 'src/components/footer/Footer.component';
 
-export type MediaItem = TvShow & Movie;
+export type MediaItem = Movie | TvShow;
 
 const TEASER_COUNT = 6;
 
@@ -29,7 +29,6 @@ const Home = () => {
 
   const displayMovies = popularMoviesData?.results.map(movie => ({
     ...movie,
-    media_type: 'movie',
     title: movie.title,
     posterPath: movie.poster_path,
     year: movie.release_date?.slice(0, 4),
@@ -37,7 +36,6 @@ const Home = () => {
   }));
   const displayTv = popularTvData?.results.map(tv => ({
     ...tv,
-    media_type: 'tv',
     title: tv.name,
     posterPath: tv.poster_path,
     year: tv.first_air_date?.slice(0, 4),
@@ -117,8 +115,8 @@ const HeroCarousel = ({ items, onItemClick, t }: HeroCarouselProps) => {
   return (
     <Box sx={{ position: 'relative', minHeight: { xs: '70vh', md: '85vh' }, overflow: 'hidden' }}>
       {items.map((item, index) => {
-        const isMovie = Boolean(item.title);
-        const title = item.title ?? item.name ?? item.original_title ?? item.original_name;
+        const isMovie = item.media_type === 'movie';
+        const title = isMovie ? item.title : item.name;
         return (
           <Box
             key={`${isMovie ? 'movie' : 'tv'}-${item.id}`}

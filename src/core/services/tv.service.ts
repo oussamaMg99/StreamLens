@@ -1,34 +1,24 @@
 // src/core/services/tv.service.ts
 
-import { Movie } from './movie.service';
 import { TMDB_CONFIG } from './tmdb.config';
 import { TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TVShowDetails } from '../models/tvShowDetails.model';
 import { SeasonDetails } from '../models/seasonDetails.model';
+import { Media } from '../models/common.model';
 
 /**
- * Basic TMDB v3 TV result shapes.
- * Expand these interfaces as your UI needs more data.
+ * Basic TMDB v3 TV result shape.
+ * Expand as your UI needs more data.
  */
-export type TvShow = {
-  adult: boolean;
-  backdrop_path: string;
-  genre_ids: number[];
-  id: number;
+export interface TvShow extends Media {
+  media_type: 'tv';
   origin_country: string[];
-  original_language: string;
   original_name: string;
-  overview: string;
-  popularity: number;
-  poster_path: string;
   first_air_date: string;
   name: string;
-  vote_average: number;
-  vote_count: number;
-  media_type?: 'tv' | 'movie';
-};
+}
 
-export type TvListResponse = TmdbListResponse<TvShow & Movie>;
+export type TvListResponse = TmdbListResponse<TvShow>;
 
 /**
  * Options for discover & search endpoints
@@ -64,7 +54,7 @@ export type GetTvOptions = {
  * The actual endpoint logic (discover-filter detection, param building, etc.) lives in
  * the shared TmdbListService base — this class just wires up media-type-specific names.
  */
-export default class TvService extends TmdbListService<TvShow & Movie, TVShowDetails> {
+export default class TvService extends TmdbListService<TvShow, TVShowDetails> {
   protected readonly mediaType = 'tv' as const;
 
   public getTvShows(options: GetTvOptions = {}): Promise<TvListResponse> {

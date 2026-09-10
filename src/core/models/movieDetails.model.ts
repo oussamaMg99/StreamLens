@@ -1,4 +1,4 @@
-import { Genre, ProductionCompany, ProductionCountry, SpokenLanguage, Videos, Crew, Images } from './common.model';
+import { Crew, MediaDetails } from './common.model';
 
 export interface BelongsToCollection {
   id: number;
@@ -8,49 +8,22 @@ export interface BelongsToCollection {
 }
 
 /**
- * Fields always present on a plain `/movie/{id}` response, with no `append_to_response`.
+ * Full `/movie/{id}` response shape. Shared fields (including `videos`/`images`, only
+ * present when requested via `append_to_response`) live on MediaDetails; `credits` stays
+ * movie-specific here since movie Cast carries a `cast_id` TV Cast doesn't.
  */
-export interface MovieDetailsBase {
-  adult: boolean;
-  backdrop_path: string;
+export interface MovieDetails extends MediaDetails {
+  media_type: 'movie';
   belongs_to_collection: BelongsToCollection;
   budget: number;
-  genres: Genre[];
-  homepage: string;
-  id: number;
   imdb_id: string;
-  origin_country: string[];
-  original_language: string;
   original_title: string;
-  overview: string;
-  popularity: number;
-  poster_path: string;
-  production_companies: ProductionCompany[];
-  production_countries: ProductionCountry[];
   release_date: string;
   revenue: number;
   runtime: number;
-  softcore: boolean;
-  spoken_languages: SpokenLanguage[];
-  status: string;
-  tagline: string;
   title: string;
   video: boolean;
-  vote_average: number;
-  vote_count: number;
-}
-
-/**
- * Full `/movie/{id}` response shape. `videos`/`credits`/`images` are each only present
- * when their name is included in the `append_to_response` query param (see
- * MovieService.getMovieById / TmdbListService.byId, where it's an optional argument) —
- * marked optional here so a call made without requesting them doesn't get typed as if
- * they were guaranteed.
- */
-export interface MovieDetails extends MovieDetailsBase {
-  videos?: Videos;
   credits?: Credits;
-  images?: Images;
 }
 
 // Movie-specific: TMDB's movie cast entries carry a `cast_id` (and an optional

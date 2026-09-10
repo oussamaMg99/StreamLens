@@ -40,7 +40,7 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 0, m: 0 }}>
-      <SummaryModalInfoBar item={item} itemDetails={itemDetails} />
+      <SummaryModalInfoBar itemDetails={itemDetails} />
       <Box
         sx={{
           display: 'flex',

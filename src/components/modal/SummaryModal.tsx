@@ -21,11 +21,15 @@ import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import { isTvShow } from 'src/utils/global.utils';
 
-export type SummaryModalDetails = (MovieDetails & TVShowDetails) | undefined;
+// MovieDetails/TVShowDetails now carry their own media_type discriminant (see
+// common.model.ts's MediaDetails base), so this is just a convenience alias for the
+// family of components under this file — no local tagging needed anymore.
+export type SummaryModalDetails = MovieDetails | TVShowDetails | undefined;
+
 interface SummaryModalProps {
   // You can add props here if needed
   open: boolean;
-  item?: (TvShow & Movie) | TvShow | Movie;
+  item?: Movie | TvShow;
   onClose: () => void;
 }
 
@@ -69,6 +73,10 @@ const SummaryModal = (props: SummaryModalProps) => {
     }
     // You can perform side effects here if needed
   }, [open]);
+
+  const tvDetails = itemDetails?.media_type === 'tv' ? itemDetails : undefined;
+  const title = itemDetails?.media_type === 'movie' ? itemDetails.title : (tvDetails?.name ?? 'Untitled');
+
   return (
     <Dialog maxWidth='md' fullWidth onClose={onClose} open={open}>
       <IconButton
@@ -99,7 +107,7 @@ const SummaryModal = (props: SummaryModalProps) => {
         >
           {/* Title */}
           <Typography sx={{ textAlign: 'center' }} color='primary' variant='h1'>
-            {itemDetails?.name ?? itemDetails?.title ?? 'Untitled'}
+            {title}
           </Typography>
           {/* Status */}
           {itemDetails?.status && (
@@ -116,18 +124,18 @@ const SummaryModal = (props: SummaryModalProps) => {
               <Tab label={t('overview')} value='1' />
               {isTvShow(item) && (
                 <Tab
-                  label={t('episodes') + (itemDetails?.seasons ? ` • ${t('seasonsCount', { count: itemDetails.seasons.length })}` : '')}
+                  label={t('episodes') + (tvDetails?.seasons ? ` • ${t('seasonsCount', { count: tvDetails.seasons.length })}` : '')}
                   value='2'
                 />
               )}
             </TabList>
 
             <TabPanel sx={{ p: 0 }} value='1'>
-              <SummaryModalOverviewTab itemDetails={itemDetails} item={item} />
+              <SummaryModalOverviewTab itemDetails={itemDetails} />
             </TabPanel>
             {isTvShow(item) && (
               <TabPanel sx={{ p: 0 }} value='2'>
-                {itemDetails?.seasons && <SummaryModalEpisodesTab item={item} itemDetails={itemDetails} />}
+                {tvDetails && <SummaryModalEpisodesTab item={item} itemDetails={tvDetails} />}
               </TabPanel>
             )}
           </TabContext>
