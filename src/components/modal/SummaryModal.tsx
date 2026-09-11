@@ -20,6 +20,7 @@ import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import { isTvShow } from 'src/utils/global.utils';
+import { useQuery } from '@tanstack/react-query';
 
 // MovieDetails/TVShowDetails now carry their own media_type discriminant (see
 // common.model.ts's MediaDetails base), so this is just a convenience alias for the
@@ -37,42 +38,46 @@ const SummaryModal = (props: SummaryModalProps) => {
   const { open, item, onClose } = props;
   const { setSnackBarProps } = useContext(AppContext);
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-
-  const [itemDetails, setItemDetails] = useState<SummaryModalDetails>();
   const [tabValue, setTabValue] = useState('1');
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setTabValue(newValue);
   };
 
-  const fetchItemDetails = async () => {
-    setLoading(true);
-    try {
-      let details: SummaryModalDetails;
+  // One query instead of a movie one and a tv one: the two services return different
+  // shapes, but the query itself (key/staleTime/enabled/error handling) is identical
+  // either way — only queryFn needs to branch on which endpoint to call.
+  const {
+    data,
+    isLoading: loading,
+    error,
+  } = useQuery<SummaryModalDetails>({
+    queryKey: ['summary-modal-details', item?.media_type, item?.id],
+    queryFn: (): Promise<SummaryModalDetails> => {
       if (item?.media_type === 'movie') {
-        details = await movieService.getMovieById(item.id, 'credits,videos,images');
-      } else if (item?.media_type === 'tv') {
-        details = await tvService.getTVById(item.id, 'credits,videos,images');
+        return movieService.getMovieById(item.id, 'credits,videos,images');
       }
+      if (item?.media_type === 'tv') {
+        return tvService.getTVById(item.id, 'credits,videos,images');
+      }
+      return Promise.resolve(undefined);
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: open && !!item,
+  });
+  // Re-bound through a plain-union local: TanStack Query's inferred `data` type doesn't
+  // narrow via `media_type` discriminant checks as cleanly as an ordinary union does.
+  const itemDetails: SummaryModalDetails = data;
 
-      setItemDetails(details);
-    } catch {
+  useEffect(() => {
+    if (error) {
       setSnackBarProps({
         open: true,
         message: t('errorLoadingItemDetails'),
         severity: 'error',
       });
-    } finally {
-      setLoading(false);
     }
-  };
-  useEffect(() => {
-    if (open) {
-      fetchItemDetails();
-    }
-    // You can perform side effects here if needed
-  }, [open]);
+  }, [error]);
 
   const tvDetails = itemDetails?.media_type === 'tv' ? itemDetails : undefined;
   const title = itemDetails?.media_type === 'movie' ? itemDetails.title : (tvDetails?.name ?? 'Untitled');
@@ -99,14 +104,17 @@ const SummaryModal = (props: SummaryModalProps) => {
             display: 'flex',
             flexDirection: 'column',
             gap: 1,
-            backgroundImage: itemDetails?.backdrop_path
-              ? `linear-gradient(to top, ${colors.phantomBlack.replace('0.6', '1')} 0%, rgba(20,20,20,0.4) 45%, rgba(20,20,20,0.2) 100%), url(https://image.tmdb.org/t/p/original${itemDetails.backdrop_path})`
-              : `linear-gradient(135deg, #5A431C 0%, #1f0303 100%)`,
+            // Darkest at the top (behind the title/status pill) fading out toward the
+            // bottom — the overlay needs to be strongest exactly where the fixed-color
+            // text sits, regardless of how bright the backdrop image itself is there.
+            backgroundImage: /* itemDetails?.backdrop_path
+              ? `linear-gradient(to bottom, ${colors.phantomBlack.replace('0.6', '1')} 0%, rgba(20,20,20,0.55) 35%, rgba(20,20,20,0.15) 100%), url(https://image.tmdb.org/t/p/original${itemDetails.backdrop_path})`
+              :  */ `linear-gradient(135deg, #5A431C 0%, #1f0303 100%)`,
             backgroundSize: 'cover',
           }}
         >
           {/* Title */}
-          <Typography sx={{ textAlign: 'center' }} color='primary' variant='h1'>
+          <Typography sx={{ textAlign: 'center', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }} color='primary' variant='h1'>
             {title}
           </Typography>
           {/* Status */}

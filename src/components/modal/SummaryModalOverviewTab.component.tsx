@@ -15,7 +15,8 @@ interface SummaryModalOverviewTabProps {
   itemDetails?: SummaryModalDetails;
 }
 
-const SummaryModalOverviewTab = ({ itemDetails }: SummaryModalOverviewTabProps) => {
+const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
+  const { itemDetails } = props;
   const { t } = useTranslation();
   const [trailerVideoId, setTrailerVideoId] = useState<string | null>(null);
   const isOfficialYoutubeTrailer = (video: Result) => {

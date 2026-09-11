@@ -1,25 +1,11 @@
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
 import SummaryModalSeasonOverview from './SummaryModalSeasonOverview.component';
 import { TvShow } from 'src/core/services/tv.service';
-import {
-  Avatar,
-  Box,
-  CircularProgress,
-  LinearProgress,
-  List,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Rating,
-  Typography,
-} from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { Avatar, Box, LinearProgress, List, ListItemAvatar, ListItemButton, ListItemText, Rating, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Season, TVShowDetails } from 'src/core/models/tvShowDetails.model';
-import { Episode } from 'src/core/models/seasonDetails.model';
 import { useTvSeasonDetails } from 'src/core/hooks/useTvSeasonDetails';
 import NoPoster from 'src/assets/images/no-movie.png';
-import Checkbox from '@mui/material/Checkbox';
 interface SummaryModalEpisodesTabProps {
   item?: TvShow;
   itemDetails?: TVShowDetails;
@@ -53,7 +39,7 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
       >
         {/*  Seasons List */}
         <SeasonsList selectedSeason={selectedSeason} seasons={itemDetails?.seasons} onSeasonClick={handleSeasonClick} />
-        {/* Episodes List */}
+        {/* Season Overview */}
         <SummaryModalSeasonOverview
           seasonNumber={selectedSeasonNumber}
           seasonDetails={seasonDetails}
@@ -116,70 +102,6 @@ const SeasonsList = (props: { selectedSeason: number; seasons?: Season[]; onSeas
     >
       {seasons?.map((season, index) => (
         <SeasonItem selected={index === selectedSeason} key={index} season={season} index={index} onSeasonClick={onSeasonClick} />
-      ))}
-    </List>
-  );
-};
-
-const EpisodeItem = ({ episode }: { episode: Episode }) => {
-  const [watched, setWatched] = useState(false);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setWatched(event.target.checked);
-  };
-  return (
-    <ListItemButton
-      sx={{
-        gap: 1,
-        backgroundColor: 'inherit',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.10)',
-        borderRadius: '10px',
-      }}
-    >
-      <ListItemAvatar>
-        <Avatar
-          variant='square'
-          alt='Preview'
-          src={episode.still_path ? `https://image.tmdb.org/t/p/w200${episode.still_path}` : NoPoster}
-          sx={{ width: 56, height: '100%' }}
-        />
-      </ListItemAvatar>
-      <Typography variant='h5' color='primary'>
-        {episode.episode_number}
-      </Typography>
-      <ListItemText
-        primary={`${episode.name}`}
-        secondary={`${episode.runtime ? `${episode.runtime} min • ` : ''}${episode.air_date || 'Unknown air date'}`}
-      />
-      <Rating name='read-only' value={episode.vote_average / 2} precision={0.5} readOnly size='small' />
-      <Checkbox checked={watched} onChange={handleChange} />
-    </ListItemButton>
-  );
-};
-
-export const EpisodesList = ({ episodes, loading, error }: { episodes?: Episode[]; loading?: boolean; error?: boolean }) => {
-  const { t } = useTranslation();
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-        <CircularProgress size={24} />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 2 }}>
-        <Typography color='error'>{t('errorLoadingEpisodes')}</Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <List component='nav' sx={{ display: 'flex', flexDirection: 'column', maxHeight: '350px', overflowY: 'auto' }}>
-      {episodes?.map(episode => (
-        <EpisodeItem key={episode.id} episode={episode} />
       ))}
     </List>
   );

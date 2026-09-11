@@ -26,7 +26,16 @@ const SummaryModalInfoBar = (props: SummaryModalInfoBarProps) => {
   const tvDetails = itemDetails?.media_type === 'tv' ? itemDetails : undefined;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'center', gap: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'center',
+        gap: 2,
+        maxWidth: '100%',
+        flexWrap: 'wrap',
+      }}
+    >
       {movieDetails && (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
           <AvTimerIcon />
@@ -44,11 +53,11 @@ const SummaryModalInfoBar = (props: SummaryModalInfoBarProps) => {
       {tvDetails && (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
           <LayersIcon />
-          <Typography variant='h5'>{tvDetails.number_of_seasons ? `${tvDetails.number_of_seasons} ${t('seasons')}` : 'N/A'}</Typography>{' '}
-          {'•'}
           <Typography variant='h5'>
-            {tvDetails.number_of_episodes ? `${tvDetails.number_of_episodes} ${t('episodes')}` : 'N/A'}
-          </Typography>
+            {tvDetails.number_of_seasons ? `${tvDetails.number_of_seasons} ${t('seasons')}` : 'N/A'}
+          </Typography>{' '}
+          {'•'}
+          <Typography variant='h5'>{tvDetails.number_of_episodes ? `${tvDetails.number_of_episodes} ${t('episodes')}` : 'N/A'}</Typography>
         </Box>
       )}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
