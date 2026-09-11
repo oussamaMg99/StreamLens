@@ -13,16 +13,14 @@ interface SummaryModalEpisodesTabProps {
 
 const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
   const { itemDetails, item } = props;
-  const [selectedSeason, setSelectedSeason] = useState(0);
+  const [selectedSeason, setSelectedSeason] = useState(itemDetails?.seasons?.[0]?.season_number ?? 1);
+  const [watchTracker, setWatchTracker] = useState({});
 
   const handleSeasonClick = (seasonIndex: number) => {
     setSelectedSeason(seasonIndex);
   };
 
-  // Array position isn't guaranteed to equal TMDB's season_number (e.g. specials are
-  // season_number 0), so look it up off the selected season object itself.
-  const selectedSeasonNumber = itemDetails?.seasons?.[selectedSeason]?.season_number;
-  const { data: seasonDetails, isLoading: episodesLoading, error: episodesError } = useTvSeasonDetails(item?.id, selectedSeasonNumber);
+  const { data: seasonDetails, isLoading: episodesLoading, error: episodesError } = useTvSeasonDetails(item?.id, selectedSeason);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 0, m: 0 }}>
@@ -41,7 +39,7 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
         <SeasonsList selectedSeason={selectedSeason} seasons={itemDetails?.seasons} onSeasonClick={handleSeasonClick} />
         {/* Season Overview */}
         <SummaryModalSeasonOverview
-          seasonNumber={selectedSeasonNumber}
+          seasonNumber={selectedSeason}
           seasonDetails={seasonDetails}
           loading={episodesLoading}
           error={!!episodesError}
@@ -101,7 +99,13 @@ const SeasonsList = (props: { selectedSeason: number; seasons?: Season[]; onSeas
       sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '35%', p: 0, maxHeight: 'inherit', overflowY: 'auto' }}
     >
       {seasons?.map((season, index) => (
-        <SeasonItem selected={index === selectedSeason} key={index} season={season} index={index} onSeasonClick={onSeasonClick} />
+        <SeasonItem
+          selected={season?.season_number === selectedSeason}
+          key={index}
+          season={season}
+          index={index}
+          onSeasonClick={onSeasonClick}
+        />
       ))}
     </List>
   );
