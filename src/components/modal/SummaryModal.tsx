@@ -19,7 +19,7 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
-import { isTvShow } from 'src/utils/global.utils';
+import { isMovie, isTvShow } from 'src/utils/global.utils';
 import { useQuery } from '@tanstack/react-query';
 
 // MovieDetails/TVShowDetails now carry their own media_type discriminant (see
@@ -54,10 +54,10 @@ const SummaryModal = (props: SummaryModalProps) => {
   } = useQuery<SummaryModalDetails>({
     queryKey: ['summary-modal-details', item?.media_type, item?.id],
     queryFn: (): Promise<SummaryModalDetails> => {
-      if (item?.media_type === 'movie') {
+      if (isMovie(item)) {
         return movieService.getMovieById(item.id, 'credits,videos,images');
       }
-      if (item?.media_type === 'tv') {
+      if (isTvShow(item)) {
         return tvService.getTVById(item.id, 'credits,videos,images');
       }
       return Promise.resolve(undefined);
@@ -79,8 +79,8 @@ const SummaryModal = (props: SummaryModalProps) => {
     }
   }, [error]);
 
-  const tvDetails = itemDetails?.media_type === 'tv' ? itemDetails : undefined;
-  const title = itemDetails?.media_type === 'movie' ? itemDetails.title : (tvDetails?.name ?? 'Untitled');
+  const tvDetails = isTvShow(itemDetails) ? itemDetails : undefined;
+  const title = isMovie(itemDetails) ? itemDetails.title : (tvDetails?.name ?? 'Untitled');
 
   return (
     <Dialog maxWidth='md' fullWidth onClose={onClose} open={open}>

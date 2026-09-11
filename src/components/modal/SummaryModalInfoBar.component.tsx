@@ -7,6 +7,7 @@ import StarIcon from '@mui/icons-material/Star';
 import GenreTag from '../tag/GenreTag.component';
 import LayersIcon from '@mui/icons-material/Layers';
 import { SummaryModalDetails } from './SummaryModal';
+import { isMovie, isTvShow } from 'src/utils/global.utils';
 
 interface SummaryModalInfoBarProps {
   itemDetails?: SummaryModalDetails;
@@ -22,8 +23,8 @@ interface SummaryModalInfoBarProps {
 const SummaryModalInfoBar = (props: SummaryModalInfoBarProps) => {
   const { itemDetails } = props;
   const { t } = useTranslation();
-  const movieDetails = itemDetails?.media_type === 'movie' ? itemDetails : undefined;
-  const tvDetails = itemDetails?.media_type === 'tv' ? itemDetails : undefined;
+  const movieDetails = isMovie(itemDetails) ? itemDetails : undefined;
+  const tvDetails = isTvShow(itemDetails) ? itemDetails : undefined;
 
   return (
     <Box

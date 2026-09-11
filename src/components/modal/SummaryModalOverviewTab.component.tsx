@@ -10,6 +10,7 @@ import { Result } from 'src/core/models/common.model';
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
 import { YouTubePlayer } from '../player/YouTubePlayer.component';
 import { SummaryModalDetails } from './SummaryModal';
+import { isMovie, isTvShow } from 'src/utils/global.utils';
 
 interface SummaryModalOverviewTabProps {
   itemDetails?: SummaryModalDetails;
@@ -30,7 +31,7 @@ const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
     }
   }, [itemDetails]);
 
-  const title = itemDetails?.media_type === 'movie' ? itemDetails.title : itemDetails?.media_type === 'tv' ? itemDetails.name : 'Untitled';
+  const title = isMovie(itemDetails) ? itemDetails.title : isTvShow(itemDetails) ? itemDetails.name : 'Untitled';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 0, m: 0 }}>

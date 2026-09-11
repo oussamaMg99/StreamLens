@@ -15,6 +15,7 @@ import { Movie } from 'src/core/services/movie.service';
 import { TvShow } from 'src/core/services/tv.service';
 import { RoutePaths } from 'src/types/Routes.type';
 import Footer from 'src/components/footer/Footer.component';
+import { isMovie } from 'src/utils/global.utils';
 
 export type MediaItem = Movie | TvShow;
 
@@ -115,11 +116,12 @@ const HeroCarousel = ({ items, onItemClick, t }: HeroCarouselProps) => {
   return (
     <Box sx={{ position: 'relative', minHeight: { xs: '70vh', md: '85vh' }, overflow: 'hidden' }}>
       {items.map((item, index) => {
-        const isMovie = item.media_type === 'movie';
-        const title = isMovie ? item.title : item.name;
+        // item's media_type is always 'movie' or 'tv' (MediaItem = Movie | TvShow), so
+        // isMovie/isTvShow are exhaustive here — no third fallback branch needed.
+        const title = isMovie(item) ? item.title : item.name;
         return (
           <Box
-            key={`${isMovie ? 'movie' : 'tv'}-${item.id}`}
+            key={`${isMovie(item) ? 'movie' : 'tv'}-${item.id}`}
             sx={{
               position: 'absolute',
               inset: 0,
@@ -145,7 +147,7 @@ const HeroCarousel = ({ items, onItemClick, t }: HeroCarouselProps) => {
               }}
             >
               <Chip
-                label={isMovie ? t('popularMovies') : t('popularTVShows')}
+                label={isMovie(item) ? t('popularMovies') : t('popularTVShows')}
                 size='small'
                 sx={{
                   mb: 2,
