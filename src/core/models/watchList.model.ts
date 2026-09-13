@@ -1,16 +1,16 @@
-// src/core/models/watchTracker.model.ts
-// Shape for the future watch-tracker API: one record per movie/tv item the user has
+// src/core/models/watchList.model.ts
+// Shape for the future watch-list API: one record per movie/tv item the user has
 // interacted with. Discriminated by media_type, same convention as Media/MediaDetails
 // (common.model.ts) — id/media_type here match Movie/TvShow's own fields exactly, so a
-// WatchEntry can be correlated against a Movie or TvShow object with no field-renaming.
+// WatchListEntry can be correlated against a Movie or TvShow object with no renaming.
 
-export interface WatchedMovieEntry {
+export interface WatchListMovieEntry {
   media_type: 'movie';
   id: number;
   watched: boolean;
 }
 
-export interface WatchedTvEntry {
+export interface WatchListTvEntry {
   media_type: 'tv';
   id: number;
   // season_number -> the episode_numbers marked watched within that season. A season's
@@ -20,7 +20,7 @@ export interface WatchedTvEntry {
   watched: Record<number, number[]>;
 }
 
-export type WatchEntry = WatchedMovieEntry | WatchedTvEntry;
+export type WatchListEntry = WatchListMovieEntry | WatchListTvEntry;
 
-/** Shape of the future watch-tracker API response. */
-export type WatchTrackerResponse = WatchEntry[];
+/** Shape of the future watch-list API response. */
+export type WatchListResponse = WatchListEntry[];

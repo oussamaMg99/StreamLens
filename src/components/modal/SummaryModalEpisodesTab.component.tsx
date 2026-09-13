@@ -14,7 +14,6 @@ interface SummaryModalEpisodesTabProps {
 const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
   const { itemDetails, item } = props;
   const [selectedSeason, setSelectedSeason] = useState(itemDetails?.seasons?.[0]?.season_number ?? 1);
-  const [watchTracker, setWatchTracker] = useState({});
 
   const handleSeasonClick = (seasonIndex: number) => {
     setSelectedSeason(seasonIndex);
