@@ -8,6 +8,10 @@ import { AppContextProvider } from './core/context/global/AppContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './assets/locales/i18n';
+import { FirebaseUIProvider } from '@firebase-oss/ui-react';
+// Firebase config + initialization lives in one place (see firebase.config.ts); importing
+// `ui` from it is also what initializes the Firebase app.
+import { ui } from './core/services/firebase.config';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,13 +27,15 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AppContextProvider>
-        <div style={{ background: colors.background.default }}>
-          <ThemeProvider theme={theme}>
-            <App />
-          </ThemeProvider>
-        </div>
-      </AppContextProvider>
+      <FirebaseUIProvider ui={ui}>
+        <AppContextProvider>
+          <div style={{ background: colors.background.default }}>
+            <ThemeProvider theme={theme}>
+              <App />
+            </ThemeProvider>
+          </div>
+        </AppContextProvider>
+      </FirebaseUIProvider>
     </QueryClientProvider>
   </StrictMode>,
 );
