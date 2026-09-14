@@ -43,5 +43,7 @@
   "ended": "Ended",
   "canceled": "Canceled",
   "seasonsCount": " {{ count }} Season(s)",
-  "errorLoadingEpisodes": "Error loading episodes. Please try again later."
+  "errorLoadingEpisodes": "Error loading episodes. Please try again later.",
+  "signIn": "Sign In",
+  "signUp": "Sign Up"
 }

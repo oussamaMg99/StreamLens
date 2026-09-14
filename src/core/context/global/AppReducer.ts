@@ -10,7 +10,7 @@ export default function AppReducer(state: any, action: any) {
       return {
         ...state,
         themeMode: 'default',
-        user: {},
+        user: undefined,
         alertDialogProps: new AlertDialogProps(),
         snackBarProps: new SnackBarProps(),
       };
@@ -23,7 +23,10 @@ export default function AppReducer(state: any, action: any) {
       };
 
     case 'SET_USER':
-      sessionStorage.setItem('_user', JSON.stringify({ ...state.user, ...action.payload }));
+      // Persist exactly what goes into state. Previously this stored a merge of the old
+      // and new user while state took the replacement, so a reload could rehydrate stale
+      // keys the live state had already dropped.
+      sessionStorage.setItem('_user', JSON.stringify(action.payload));
       return {
         ...state,
         user: action.payload,

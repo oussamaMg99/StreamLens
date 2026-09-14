@@ -43,5 +43,7 @@
   "ended": "Terminé(e)",
   "canceled": "Annulé(e)",
   "seasonsCount": " {{ count }} Saison(s)",
-  "errorLoadingEpisodes": "Erreur lors du chargement des épisodes. Veuillez réessayer plus tard."
+  "errorLoadingEpisodes": "Erreur lors du chargement des épisodes. Veuillez réessayer plus tard.",
+  "signIn": "Se Connecter",
+  "signUp": "S'inscrire"
 }

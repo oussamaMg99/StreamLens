@@ -6,7 +6,8 @@ export type ThemeMode = 'default' | 'dark' | 'light';
 
 export interface AppContextState {
   themeMode: ThemeMode;
-  user: User;
+  /** undefined when signed out, so `!!user` is a meaningful "is signed in" check. */
+  user: User | undefined;
   alertDialogProps: AlertDialogProps;
   snackBarProps: SnackBarProps;
 }

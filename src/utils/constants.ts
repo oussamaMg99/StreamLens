@@ -1,3 +1,5 @@
+import { t } from 'i18next';
+
 export const navbarHeight = '4rem';
 export const languageOptions = [
   { code: 'en', label: 'English' },

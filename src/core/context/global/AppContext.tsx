@@ -9,7 +9,7 @@ import { SnackBarProps } from 'src/core/models/snackbar.model';
 
 const initialState: AppContextType = {
   themeMode: JSON.parse(localStorage.getItem('_themeMode') ?? '{}'),
-  user: JSON.parse(sessionStorage.getItem('_user') ?? '{}'),
+  user: JSON.parse(sessionStorage.getItem('_user') ?? 'null') ?? undefined,
   alertDialogProps: new AlertDialogProps(),
   snackBarProps: new SnackBarProps(),
   setThemeMode: () => {},
