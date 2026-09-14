@@ -243,7 +243,7 @@ export const ProviderRow = (props: ProviderRowProps) => {
 
   return (
     <>
-      <Divider sx={{ borderColor: 'white', my: 0.5 }}>
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', my: 0.5 }}>
         <Typography variant='caption' sx={{ letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,227,0.5)' }}>
           {intent === 'signUp' ? t('orSignUpWith') : t('orContinueWith')}
         </Typography>

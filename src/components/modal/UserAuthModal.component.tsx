@@ -63,17 +63,17 @@ const UserAuthModal = (props: UserAuthModalProps) => {
             <Tab label={t('signUp')} value='2' />
           </TabList>
           <TabPanel sx={{ p: 0 }} value='1'>
-            <UserAuthSignInTab />
+            <UserAuthSignInTab onAuthenticated={onClose} />
           </TabPanel>
           <TabPanel sx={{ p: 0 }} value='2'>
-            <UserAuthSignUpTab />
+            <UserAuthSignUpTab onAuthenticated={onClose} />
           </TabPanel>
         </TabContext>
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', my: 0.5 }} />
         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
-          <Typography>{'Just browsing ?'}</Typography>
+          <Typography>{t('justBrowsing')}</Typography>
           <Typography component={Button} sx={{ cursor: 'pointer', color: colors.primary.main }}>
-            {'Continue as guest'}
+            {t('continueAsGuest')}
           </Typography>
         </Box>
       </DialogContent>
