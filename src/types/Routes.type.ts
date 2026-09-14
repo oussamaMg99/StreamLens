@@ -3,5 +3,4 @@ export enum RoutePaths {
   ABOUT = '/about',
   MOVIES = '/movies',
   TV_SHOWS = '/tv-shows',
-  SIGNIN = '/sign-in',
 }
