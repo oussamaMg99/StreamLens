@@ -9,6 +9,7 @@ import UserAuthSignInTab from './UserAuthSignInTab.component';
 import UserAuthSignUpTab from './UserAuthSignUpTab.component';
 import { useTranslation } from 'react-i18next';
 import AppContext from 'src/core/context/global/AppContext';
+import colors from 'src/assets/themes/colors';
 
 interface UserAuthModalProps {
   open: boolean;
@@ -25,7 +26,7 @@ const UserAuthModal = (props: UserAuthModalProps) => {
     setTabValue(newValue);
   };
   return (
-    <Dialog onClose={onClose} open={open}>
+    <Dialog maxWidth='xs' fullWidth open={open} onClose={onClose}>
       <IconButton
         aria-label='close'
         onClick={onClose}
@@ -47,7 +48,7 @@ const UserAuthModal = (props: UserAuthModalProps) => {
           backgroundSize: 'cover',
         }}
       >
-        <Typography sx={{ textAlign: 'center', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }} color='primary' variant='h1'>
+        <Typography variant='h3' color='primary' sx={{ textAlign: 'center', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}>
           {t('appName')}
         </Typography>
         <TabContext value={tabValue}>
@@ -68,12 +69,12 @@ const UserAuthModal = (props: UserAuthModalProps) => {
             <UserAuthSignUpTab />
           </TabPanel>
         </TabContext>
-        <Divider />
-        <Box>
-          <Typography>{'Just browsing'}</Typography>
-          <Button variant='text' component={Typography}>
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', my: 0.5 }} />
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
+          <Typography>{'Just browsing ?'}</Typography>
+          <Typography component={Button} sx={{ cursor: 'pointer', color: colors.primary.main }}>
             {'Continue as guest'}
-          </Button>
+          </Typography>
         </Box>
       </DialogContent>
     </Dialog>
