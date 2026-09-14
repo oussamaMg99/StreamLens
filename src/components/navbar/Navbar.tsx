@@ -1,5 +1,5 @@
-import { AppBar, Toolbar, Box, Button, IconButton, Typography, Drawer, useTheme, useMediaQuery, Link } from '@mui/material';
-import { NavLink, useNavigate } from 'react-router';
+import { AppBar, Toolbar, Box, Button, IconButton, Drawer, useTheme, useMediaQuery, Link } from '@mui/material';
+import { NavLink } from 'react-router';
 import colors from 'src/assets/themes/colors';
 import { languageOptions, navbarHeight } from 'src/utils/constants';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import i18n from 'src/assets/locales/i18n';
 import { RoutePaths } from 'src/types/Routes.type';
 import SearchBar, { SearchResultItem } from '../search/SearchBar.component';
 import PersonIcon from '@mui/icons-material/Person';
+import UserAuthModal from '../modal/UserAuthModal.component';
 
 type UserAction = 'signIn' | 'signUp';
 
@@ -27,21 +28,13 @@ interface NavbarProps {
 const Navbar = (props: NavbarProps) => {
   const { enableSearch, onSearch, searchResults, searchLoading, searchError, onSelectSearchResult } = props;
   const [openMenu, setOpenMenu] = useState(false);
+  const [openAuthModal, setOpenAuthModal] = useState(false);
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-
-  const [anchorUser, setAnchorUser] = useState<null | HTMLElement>(null);
-  const openUser = Boolean(anchorUser);
-
-  const userOptions: { label: string; value: UserAction }[] = [
-    { label: t('signUp'), value: 'signUp' },
-    { label: t('signIn'), value: 'signIn' },
-  ];
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -57,16 +50,15 @@ const Navbar = (props: NavbarProps) => {
     setAnchorEl(null);
   };
 
-  const handleUserAction = (action: UserAction) => {
-    // Close the menu first, so it doesn't linger over the destination after navigating.
-    setAnchorUser(null);
-
+  const handleAuthModalDisplay = (action: 'open' | 'close') => {
     switch (action) {
-      case 'signIn':
-        navigate(RoutePaths.SIGNIN);
+      case 'open':
+        setOpenAuthModal(true);
         break;
-      case 'signUp':
-        // No sign-up route yet — needs a RoutePaths entry + page before this can navigate.
+      case 'close':
+        setOpenAuthModal(false);
+        break;
+      default:
         break;
     }
   };
@@ -76,6 +68,8 @@ const Navbar = (props: NavbarProps) => {
   }, [isMdUp]);
   return (
     <>
+      {' '}
+      {openAuthModal && <UserAuthModal open={openAuthModal} onClose={() => handleAuthModalDisplay('close')} />}
       <AppBar
         position='fixed'
         elevation={3}
@@ -157,53 +151,10 @@ const Navbar = (props: NavbarProps) => {
                   onSelectResult={onSelectSearchResult}
                 />
               )}
-              <IconButton
-                type='button'
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                  setAnchorUser(event.currentTarget);
-                }}
-              >
+              <IconButton onClick={() => handleAuthModalDisplay('open')}>
                 <PersonIcon color='primary' />
               </IconButton>
-              <Menu
-                anchorEl={anchorUser}
-                open={openUser}
-                onClose={() => {
-                  setAnchorUser(null);
-                }}
-                slotProps={{
-                  paper: {
-                    sx: {
-                      backgroundColor: colors.phantomBlack,
-                      backdropFilter: theme => `blur(${theme.spacing(2)})`,
-                      mt: 1,
-                    },
-                  },
-                }}
-              >
-                {userOptions.map(option => (
-                  <MenuItem
-                    key={option.value}
-                    onClick={() => handleUserAction(option.value)}
-                    sx={{
-                      color: colors.text.primary,
-                      '&.Mui-selected': {
-                        color: colors.primary.main,
-                        backgroundColor: 'rgba(226, 168, 71, 0.15)',
-                      },
-                      '&:hover': {
-                        color: colors.primary.main,
-                        backgroundColor: 'rgba(226, 168, 71, 0.1)',
-                      },
-                      '&.Mui-selected:hover': {
-                        backgroundColor: 'rgba(226, 168, 71, 0.2)',
-                      },
-                    }}
-                  >
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Menu>
+
               <IconButton type='button' aria-label='language' onClick={handleClick}>
                 <LanguageIcon color='primary' />
               </IconButton>
