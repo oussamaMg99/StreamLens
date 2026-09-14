@@ -14,8 +14,6 @@ import SearchBar, { SearchResultItem } from '../search/SearchBar.component';
 import PersonIcon from '@mui/icons-material/Person';
 import UserAuthModal from '../modal/UserAuthModal.component';
 
-type UserAction = 'signIn' | 'signUp';
-
 interface NavbarProps {
   enableSearch?: boolean;
   onSearch?: (query: string) => void;
@@ -68,8 +66,7 @@ const Navbar = (props: NavbarProps) => {
   }, [isMdUp]);
   return (
     <>
-      {' '}
-      {openAuthModal && <UserAuthModal open={openAuthModal} onClose={() => handleAuthModalDisplay('close')} />}
+      <UserAuthModal open={openAuthModal} onClose={() => handleAuthModalDisplay('close')} />
       <AppBar
         position='fixed'
         elevation={3}

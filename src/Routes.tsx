@@ -6,7 +6,6 @@ const About = React.lazy(() => import('./pages/About.page'));
 const LoadingPage = React.lazy(() => import('./pages/LoadingPage.page'));
 const Movies = React.lazy(() => import('./pages/Movies.page'));
 const TVShows = React.lazy(() => import('./pages/TVShows.page'));
-const SignIn = React.lazy(() => import('./pages/SignIn.page'));
 
 const AppRoutes: React.FC = () => (
   <React.Suspense fallback={<LoadingPage />}>
@@ -15,7 +14,6 @@ const AppRoutes: React.FC = () => (
       <Route path={RoutePaths.ABOUT} element={<About />} />
       <Route path={RoutePaths.MOVIES} element={<Movies />} />
       <Route path={RoutePaths.TV_SHOWS} element={<TVShows />} />
-      <Route path={RoutePaths.SIGNIN} element={<SignIn />} />
     </Routes>
   </React.Suspense>
 );
