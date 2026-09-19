@@ -26,7 +26,6 @@ import {
 } from './UserProfileParts.component';
 import AppContext from 'src/core/context/global/AppContext';
 import { toUser } from 'src/core/models/user.model';
-
 interface UserProfileModalProps {
   open: boolean;
   onClose: () => void;
@@ -42,10 +41,11 @@ const UserProfileModal = (props: UserProfileModalProps) => {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const { user, setUser } = useContext(AppContext);
+  const { user, setUser, setSnackBarProps } = useContext(AppContext);
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [errorKey, setErrorKey] = useState('');
   const [verificationSent, setVerificationSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
@@ -121,8 +121,15 @@ const UserProfileModal = (props: UserProfileModalProps) => {
   };
 
   const handleSignOut = async () => {
-    await signOut(auth);
-    onClose();
+    setSigningOut(true);
+    try {
+      await signOut(auth);
+      onClose();
+    } catch {
+      setSnackBarProps({ open: true, severity: 'error', message: t('errorOccurred') });
+    } finally {
+      setSigningOut(false);
+    }
   };
 
   return (
@@ -242,9 +249,11 @@ const UserProfileModal = (props: UserProfileModalProps) => {
                 </Button>
               </Box>
               <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', my: 0.5 }} />
-              <Button
+              <LoadingButton
                 fullWidth
                 variant='outlined'
+                loading={signingOut}
+                loadingPosition='start'
                 startIcon={<LogoutIcon />}
                 onClick={handleSignOut}
                 sx={{
@@ -255,7 +264,7 @@ const UserProfileModal = (props: UserProfileModalProps) => {
                 }}
               >
                 {t('signOut')}
-              </Button>
+              </LoadingButton>
             </Box>
           )}
         </DialogContent>

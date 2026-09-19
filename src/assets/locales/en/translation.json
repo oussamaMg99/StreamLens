@@ -91,5 +91,7 @@
   "memberSince": "Member since",
   "lastSignIn": "Last sign in",
   "sent": "Sent",
-  "signedInSuccessfully": "Signed in successfully."
+  "signedInSuccessfully": "Signed in successfully.",
+  "emailVerified": "Email verified",
+  "emailNotVerified": "Email not verified"
 }

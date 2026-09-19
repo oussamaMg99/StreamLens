@@ -8,6 +8,7 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined';
 import colors from 'src/assets/themes/colors';
+import { useTranslation } from 'react-i18next';
 
 export const panelSx = {
   borderRadius: '10px',
@@ -88,6 +89,7 @@ interface VerifiedChipProps {
 }
 
 export const VerifiedChip = (props: VerifiedChipProps) => {
+  const { t } = useTranslation();
   const { verified, action } = props;
   const tone = verified ? colors.success.main : colors.primary.main;
 
@@ -104,7 +106,7 @@ export const VerifiedChip = (props: VerifiedChipProps) => {
       }
       label={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <span>{verified ? 'Email verified' : 'Email not verified'}</span>
+          <span>{verified ? t('emailVerified') : t('emailNotVerified')}</span>
           {action}
         </Box>
       }
@@ -185,7 +187,7 @@ export const InlineInput = (props: {
         color: colors.text.primary,
         backgroundColor: colors.phantomBlack,
         border: '1px solid rgba(226,168,71,0.5)',
-        '& input': { textAlign: 'right' },
+        '& input': { textAlign: 'center' },
         '& input::placeholder': { color: 'rgba(255,255,227,0.35)', opacity: 1 },
         '&:focus-within': { borderColor: colors.primary.main, boxShadow: '0 0 0 2px rgba(226,168,71,0.25)' },
       }}

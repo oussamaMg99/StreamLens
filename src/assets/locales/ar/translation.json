@@ -91,5 +91,7 @@
   "memberSince": "عضو منذ",
   "lastSignIn": "آخر تسجيل دخول",
   "sent": "تم الإرسال",
-  "signedInSuccessfully": "تم تسجيل الدخول بنجاح."
+  "signedInSuccessfully": "تم تسجيل الدخول بنجاح.",
+  "emailVerified": "تم التحقق من البريد الإلكتروني",
+  "emailNotVerified": "لم يتم التحقق من البريد الإلكتروني"
 }
