@@ -5,11 +5,17 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
-import { auth } from 'src/core/services/firebase.config';
+import { auth, authErrorKey } from 'src/core/services/firebase.config';
 import colors from 'src/assets/themes/colors';
-import { AuthError, AuthField, ProviderRow, authErrorKey, isValidEmail, onPrimary } from './UserAuthShared.component';
+import { AuthField, ProviderRow, isValidEmail } from './UserAuthShared.component';
+import AuthError from 'src/components/modal/shared/AuthError.component';
 
 type SignInView = 'form' | 'forgotPassword' | 'resetSent';
+
+interface SignInCredentials {
+  email: string;
+  password: string;
+}
 
 interface UserAuthSignInTabProps {
   /** Called once the user is authenticated, so the modal can close itself. */
@@ -20,11 +26,15 @@ const UserAuthSignInTab = (props: UserAuthSignInTabProps) => {
   const { onAuthenticated } = props;
   const { t } = useTranslation();
   const [view, setView] = useState<SignInView>('form');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [credentials, setCredentials] = useState<SignInCredentials>({ email: '', password: '' });
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorKey, setErrorKey] = useState('');
+
+  const { email, password } = credentials;
+
+  // Functional update so a keystroke in one field can't overwrite the other with a stale copy.
+  const updateCredential = (field: keyof SignInCredentials) => (value: string) => setCredentials(prev => ({ ...prev, [field]: value }));
 
   const emailError = touched && !!email && !isValidEmail(email) ? t('invalidEmail') : '';
   const canSubmit = isValidEmail(email) && !!password;
@@ -35,6 +45,7 @@ const UserAuthSignInTab = (props: UserAuthSignInTabProps) => {
     setLoading(true);
     setErrorKey('');
     try {
+      // No setUser here: the onAuthStateChanged listener in AppContext picks the user up.
       await signInWithEmailAndPassword(auth, email.trim(), password);
       onAuthenticated?.();
     } catch (error) {
@@ -136,7 +147,7 @@ const UserAuthSignInTab = (props: UserAuthSignInTabProps) => {
           label={t('email')}
           type='email'
           value={email}
-          onChange={setEmail}
+          onChange={updateCredential('email')}
           placeholder='you@example.com'
           autoComplete='email'
           error={emailError}
@@ -146,7 +157,7 @@ const UserAuthSignInTab = (props: UserAuthSignInTabProps) => {
           loading={loading}
           variant='contained'
           onClick={handleReset}
-          sx={{ minHeight: 48, fontSize: 16, color: onPrimary }}
+          sx={{ minHeight: 48, fontSize: 16, color: colors.onPrimary }}
         >
           {t('sendResetLink')}
         </LoadingButton>
@@ -161,7 +172,7 @@ const UserAuthSignInTab = (props: UserAuthSignInTabProps) => {
         label={t('email')}
         type='email'
         value={email}
-        onChange={setEmail}
+        onChange={updateCredential('email')}
         placeholder='you@example.com'
         autoComplete='email'
         error={emailError}
@@ -170,7 +181,7 @@ const UserAuthSignInTab = (props: UserAuthSignInTabProps) => {
         label={t('password')}
         type='password'
         value={password}
-        onChange={setPassword}
+        onChange={updateCredential('password')}
         placeholder='••••••••'
         autoComplete='current-password'
         action={
@@ -188,7 +199,7 @@ const UserAuthSignInTab = (props: UserAuthSignInTabProps) => {
         disabled={touched && !canSubmit}
         variant='contained'
         onClick={handleSignIn}
-        sx={{ minHeight: 48, fontSize: 16, color: onPrimary }}
+        sx={{ minHeight: 48, fontSize: 16, color: colors.onPrimary }}
       >
         {t('signIn')}
       </LoadingButton>

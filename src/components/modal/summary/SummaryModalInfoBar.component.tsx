@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import AvTimerIcon from '@mui/icons-material/AvTimer';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import StarIcon from '@mui/icons-material/Star';
-import GenreTag from '../tag/GenreTag.component';
+import GenreTag from 'src/components/tag/GenreTag.component';
 import LayersIcon from '@mui/icons-material/Layers';
-import { SummaryModalDetails } from './SummaryModal';
+import { SummaryModalDetails } from './SummaryModal.component';
 import { isMovie, isTvShow } from 'src/utils/global.utils';
 
 interface SummaryModalInfoBarProps {

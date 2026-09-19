@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
@@ -26,7 +26,7 @@ const UserAuthModal = (props: UserAuthModalProps) => {
     setTabValue(newValue);
   };
   return (
-    <Dialog maxWidth='xs' fullWidth open={open} onClose={onClose}>
+    <Dialog maxWidth='xs' fullWidth open={open} slotProps={{ backdrop: { sx: { backdropFilter: 'blur(4px)' } } }}>
       <IconButton
         aria-label='close'
         onClick={onClose}
@@ -63,7 +63,12 @@ const UserAuthModal = (props: UserAuthModalProps) => {
             <Tab label={t('signUp')} value='2' />
           </TabList>
           <TabPanel sx={{ p: 0 }} value='1'>
-            <UserAuthSignInTab onAuthenticated={onClose} />
+            <UserAuthSignInTab
+              onAuthenticated={() => {
+                setSnackBarProps({ open: true, severity: 'success', message: t('signedInSuccessfully') });
+                onClose();
+              }}
+            />
           </TabPanel>
           <TabPanel sx={{ p: 0 }} value='2'>
             <UserAuthSignUpTab onAuthenticated={onClose} />

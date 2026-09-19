@@ -2,7 +2,7 @@ import { AppBar, Toolbar, Box, Button, IconButton, Drawer, useTheme, useMediaQue
 import { NavLink } from 'react-router';
 import colors from 'src/assets/themes/colors';
 import { languageOptions, navbarHeight } from 'src/utils/constants';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,9 @@ import i18n from 'src/assets/locales/i18n';
 import { RoutePaths } from 'src/types/Routes.type';
 import SearchBar, { SearchResultItem } from '../search/SearchBar.component';
 import PersonIcon from '@mui/icons-material/Person';
-import UserAuthModal from '../modal/UserAuthModal.component';
+import UserAuthModal from '../modal/userAuth/UserAuthModal.component';
+import UserProfileModal from '../modal/userProfile/UserProfileModal.component';
+import AppContext from 'src/core/context/global/AppContext';
 
 interface NavbarProps {
   enableSearch?: boolean;
@@ -27,9 +29,11 @@ const Navbar = (props: NavbarProps) => {
   const { enableSearch, onSearch, searchResults, searchLoading, searchError, onSelectSearchResult } = props;
   const [openMenu, setOpenMenu] = useState(false);
   const [openAuthModal, setOpenAuthModal] = useState(false);
+  const [openProfileModal, setOpenProfileModal] = useState(false);
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const { t } = useTranslation();
+  const { user, authReady } = useContext(AppContext);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -61,11 +65,25 @@ const Navbar = (props: NavbarProps) => {
     }
   };
 
+  const handleProfileModalDisplay = (action: 'open' | 'close') => {
+    switch (action) {
+      case 'open':
+        setOpenProfileModal(true);
+        break;
+      case 'close':
+        setOpenProfileModal(false);
+        break;
+      default:
+        break;
+    }
+  };
+
   useEffect(() => {
     if (isMdUp && openMenu) setOpenMenu(false);
   }, [isMdUp]);
   return (
     <>
+      <UserProfileModal open={openProfileModal} onClose={() => handleProfileModalDisplay('close')} />
       <UserAuthModal open={openAuthModal} onClose={() => handleAuthModalDisplay('close')} />
       <AppBar
         position='fixed'
@@ -148,7 +166,8 @@ const Navbar = (props: NavbarProps) => {
                   onSelectResult={onSelectSearchResult}
                 />
               )}
-              <IconButton onClick={() => handleAuthModalDisplay('open')}>
+              {/* Disabled until the session is restored, so a signed-in visitor clicking during load doesn't get the sign-in modal. */}
+              <IconButton disabled={!authReady} onClick={() => (user ? handleProfileModalDisplay('open') : handleAuthModalDisplay('open'))}>
                 <PersonIcon color='primary' />
               </IconButton>
 

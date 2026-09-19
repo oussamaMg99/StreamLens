@@ -1,15 +1,19 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { createContext, useMemo, useReducer } from 'react';
+import { createContext, useEffect, useMemo, useReducer } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { AppContextType, ThemeMode } from './types';
 import AppReducer from './AppReducer';
-import { User } from 'src/core/models/user.model';
-import { Theme } from '@emotion/react';
 import { AlertDialogProps } from 'src/core/models/alertDialog.model';
 import { SnackBarProps } from 'src/core/models/snackbar.model';
+import { User, toUser } from 'src/core/models/user.model';
+import { auth } from 'src/core/services/firebase.config';
 
 const initialState: AppContextType = {
   themeMode: JSON.parse(localStorage.getItem('_themeMode') ?? '{}'),
-  user: JSON.parse(sessionStorage.getItem('_user') ?? 'null') ?? undefined,
+  // Not hydrated from storage: Firebase persists the session itself, and the auth
+  // listener below fills this in once that session is restored.
+  user: undefined,
+  authReady: false,
   alertDialogProps: new AlertDialogProps(),
   snackBarProps: new SnackBarProps(),
   setThemeMode: () => {},
@@ -24,6 +28,17 @@ const AppContext = createContext(initialState);
 export const AppContextProvider = ({ children }: any) => {
   const [state, dispatch] = useReducer(AppReducer, initialState);
 
+  // Single source of truth for who's signed in. Covers every path that changes it —
+  // email and provider sign-in, sign-up, session restore on reload, sign-out, revoked
+  // sessions — so no individual form has to remember to call setUser.
+  useEffect(() => {
+    // Older builds stored the whole Firebase user (refresh token included) here.
+    sessionStorage.removeItem('_user');
+    return onAuthStateChanged(auth, firebaseUser => {
+      dispatch({ type: 'SET_USER', payload: firebaseUser ? toUser(firebaseUser) : undefined });
+    });
+  }, []);
+
   const clearSession = () => {
     dispatch({ type: 'CLEAR_SESSION' });
   };
@@ -35,7 +50,7 @@ export const AppContextProvider = ({ children }: any) => {
     });
   };
 
-  const setUser = (user: User) => {
+  const setUser = (user?: User) => {
     dispatch({
       type: 'SET_USER',
       payload: user,
@@ -60,6 +75,7 @@ export const AppContextProvider = ({ children }: any) => {
     () => ({
       themeMode: state.themeMode,
       user: state.user,
+      authReady: state.authReady,
       alertDialogProps: state.alertDialogProps,
       snackBarProps: state.snackBarProps,
       clearSession,
@@ -71,6 +87,7 @@ export const AppContextProvider = ({ children }: any) => {
     [
       state.themeMode,
       state.user,
+      state.authReady,
       state.alertDialogProps,
       state.snackBarProps,
       clearSession,

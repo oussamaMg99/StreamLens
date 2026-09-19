@@ -81,5 +81,15 @@
   "authEmailInUse": "Un compte existe déjà avec cette adresse e-mail. Connectez-vous plutôt.",
   "authWeakPassword": "Choisissez un mot de passe plus long, d'au moins 8 caractères.",
   "authAccountExistsWithProvider": "Vous avez déjà un compte associé à une autre méthode de connexion. Utilisez ce fournisseur pour vous connecter.",
-  "authTooManyRequests": "Trop de tentatives. Patientez un instant, puis réessayez."
+  "authTooManyRequests": "Trop de tentatives. Patientez un instant, puis réessayez.",
+  "saveChanges": "Enregistrer les modifications",
+  "editProfile": "Modifier le profil",
+  "signOut": "Se déconnecter",
+  "phone": "Téléphone",
+  "addPhoneNumber": "Ajouter un numéro de téléphone",
+  "signedInWith": "Connecté via",
+  "memberSince": "Membre depuis",
+  "lastSignIn": "Dernière connexion",
+  "sent": "Envoyé",
+  "signedInSuccessfully": "Connexion réussie."
 }

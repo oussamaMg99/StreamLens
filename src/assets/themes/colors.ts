@@ -11,6 +11,8 @@ const colors = {
     dark: '#C7943E',
     contrastText: '#ffffff',
   },
+  /** Amber ink that actually passes contrast on the primary fill (primary.contrastText #fff → 2.12:1). */
+  onPrimary: '#1F0303',
   secondary: {
     main: '#5A431C',
     light: '#5A431C',

@@ -4,7 +4,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
-import SummaryModal from 'src/components/modal/SummaryModal';
+import SummaryModal from 'src/components/modal/summary/SummaryModal.component';
 import NavBar from 'src/components/navbar/Navbar';
 import MediaGrid from 'src/components/mediaGrid/MediaGrid.component';
 import colors from 'src/assets/themes/colors';

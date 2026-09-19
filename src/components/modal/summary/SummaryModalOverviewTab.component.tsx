@@ -8,8 +8,8 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import NoPoster from 'src/assets/images/no-movie.png';
 import { Result } from 'src/core/models/common.model';
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
-import { YouTubePlayer } from '../player/YouTubePlayer.component';
-import { SummaryModalDetails } from './SummaryModal';
+import { YouTubePlayer } from 'src/components/player/YouTubePlayer.component';
+import { SummaryModalDetails } from './SummaryModal.component';
 import { isMovie, isTvShow } from 'src/utils/global.utils';
 
 interface SummaryModalOverviewTabProps {

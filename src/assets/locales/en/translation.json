@@ -81,5 +81,15 @@
   "authEmailInUse": "An account with this email already exists. Sign in instead.",
   "authWeakPassword": "Choose a longer password — at least 8 characters.",
   "authAccountExistsWithProvider": "You already have an account with a different sign-in method. Use that provider to sign in.",
-  "authTooManyRequests": "Too many attempts. Wait a moment and try again."
+  "authTooManyRequests": "Too many attempts. Wait a moment and try again.",
+  "saveChanges": "Save changes",
+  "editProfile": "Edit profile",
+  "signOut": "Sign out",
+  "phone": "Phone",
+  "addPhoneNumber": "Add phone number",
+  "signedInWith": "Signed in with",
+  "memberSince": "Member since",
+  "lastSignIn": "Last sign in",
+  "sent": "Sent",
+  "signedInSuccessfully": "Signed in successfully."
 }

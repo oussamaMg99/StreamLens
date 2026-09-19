@@ -23,13 +23,12 @@ export default function AppReducer(state: any, action: any) {
       };
 
     case 'SET_USER':
-      // Persist exactly what goes into state. Previously this stored a merge of the old
-      // and new user while state took the replacement, so a reload could rehydrate stale
-      // keys the live state had already dropped.
-      sessionStorage.setItem('_user', JSON.stringify(action.payload));
+      // Not persisted: Firebase keeps the session itself and the auth listener in
+      // AppContext restores `user` on reload. The first dispatch marks auth as ready.
       return {
         ...state,
         user: action.payload,
+        authReady: true,
       };
 
     case 'SET_ALERT_DIALOG_PROPS':

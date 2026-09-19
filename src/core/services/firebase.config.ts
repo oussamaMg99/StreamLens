@@ -14,7 +14,7 @@
 // these. They live in env vars for parity with VITE_TMDB_* and so dev/prod can point at
 // different Firebase projects without editing source.
 
-import { initializeApp } from 'firebase/app';
+import { FirebaseError, initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -44,3 +44,31 @@ isAnalyticsSupported()
   .catch(() => {
     // Analytics is non-essential; never let it break app start-up.
   });
+
+/**
+ * Maps a Firebase Auth error to an i18n key. Firebase error codes are not user-facing
+ * copy, so anything unmapped falls back to the app's generic message rather than leaking
+ * a code into the UI. An empty string means "show nothing" (the user cancelled a popup).
+ */
+export const authErrorKey = (error: unknown) => {
+  const code = error instanceof FirebaseError ? error.code : '';
+  switch (code) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'authInvalidCredentials';
+    case 'auth/email-already-in-use':
+      return 'authEmailInUse';
+    case 'auth/weak-password':
+      return 'authWeakPassword';
+    case 'auth/account-exists-with-different-credential':
+      return 'authAccountExistsWithProvider';
+    case 'auth/too-many-requests':
+      return 'authTooManyRequests';
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return '';
+    default:
+      return 'errorOccurred';
+  }
+};

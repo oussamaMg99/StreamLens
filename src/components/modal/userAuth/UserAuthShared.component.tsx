@@ -1,12 +1,11 @@
 import { ReactNode, useState } from 'react';
-import { Alert, Box, Divider, IconButton, InputBase, LinearProgress, SvgIcon, Typography } from '@mui/material';
+import { Box, Divider, IconButton, InputBase, LinearProgress, SvgIcon, Typography } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import GoogleIcon from '@mui/icons-material/Google';
 import FacebookIcon from '@mui/icons-material/Facebook';
-import { FirebaseError } from 'firebase/app';
 import { FacebookAuthProvider, GoogleAuthProvider, OAuthProvider, signInWithPopup, type AuthProvider } from 'firebase/auth';
-import { auth } from 'src/core/services/firebase.config';
+import { auth, authErrorKey } from 'src/core/services/firebase.config';
 import colors from 'src/assets/themes/colors';
 import { useTranslation } from 'react-i18next';
 
@@ -15,9 +14,6 @@ import { useTranslation } from 'react-i18next';
  * than one file each because neither is meaningful on its own — both tabs render the
  * identical field and provider treatments, and the tabs are the only consumers.
  */
-
-/** Amber ink that actually passes contrast on the amber fill (palette contrastText is #fff → 2.12:1). */
-export const onPrimary = '#1F0303';
 
 const fieldSx = (error?: boolean) => ({
   px: 1.75,
@@ -138,58 +134,6 @@ export const PasswordStrength = (props: { password: string }) => {
         {password ? scale[score].label : '—'}
       </Typography>
     </Box>
-  );
-};
-
-/* ------------------------------------------------------------------- errors */
-
-/**
- * Firebase error codes are not user-facing copy. Anything unmapped falls back to the
- * app's generic message rather than leaking a code into the UI.
- */
-export const authErrorKey = (error: unknown) => {
-  const code = error instanceof FirebaseError ? error.code : '';
-  switch (code) {
-    case 'auth/invalid-credential':
-    case 'auth/wrong-password':
-    case 'auth/user-not-found':
-      return 'authInvalidCredentials';
-    case 'auth/email-already-in-use':
-      return 'authEmailInUse';
-    case 'auth/weak-password':
-      return 'authWeakPassword';
-    case 'auth/account-exists-with-different-credential':
-      return 'authAccountExistsWithProvider';
-    case 'auth/too-many-requests':
-      return 'authTooManyRequests';
-    case 'auth/popup-closed-by-user':
-    case 'auth/cancelled-popup-request':
-      return '';
-    default:
-      return 'errorOccurred';
-  }
-};
-
-export const AuthError = (props: { messageKey: string }) => {
-  const { messageKey } = props;
-  const { t } = useTranslation();
-  if (!messageKey) return null;
-  const isProviderHint = messageKey === 'authAccountExistsWithProvider';
-
-  return (
-    <Alert
-      severity={isProviderHint ? 'warning' : 'error'}
-      icon={false}
-      sx={{
-        borderRadius: '10px',
-        color: colors.text.primary,
-        backgroundColor: isProviderHint ? 'rgba(226,168,71,0.10)' : 'rgba(232,93,93,0.12)',
-        border: `1px solid ${isProviderHint ? 'rgba(226,168,71,0.45)' : 'rgba(232,93,93,0.45)'}`,
-        '& .MuiAlert-message': { fontSize: 13, lineHeight: 1.55, py: 0 },
-      }}
-    >
-      {t(messageKey)}
-    </Alert>
   );
 };
 

@@ -1,43 +1,45 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Box, Checkbox, FormControlLabel, Link, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
-import { auth } from 'src/core/services/firebase.config';
+import { auth, authErrorKey } from 'src/core/services/firebase.config';
 import colors from 'src/assets/themes/colors';
-import {
-  isValidEmail,
-  passwordScore,
-  authErrorKey,
-  AuthError,
-  onPrimary,
-  AuthField,
-  PasswordStrength,
-  ProviderRow,
-} from './UserAuthShared.component';
+import { AuthField, PasswordStrength, ProviderRow, isValidEmail, passwordScore } from './UserAuthShared.component';
+import AuthError from 'src/components/modal/shared/AuthError.component';
+import AppContext from 'src/core/context/global/AppContext';
+import { toUser } from 'src/core/models/user.model';
+
+interface SignUpForm {
+  displayName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 interface UserAuthSignUpTabProps {
-  /** Called from the verification notice, so the modal can close itself. */
   onAuthenticated?: () => void;
 }
 
 const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
   const { onAuthenticated } = props;
+  const { setUser } = useContext(AppContext);
   const { t } = useTranslation();
   const [verificationSentTo, setVerificationSentTo] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [form, setForm] = useState<SignUpForm>({ displayName: '', email: '', password: '', confirmPassword: '' });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorKey, setErrorKey] = useState('');
 
+  const { displayName, email, password, confirmPassword } = form;
+
   const emailError = touched && !!email && !isValidEmail(email) ? t('invalidEmail') : '';
   const confirmError = !!confirmPassword && confirmPassword !== password ? t('passwordsDontMatch') : '';
   const canSubmit = isValidEmail(email) && passwordScore(password) >= 2 && password === confirmPassword && acceptedTerms;
+
+  const updateField = (field: keyof SignUpForm) => (value: string) => setForm(prev => ({ ...prev, [field]: value }));
 
   const handleSignUp = async () => {
     setTouched(true);
@@ -48,6 +50,9 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
       const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
       if (displayName.trim()) {
         await updateProfile(credential.user, { displayName: displayName.trim() });
+        // onAuthStateChanged fired at account creation, before the name existed, and
+        // doesn't fire for profile updates — so push the updated snapshot ourselves.
+        setUser(toUser(credential.user));
       }
       await sendEmailVerification(credential.user);
       setVerificationSentTo(credential.user.email ?? email.trim());
@@ -108,7 +113,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
           <LoadingButton fullWidth loading={loading} variant='outlined' onClick={handleResend} sx={{ minHeight: 44 }}>
             {t('resend')}
           </LoadingButton>
-          <LoadingButton fullWidth variant='contained' onClick={() => onAuthenticated?.()} sx={{ minHeight: 44, color: onPrimary }}>
+          <LoadingButton fullWidth variant='contained' onClick={() => onAuthenticated?.()} sx={{ minHeight: 44, color: colors.onPrimary }}>
             {t('continue')}
           </LoadingButton>
         </Box>
@@ -122,7 +127,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
       <AuthField
         label={t('displayName')}
         value={displayName}
-        onChange={setDisplayName}
+        onChange={updateField('displayName')}
         placeholder={t('displayNamePlaceholder')}
         autoComplete='name'
       />
@@ -130,7 +135,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         label={t('email')}
         type='email'
         value={email}
-        onChange={setEmail}
+        onChange={updateField('email')}
         placeholder='you@example.com'
         autoComplete='email'
         error={emailError}
@@ -139,7 +144,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         label={t('password')}
         type='password'
         value={password}
-        onChange={setPassword}
+        onChange={updateField('password')}
         placeholder='••••••••'
         autoComplete='new-password'
       >
@@ -149,7 +154,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         label={t('confirmPassword')}
         type='password'
         value={confirmPassword}
-        onChange={setConfirmPassword}
+        onChange={updateField('confirmPassword')}
         placeholder='••••••••'
         autoComplete='new-password'
         error={confirmError}
@@ -176,7 +181,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         disabled={touched && !canSubmit}
         variant='contained'
         onClick={handleSignUp}
-        sx={{ minHeight: 48, fontSize: 16, color: onPrimary }}
+        sx={{ minHeight: 48, fontSize: 16, color: colors.onPrimary }}
       >
         {t('createAccount')}
       </LoadingButton>
