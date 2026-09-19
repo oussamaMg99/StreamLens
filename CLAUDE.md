@@ -34,6 +34,7 @@ Env vars live in `.env` / `.env.local` (gitignored, not committed):
 - `VITE_TMDB_KEY`
 - `VITE_TMDB_READ_ACCESS_TOKEN` — the Bearer token actually used for API auth (v3 endpoints, v4 read-access token)
 - `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_MEASUREMENT_ID` — Firebase web config. Not secrets (it ships to every browser; access is governed by Firestore rules), kept in env so dev/prod can target different projects.
+- `VITE_AUTH_GOOGLE_ENABLED`, `VITE_AUTH_FACEBOOK_ENABLED`, `VITE_AUTH_APPLE_ENABLED` — which social sign-in tiles the auth modal shows (read in `src/utils/constants.ts`; only the literal `true` enables, unset = off). A provider must also be enabled in the Firebase console.
 
 ## Architecture
 

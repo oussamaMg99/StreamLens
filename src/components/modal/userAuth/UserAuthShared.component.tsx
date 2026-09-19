@@ -8,6 +8,7 @@ import { FacebookAuthProvider, GoogleAuthProvider, OAuthProvider, signInWithPopu
 import { auth, authErrorKey } from 'src/core/services/firebase.config';
 import colors from 'src/assets/themes/colors';
 import { useTranslation } from 'react-i18next';
+import { APPLE_AUTH_ENABLED, FACEBOOK_AUTH_ENABLED, GOOGLE_AUTH_ENABLED } from 'src/utils/constants';
 
 /**
  * Pieces shared by UserAuthSignInTab and UserAuthSignUpTab. They're in one file rather
@@ -145,17 +146,10 @@ const AppleIcon = () => (
   </SvgIcon>
 );
 
-/**
- * Apple sign-in needs a paid Apple Developer account and a Services ID. Until that
- * exists the tile should stay hidden rather than fail on click — flip this flag (or
- * move it to an env var) once the provider is configured in the Firebase console.
- */
-const APPLE_ENABLED = false;
-
-const providers: { id: string; label: string; icon: ReactNode; create: () => AuthProvider }[] = [
-  { id: 'google', label: 'Google', icon: <GoogleIcon />, create: () => new GoogleAuthProvider() },
-  { id: 'apple', label: 'Apple', icon: <AppleIcon />, create: () => new OAuthProvider('apple.com') },
-  { id: 'facebook', label: 'Facebook', icon: <FacebookIcon />, create: () => new FacebookAuthProvider() },
+const providers: { id: string; enabled: boolean; label: string; icon: ReactNode; create: () => AuthProvider }[] = [
+  { id: 'google', enabled: GOOGLE_AUTH_ENABLED, label: 'Google', icon: <GoogleIcon />, create: () => new GoogleAuthProvider() },
+  { id: 'facebook', enabled: FACEBOOK_AUTH_ENABLED, label: 'Facebook', icon: <FacebookIcon />, create: () => new FacebookAuthProvider() },
+  { id: 'apple', enabled: APPLE_AUTH_ENABLED, label: 'Apple', icon: <AppleIcon />, create: () => new OAuthProvider('apple.com') },
 ];
 
 interface ProviderRowProps {
@@ -170,7 +164,10 @@ export const ProviderRow = (props: ProviderRowProps) => {
   const { intent, disabled, onError, onSuccess } = props;
   const { t } = useTranslation();
   const [pending, setPending] = useState('');
-  const available = providers.filter(provider => provider.id !== 'apple' || APPLE_ENABLED);
+  const available = providers.filter(provider => provider.enabled);
+  // All flags off (or VITE_AUTH_* unset): render nothing rather than an "Or continue
+  // with" divider over an empty row. Must stay below the hooks above.
+  if (!available.length) return null;
 
   const handleClick = async (provider: (typeof providers)[number]) => {
     setPending(provider.id);
