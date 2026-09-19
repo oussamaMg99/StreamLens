@@ -22,5 +22,10 @@ export interface WatchListTvEntry {
 
 export type WatchListEntry = WatchListMovieEntry | WatchListTvEntry;
 
+export interface WatchList {
+  uid: string;
+  watch_list: WatchListEntry[];
+}
+
 /** Shape of the future watch-list API response. */
-export type WatchListResponse = WatchListEntry[];
+export type WatchListResponse = WatchList;
