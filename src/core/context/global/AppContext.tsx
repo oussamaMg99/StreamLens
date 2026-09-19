@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { createContext, useEffect, useMemo, useReducer } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useQueryClient } from '@tanstack/react-query';
 import { AppContextType, ThemeMode } from './types';
 import AppReducer from './AppReducer';
 import { AlertDialogProps } from 'src/core/models/alertDialog.model';
 import { SnackBarProps } from 'src/core/models/snackbar.model';
 import { User, toUser } from 'src/core/models/user.model';
 import { auth } from 'src/core/services/firebase.config';
+import { WATCH_LIST_QUERY_ROOT } from 'src/core/hooks/useWatchList';
 
 const initialState: AppContextType = {
   themeMode: JSON.parse(localStorage.getItem('_themeMode') ?? '{}'),
@@ -20,13 +22,14 @@ const initialState: AppContextType = {
   setUser: () => {},
   setAlertDialogProps: () => {},
   setSnackBarProps: () => {},
-  clearSession: () => {},
 };
 
 const AppContext = createContext(initialState);
 
 export const AppContextProvider = ({ children }: any) => {
   const [state, dispatch] = useReducer(AppReducer, initialState);
+  // Available because main.tsx nests this provider inside QueryClientProvider.
+  const queryClient = useQueryClient();
 
   // Single source of truth for who's signed in. Covers every path that changes it —
   // email and provider sign-in, sign-up, session restore on reload, sign-out, revoked
@@ -36,12 +39,12 @@ export const AppContextProvider = ({ children }: any) => {
     sessionStorage.removeItem('_user');
     return onAuthStateChanged(auth, firebaseUser => {
       dispatch({ type: 'SET_USER', payload: firebaseUser ? toUser(firebaseUser) : undefined });
+      // Sign-out cleanup lives here rather than in a sign-out button: revoked or expired
+      // sessions, a deleted account, and sign-out in another tab all end up here without
+      // running any app code. Only user-scoped caches go; TMDB data isn't per-user.
+      if (!firebaseUser) queryClient.removeQueries({ queryKey: [WATCH_LIST_QUERY_ROOT] });
     });
-  }, []);
-
-  const clearSession = () => {
-    dispatch({ type: 'CLEAR_SESSION' });
-  };
+  }, [queryClient]);
 
   const setThemeMode = (mode: ThemeMode) => {
     dispatch({
@@ -78,7 +81,6 @@ export const AppContextProvider = ({ children }: any) => {
       authReady: state.authReady,
       alertDialogProps: state.alertDialogProps,
       snackBarProps: state.snackBarProps,
-      clearSession,
       setThemeMode,
       setUser,
       setAlertDialogProps,
@@ -90,7 +92,6 @@ export const AppContextProvider = ({ children }: any) => {
       state.authReady,
       state.alertDialogProps,
       state.snackBarProps,
-      clearSession,
       setThemeMode,
       setUser,
       setAlertDialogProps,

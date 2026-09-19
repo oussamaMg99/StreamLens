@@ -50,6 +50,7 @@ Env vars live in `.env` / `.env.local` (gitignored, not committed):
 - **One source of truth for the user**: an `onAuthStateChanged` listener in `AppContextProvider` dispatches `SET_USER` with a plain snapshot built by `toUser()` (`src/core/models/user.model.ts`). Sign-in/sign-up forms don't call `setUser` themselves.
 - Never put the Firebase `User` object in state or storage: it's mutated in place (React won't see edits) and its `toJSON()` includes the refresh token.
 - `onAuthStateChanged` does **not** fire on profile edits — after `updateProfile`, call `setUser(toUser(currentUser))` yourself.
+- Sign-out is just `signOut(auth)`, from anywhere. Anything that must happen on sign-out (e.g. dropping user-scoped queries like `[WATCH_LIST_QUERY_ROOT, uid]`) goes in the `onAuthStateChanged` listener, not in a sign-out button — revoked sessions and sign-out in another tab never run button code. There is deliberately no `clearSession`/`CLEAR_SESSION`.
 - Render from context `user`; use `auth.currentUser` only inside event handlers for SDK calls. `user` is `undefined` both when signed out and before Firebase restores the session on load — check `authReady` before treating it as signed out.
 - UI: custom forms in `src/components/modal/userAuth/` (email/password + Google/Facebook popup; Apple behind a flag) and the account view in `src/components/modal/userProfile/`. The Navbar person icon opens one or the other.
 

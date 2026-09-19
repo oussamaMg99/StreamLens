@@ -1,20 +1,7 @@
-import { AlertDialogProps } from 'src/core/models/alertDialog.model';
-import { SnackBarProps } from 'src/core/models/snackbar.model';
-
 export default function AppReducer(state: any, action: any) {
   switch (action.type) {
-    case 'CLEAR_SESSION':
-      // Wipe the persisted user session (auth) and any theme/UI preferences.
-      sessionStorage.clear();
-      localStorage.clear();
-      return {
-        ...state,
-        themeMode: 'default',
-        user: undefined,
-        alertDialogProps: new AlertDialogProps(),
-        snackBarProps: new SnackBarProps(),
-      };
-
+    // No CLEAR_SESSION: sign-out is signOut(auth), and the auth listener in AppContext
+    // clears the user and user-scoped caches on every sign-out path.
     case 'SET_THEME_MODE':
       localStorage.setItem('_themeMode', JSON.stringify(action.payload));
       return {

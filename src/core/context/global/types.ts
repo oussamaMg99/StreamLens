@@ -18,7 +18,6 @@ export interface AppContextState {
 }
 
 export type AppContextActions = {
-  clearSession: () => void;
   setThemeMode: (mode: ThemeMode) => void;
   setUser: (user?: User) => void;
   setAlertDialogProps: (dialog?: AlertDialogProps) => void;
