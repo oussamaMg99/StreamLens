@@ -3,6 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getWatchList } from 'src/core/services/watchList.service';
 import { WatchListResponse } from 'src/core/models/watchList.model';
 
+/** Root of every user-scoped watch-list query key: ['watch-list', uid]. */
+export const WATCH_LIST_QUERY_ROOT = 'watch-list';
+
 /**
  * useWatchList - the signed-in user's watch list.
  *
@@ -12,7 +15,7 @@ import { WatchListResponse } from 'src/core/models/watchList.model';
  */
 export function useWatchList(uid?: string, queryOptions?: { enabled?: boolean }) {
   return useQuery<WatchListResponse>({
-    queryKey: ['watch-list', uid],
+    queryKey: [WATCH_LIST_QUERY_ROOT, uid],
     queryFn: () => getWatchList(uid as string),
     staleTime: 1000 * 60 * 5,
     enabled: (queryOptions?.enabled ?? true) && uid !== undefined,
