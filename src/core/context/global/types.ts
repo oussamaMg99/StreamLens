@@ -13,6 +13,11 @@ export interface AppContextState {
    * `user` is undefined even for a signed-in visitor, so don't treat that as signed out.
    */
   authReady: boolean;
+  /**
+   * The sign-in/sign-up modal is global so any component can prompt for sign-in — e.g.
+   * the Summary modal's watch-list controls, which sit far from the Navbar.
+   */
+  authModalOpen: boolean;
   alertDialogProps: AlertDialogProps;
   snackBarProps: SnackBarProps;
 }
@@ -20,6 +25,7 @@ export interface AppContextState {
 export type AppContextActions = {
   setThemeMode: (mode: ThemeMode) => void;
   setUser: (user?: User) => void;
+  setAuthModalOpen: (open: boolean) => void;
   setAlertDialogProps: (dialog?: AlertDialogProps) => void;
   setSnackBarProps: (snackbar?: SnackBarProps) => void;
 };

@@ -38,6 +38,7 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
         <SeasonsList selectedSeason={selectedSeason} seasons={itemDetails?.seasons} onSeasonClick={handleSeasonClick} />
         {/* Season Overview */}
         <SummaryModalSeasonOverview
+          tvId={item?.id}
           seasonNumber={selectedSeason}
           seasonDetails={seasonDetails}
           loading={episodesLoading}

@@ -100,10 +100,7 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
   /**
    * popular - convenience wrapper for /{mediaType}/popular
    */
-  protected async popular(
-    page = 1,
-    opts: { language?: string; region?: string; retry?: number } = {},
-  ): Promise<TmdbListResponse<TItem>> {
+  protected async popular(page = 1, opts: { language?: string; region?: string; retry?: number } = {}): Promise<TmdbListResponse<TItem>> {
     const { language = 'en-US', region, retry = 0 } = opts;
     const params: Record<string, any> = { page, language };
     if (region) params.region = region;

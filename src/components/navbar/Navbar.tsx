@@ -12,7 +12,6 @@ import i18n from 'src/assets/locales/i18n';
 import { RoutePaths } from 'src/types/Routes.type';
 import SearchBar, { SearchResultItem } from '../search/SearchBar.component';
 import PersonIcon from '@mui/icons-material/Person';
-import UserAuthModal from '../modal/userAuth/UserAuthModal.component';
 import UserProfileModal from '../modal/userProfile/UserProfileModal.component';
 import AppContext from 'src/core/context/global/AppContext';
 
@@ -28,12 +27,11 @@ interface NavbarProps {
 const Navbar = (props: NavbarProps) => {
   const { enableSearch, onSearch, searchResults, searchLoading, searchError, onSelectSearchResult } = props;
   const [openMenu, setOpenMenu] = useState(false);
-  const [openAuthModal, setOpenAuthModal] = useState(false);
   const [openProfileModal, setOpenProfileModal] = useState(false);
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const { t } = useTranslation();
-  const { user, authReady } = useContext(AppContext);
+  const { user, authReady, setAuthModalOpen } = useContext(AppContext);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -50,19 +48,6 @@ const Navbar = (props: NavbarProps) => {
     // Implement language change logic here
     i18n.changeLanguage(code);
     setAnchorEl(null);
-  };
-
-  const handleAuthModalDisplay = (action: 'open' | 'close') => {
-    switch (action) {
-      case 'open':
-        setOpenAuthModal(true);
-        break;
-      case 'close':
-        setOpenAuthModal(false);
-        break;
-      default:
-        break;
-    }
   };
 
   const handleProfileModalDisplay = (action: 'open' | 'close') => {
@@ -84,7 +69,6 @@ const Navbar = (props: NavbarProps) => {
   return (
     <>
       <UserProfileModal open={openProfileModal} onClose={() => handleProfileModalDisplay('close')} />
-      <UserAuthModal open={openAuthModal} onClose={() => handleAuthModalDisplay('close')} />
       <AppBar
         position='fixed'
         elevation={3}
@@ -167,7 +151,7 @@ const Navbar = (props: NavbarProps) => {
                 />
               )}
               {/* Disabled until the session is restored, so a signed-in visitor clicking during load doesn't get the sign-in modal. */}
-              <IconButton disabled={!authReady} onClick={() => (user ? handleProfileModalDisplay('open') : handleAuthModalDisplay('open'))}>
+              <IconButton disabled={!authReady} onClick={() => (user ? handleProfileModalDisplay('open') : setAuthModalOpen(true))}>
                 <PersonIcon color='primary' />
               </IconButton>
 

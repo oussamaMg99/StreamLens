@@ -93,5 +93,13 @@
   "sent": "Sent",
   "signedInSuccessfully": "Signed in successfully.",
   "emailVerified": "Email verified",
-  "emailNotVerified": "Email not verified"
+  "emailNotVerified": "Email not verified",
+  "season": "Season",
+  "watched": "watched",
+  "airDateUnknown": "Air date unknown",
+  "markSeasonWatched": "Mark season watched",
+  "signInToSave": "Sign in to save titles to your watch list",
+  "removeFromWatchList": "Remove from watch list",
+  "savedToWatchList": "Saved to your watch list.",
+  "removedFromWatchList": "Removed from your watch list."
 }

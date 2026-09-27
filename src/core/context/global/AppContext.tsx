@@ -8,7 +8,7 @@ import { AlertDialogProps } from 'src/core/models/alertDialog.model';
 import { SnackBarProps } from 'src/core/models/snackbar.model';
 import { User, toUser } from 'src/core/models/user.model';
 import { auth } from 'src/core/services/firebase.config';
-import { WATCH_LIST_QUERY_ROOT } from 'src/core/hooks/useWatchList';
+import { WATCH_LIST_QUERY_ROOT } from 'src/core/services/watchList.service';
 
 const initialState: AppContextType = {
   themeMode: JSON.parse(localStorage.getItem('_themeMode') ?? '{}'),
@@ -16,10 +16,12 @@ const initialState: AppContextType = {
   // listener below fills this in once that session is restored.
   user: undefined,
   authReady: false,
+  authModalOpen: false,
   alertDialogProps: new AlertDialogProps(),
   snackBarProps: new SnackBarProps(),
   setThemeMode: () => {},
   setUser: () => {},
+  setAuthModalOpen: () => {},
   setAlertDialogProps: () => {},
   setSnackBarProps: () => {},
 };
@@ -60,6 +62,13 @@ export const AppContextProvider = ({ children }: any) => {
     });
   };
 
+  const setAuthModalOpen = (open: boolean) => {
+    dispatch({
+      type: 'SET_AUTH_MODAL_OPEN',
+      payload: open,
+    });
+  };
+
   const setAlertDialogProps = (dialog?: AlertDialogProps) => {
     dispatch({
       type: 'SET_ALERT_DIALOG_PROPS',
@@ -79,10 +88,12 @@ export const AppContextProvider = ({ children }: any) => {
       themeMode: state.themeMode,
       user: state.user,
       authReady: state.authReady,
+      authModalOpen: state.authModalOpen,
       alertDialogProps: state.alertDialogProps,
       snackBarProps: state.snackBarProps,
       setThemeMode,
       setUser,
+      setAuthModalOpen,
       setAlertDialogProps,
       setSnackBarProps,
     }),
@@ -90,10 +101,12 @@ export const AppContextProvider = ({ children }: any) => {
       state.themeMode,
       state.user,
       state.authReady,
+      state.authModalOpen,
       state.alertDialogProps,
       state.snackBarProps,
       setThemeMode,
       setUser,
+      setAuthModalOpen,
       setAlertDialogProps,
       setSnackBarProps,
     ],

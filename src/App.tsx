@@ -7,9 +7,11 @@ import AppContext from './core/context/global/AppContext';
 import SnackbarComponent from './components/snackBar/SnackBar.component';
 import { AlertDialogProps } from './core/models/alertDialog.model';
 import AlertDialog from './components/dialogs/AlertDialog.component';
+import UserAuthModal from './components/modal/userAuth/UserAuthModal.component';
 
 const App = () => {
-  const { alertDialogProps, snackBarProps, setAlertDialogProps, setSnackBarProps } = useContext(AppContext);
+  const { alertDialogProps, snackBarProps, authModalOpen, setAlertDialogProps, setSnackBarProps, setAuthModalOpen } =
+    useContext(AppContext);
 
   const closeSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
     setSnackBarProps();
@@ -52,6 +54,9 @@ const App = () => {
       )}
       <CssBaseline />
       <BrowserRouter basename='/StreamLens/'>
+        {/* Rendered once here, not per call site, so anything can prompt sign-in via
+            setAuthModalOpen. Inside the router so its links can become router links. */}
+        <UserAuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
         <AppRoutes />
       </BrowserRouter>
     </>

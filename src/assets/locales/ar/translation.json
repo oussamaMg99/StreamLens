@@ -93,5 +93,13 @@
   "sent": "تم الإرسال",
   "signedInSuccessfully": "تم تسجيل الدخول بنجاح.",
   "emailVerified": "تم التحقق من البريد الإلكتروني",
-  "emailNotVerified": "لم يتم التحقق من البريد الإلكتروني"
+  "emailNotVerified": "لم يتم التحقق من البريد الإلكتروني",
+  "season": "الموسم",
+  "watched": "تمت مشاهدتها",
+  "airDateUnknown": "تاريخ العرض غير معروف",
+  "markSeasonWatched": "تحديد الموسم كمشاهد",
+  "signInToSave": "سجّل الدخول لإضافة الأعمال إلى قائمة المشاهدة",
+  "removeFromWatchList": "إزالة من قائمة المشاهدة",
+  "savedToWatchList": "تمت الإضافة إلى قائمة المشاهدة.",
+  "removedFromWatchList": "تمت الإزالة من قائمة المشاهدة."
 }

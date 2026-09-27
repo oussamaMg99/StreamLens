@@ -18,6 +18,13 @@ export default function AppReducer(state: any, action: any) {
         authReady: true,
       };
 
+    case 'SET_AUTH_MODAL_OPEN':
+      // Pure UI state, not persisted: a reload shouldn't reopen the sign-in modal.
+      return {
+        ...state,
+        authModalOpen: action.payload,
+      };
+
     case 'SET_ALERT_DIALOG_PROPS':
       return {
         ...state,

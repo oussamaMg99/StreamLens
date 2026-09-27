@@ -20,6 +20,13 @@ import { WatchList, WatchListEntry, WatchListMovieEntry, WatchListResponse, Watc
 
 const WATCH_LISTS_COLLECTION = 'watchLists';
 
+/**
+ * Root of every user-scoped watch-list query key: ['watch-list', uid]. It lives here
+ * rather than in the hook so AppContext can invalidate on sign-out without importing a
+ * hook that imports AppContext back.
+ */
+export const WATCH_LIST_QUERY_ROOT = 'watch-list';
+
 const watchListRef = (uid: string) => doc(db, WATCH_LISTS_COLLECTION, uid);
 
 /**
@@ -53,6 +60,21 @@ const updateEntries = async (uid: string, update: (entries: WatchListEntry[]) =>
     transaction.set(ref, { uid, watch_list: next });
   });
 };
+
+/**
+ * Puts a title on the list with no progress yet ("want to watch"); no-op if it's already
+ * there. The per-episode/per-movie setters can't express this: they'd have to mark
+ * something watched to create the entry.
+ */
+export const addToWatchList = (uid: string, entry: Pick<WatchListEntry, 'media_type' | 'id'>): Promise<void> =>
+  updateEntries(uid, entries => {
+    if (entries.some(current => current.media_type === entry.media_type && current.id === entry.id)) return entries;
+    const created: WatchListEntry =
+      entry.media_type === 'movie'
+        ? { media_type: 'movie', id: entry.id, watched: false }
+        : { media_type: 'tv', id: entry.id, watched: {} };
+    return [...entries, created];
+  });
 
 /** Marks a movie watched or unwatched, adding it to the list if it isn't there yet. */
 export const setMovieWatched = (uid: string, id: number, watched: boolean): Promise<void> =>
