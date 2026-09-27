@@ -101,5 +101,8 @@
   "signInToSave": "Sign in to save titles to your watch list",
   "removeFromWatchList": "Remove from watch list",
   "savedToWatchList": "Saved to your watch list.",
-  "removedFromWatchList": "Removed from your watch list."
+  "removedFromWatchList": "Removed from your watch list.",
+  "verifyEmailToSave": "Verify your email to save titles to your watch list",
+  "verifyEmailToSaveHint": "Your watch list needs a verified email address. Click the link we sent you, then come back — saving will work right away.",
+  "emailVerifiedNow": "Email verified. Your watch list is ready."
 }

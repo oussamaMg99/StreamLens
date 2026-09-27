@@ -16,6 +16,7 @@ import { isMovie, isTvShow } from 'src/utils/global.utils';
 import AppContext from 'src/core/context/global/AppContext';
 import { useWatchListEntry } from 'src/core/hooks/useWatchList';
 import { useAddToWatchList, useRemoveFromWatchList } from 'src/core/hooks/useWatchListMutations';
+import { useWatchListGate } from 'src/core/hooks/useWatchListGate';
 
 interface SummaryModalOverviewTabProps {
   itemDetails?: SummaryModalDetails;
@@ -24,20 +25,22 @@ interface SummaryModalOverviewTabProps {
 const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
   const { itemDetails } = props;
   const { t } = useTranslation();
-  const { user, authReady, setAuthModalOpen, setSnackBarProps } = useContext(AppContext);
+  const { setSnackBarProps } = useContext(AppContext);
   const [trailerVideoId, setTrailerVideoId] = useState<string | null>(null);
 
+  const gate = useWatchListGate();
   const watchListEntry = useWatchListEntry(itemDetails);
   const addToList = useAddToWatchList();
   const removeFromList = useRemoveFromWatchList();
   const watchListPending = addToList.isPending || removeFromList.isPending;
 
-  /** Signed out, the button is the sign-in prompt rather than a dead control. */
+  /**
+   * Blocked (signed out, or signed in but unverified — firestore.rules requires a
+   * verified email), the button becomes the prompt rather than a dead control or a
+   * write that's guaranteed to be denied.
+   */
   const handleWatchListClick = () => {
-    if (!user) {
-      setAuthModalOpen(true);
-      return;
-    }
+    if (gate.promptIfBlocked()) return;
     if (!itemDetails) return;
     const entryRef = { media_type: itemDetails.media_type, id: itemDetails.id };
     const mutation = watchListEntry ? removeFromList : addToList;
@@ -84,14 +87,14 @@ const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, width: { xs: '100%', sm: '48%' } }}>
           <Typography gutterBottom>{itemDetails?.overview ?? t('noSummaryAvailable')}</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, justifyContent: 'center' }}>
-            {/* Empty title renders no tooltip, so signed-in users just get the button. */}
-            <Tooltip title={user ? '' : t('signInToSave')}>
+            {/* Empty title renders no tooltip, so unblocked users just get the button. */}
+            <Tooltip title={gate.blockedHint}>
               <Button
                 variant='contained'
                 startIcon={watchListEntry ? <BookmarkAddedIcon /> : <BookmarkAddIcon />}
-                // !authReady: `user` is still undefined mid session-restore, and a click
-                // then would wrongly prompt sign-in instead of saving.
-                disabled={!authReady || watchListPending || !itemDetails}
+                // 'loading' access: the session is still being restored, so a click would
+                // prompt sign-in for someone who is actually signed in.
+                disabled={gate.access === 'loading' || watchListPending || !itemDetails}
                 onClick={handleWatchListClick}
               >
                 {watchListEntry ? t('removeFromWatchList') : t('saveToWatchList')}

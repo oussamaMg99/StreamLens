@@ -101,5 +101,8 @@
   "signInToSave": "Connectez-vous pour ajouter des titres à votre liste",
   "removeFromWatchList": "Retirer de la liste",
   "savedToWatchList": "Ajouté à votre liste.",
-  "removedFromWatchList": "Retiré de votre liste."
+  "removedFromWatchList": "Retiré de votre liste.",
+  "verifyEmailToSave": "Vérifiez votre e-mail pour ajouter des titres à votre liste",
+  "verifyEmailToSaveHint": "Votre liste nécessite une adresse e-mail vérifiée. Cliquez sur le lien que nous vous avons envoyé, puis revenez — l'ajout fonctionnera aussitôt.",
+  "emailVerifiedNow": "E-mail vérifié. Votre liste est prête."
 }

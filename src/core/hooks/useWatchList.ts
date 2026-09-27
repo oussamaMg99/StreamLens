@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { WATCH_LIST_QUERY_ROOT, getWatchList } from 'src/core/services/watchList.service';
 import { WatchListEntry, WatchListResponse } from 'src/core/models/watchList.model';
 import AppContext from 'src/core/context/global/AppContext';
+import { useWatchListGate } from './useWatchListGate';
 
 /**
  * useWatchList - the signed-in user's watch list.
@@ -27,7 +28,10 @@ export function useWatchList(uid?: string, queryOptions?: { enabled?: boolean })
  */
 export function useWatchListEntry(item?: Pick<WatchListEntry, 'media_type' | 'id'>) {
   const { user } = useContext(AppContext);
-  const { data } = useWatchList(user?.uid);
+  const { access } = useWatchListGate();
+  // Unverified users are denied by firestore.rules, so don't spend a request (and a
+  // retry) finding that out on every render.
+  const { data } = useWatchList(user?.uid, { enabled: access === 'ready' });
   if (!item) return undefined;
   return data?.watch_list.find(entry => entry.media_type === item.media_type && entry.id === item.id);
 }

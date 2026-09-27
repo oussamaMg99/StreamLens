@@ -5,12 +5,11 @@ import Divider from '@mui/material/Divider';
 import { useTranslation } from 'react-i18next';
 import CheckIcon from '@mui/icons-material/Check';
 import { Episode, SeasonDetails } from 'src/core/models/seasonDetails.model';
-import { Avatar, Checkbox, CircularProgress, List, ListItemAvatar, ListItemButton, ListItemText, Rating } from '@mui/material';
-import { useContext } from 'react';
+import { Avatar, Checkbox, CircularProgress, List, ListItemAvatar, ListItemButton, ListItemText, Rating, Tooltip } from '@mui/material';
 import NoPoster from 'src/assets/images/no-movie.png';
-import AppContext from 'src/core/context/global/AppContext';
 import { useWatchListEntry } from 'src/core/hooks/useWatchList';
 import { useSetEpisodeWatched } from 'src/core/hooks/useWatchListMutations';
+import { useWatchListGate } from 'src/core/hooks/useWatchListGate';
 
 interface SummaryModalSeasonOverviewProps {
   /** TMDB id of the show — needed to write progress against the right watch-list entry. */
@@ -72,15 +71,12 @@ interface EpisodeItemProps {
 const EpisodeItem = (props: EpisodeItemProps) => {
   const { episode, tvId, seasonNumber, watched } = props;
   const { t } = useTranslation();
-  const { user, authReady, setAuthModalOpen } = useContext(AppContext);
+  const gate = useWatchListGate();
   const setEpisodeWatched = useSetEpisodeWatched();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Signed out, the tick is the sign-in prompt — nothing is written.
-    if (!user) {
-      setAuthModalOpen(true);
-      return;
-    }
+    // Signed out or unverified, the tick is the prompt — nothing is written.
+    if (gate.promptIfBlocked()) return;
     if (tvId === undefined || seasonNumber === undefined) return;
     setEpisodeWatched.mutate({ tvId, season: seasonNumber, episode: episode.episode_number, watched: event.target.checked });
   };
@@ -110,13 +106,15 @@ const EpisodeItem = (props: EpisodeItemProps) => {
         secondary={`${episode.runtime ? `${episode.runtime}${t('minute(s)')} • ` : ''}${episode.air_date || t('airDateUnknown')}`}
       />
       <Rating name='read-only' value={episode.vote_average / 2} precision={0.5} readOnly size='small' />
-      <Checkbox
-        checked={watched}
-        disabled={!authReady || setEpisodeWatched.isPending}
-        onChange={handleChange}
-        // The row is a ListItemButton, so keep the tick from also triggering it.
-        onClick={event => event.stopPropagation()}
-      />
+      <Tooltip title={gate.blockedHint}>
+        <Checkbox
+          checked={watched}
+          disabled={gate.access === 'loading' || setEpisodeWatched.isPending}
+          onChange={handleChange}
+          // The row is a ListItemButton, so keep the tick from also triggering it.
+          onClick={event => event.stopPropagation()}
+        />
+      </Tooltip>
     </ListItemButton>
   );
 };
