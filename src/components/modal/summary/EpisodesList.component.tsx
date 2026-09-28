@@ -1,65 +1,11 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import { useTranslation } from 'react-i18next';
-import CheckIcon from '@mui/icons-material/Check';
-import { Episode, SeasonDetails } from 'src/core/models/seasonDetails.model';
 import { Avatar, Checkbox, CircularProgress, List, ListItemAvatar, ListItemButton, ListItemText, Rating, Tooltip } from '@mui/material';
+import { Episode } from 'src/core/models/seasonDetails.model';
 import NoPoster from 'src/assets/images/no-movie.png';
-import { useWatchListEntry } from 'src/core/hooks/useWatchList';
 import { useSetEpisodeWatched } from 'src/core/hooks/useWatchListMutations';
 import { useWatchListGate } from 'src/core/hooks/useWatchListGate';
-
-interface SummaryModalSeasonOverviewProps {
-  /** TMDB id of the show — needed to write progress against the right watch-list entry. */
-  tvId?: number;
-  seasonNumber?: number;
-  seasonDetails?: SeasonDetails;
-  loading?: boolean;
-  error?: boolean;
-}
-
-const SummaryModalSeasonOverview = (props: SummaryModalSeasonOverviewProps) => {
-  const { tvId, seasonNumber, seasonDetails, loading, error } = props;
-  const { t } = useTranslation();
-
-  // Looked up once here and passed down, so one query backs the whole episode list
-  // instead of every row resolving its own entry.
-  const entry = useWatchListEntry(tvId !== undefined ? { media_type: 'tv', id: tvId } : undefined);
-  const watchedEpisodes = (entry?.media_type === 'tv' ? entry.watched[seasonNumber ?? 0] : undefined) ?? [];
-
-  return (
-    <Box sx={{ width: '65%', backgroundColor: 'rgba(20, 20, 20, 0.45)', borderRadius: '10px', p: 1 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 1, p: 1 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          <Typography variant='h4'>
-            {t('season')} {seasonNumber}
-          </Typography>
-          <Typography variant='body2' color='textSecondary'>
-            {seasonDetails?.episodes?.length ?? 0} {t('episodes')} •{' '}
-            {seasonDetails?.air_date ? `${seasonDetails.air_date?.split('-')[0]}` : t('airDateUnknown')} • {watchedEpisodes.length}{' '}
-            {t('watched')}
-          </Typography>
-        </Box>
-        <Button size='small' variant='outlined' startIcon={<CheckIcon />}>
-          {t('markSeasonWatched')}
-        </Button>
-      </Box>
-      <Divider sx={{ borderColor: 'rgba(226, 168, 71, 0.25)' }} />
-      <EpisodesList
-        episodes={seasonDetails?.episodes}
-        tvId={tvId}
-        seasonNumber={seasonNumber}
-        watchedEpisodes={watchedEpisodes}
-        loading={loading}
-        error={error}
-      />
-    </Box>
-  );
-};
-
-export default SummaryModalSeasonOverview;
 
 interface EpisodeItemProps {
   episode: Episode;
@@ -68,6 +14,10 @@ interface EpisodeItemProps {
   watched: boolean;
 }
 
+/**
+ * One episode row. Kept private to this file: it only makes sense inside EpisodesList,
+ * which supplies the ids and the watched flag from the season's entry.
+ */
 const EpisodeItem = (props: EpisodeItemProps) => {
   const { episode, tvId, seasonNumber, watched } = props;
   const { t } = useTranslation();
@@ -123,12 +73,14 @@ interface EpisodesListProps {
   episodes?: Episode[];
   tvId?: number;
   seasonNumber?: number;
+  /** Episode numbers marked watched in this season; owned by SummaryModalEpisodesTab. */
   watchedEpisodes?: number[];
   loading?: boolean;
   error?: boolean;
 }
 
-export const EpisodesList = (props: EpisodesListProps) => {
+/** The season's episodes with their watched ticks, plus the loading/error states. */
+const EpisodesList = (props: EpisodesListProps) => {
   const { episodes, tvId, seasonNumber, watchedEpisodes = [], loading, error } = props;
   const { t } = useTranslation();
 
@@ -162,3 +114,5 @@ export const EpisodesList = (props: EpisodesListProps) => {
     </List>
   );
 };
+
+export default EpisodesList;

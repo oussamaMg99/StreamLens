@@ -1,11 +1,17 @@
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
-import SummaryModalSeasonOverview from './SummaryModalSeasonOverview.component';
 import { TvShow } from 'src/core/services/tv.service';
 import { Avatar, Box, LinearProgress, List, ListItemAvatar, ListItemButton, ListItemText, Rating, Typography } from '@mui/material';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Season, TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { useTvSeasonDetails } from 'src/core/hooks/useTvSeasonDetails';
+import { useWatchListEntry } from 'src/core/hooks/useWatchList';
 import NoPoster from 'src/assets/images/no-movie.png';
+import SeasonOverview from './SeasonOverview.component';
+
+/** season_number -> the episode numbers marked watched in it. */
+type WatchedBySeason = Record<number, number[]>;
+
 interface SummaryModalEpisodesTabProps {
   item?: TvShow;
   itemDetails?: TVShowDetails;
@@ -15,11 +21,17 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
   const { itemDetails, item } = props;
   const [selectedSeason, setSelectedSeason] = useState(itemDetails?.seasons?.[0]?.season_number ?? 1);
 
-  const handleSeasonClick = (seasonIndex: number) => {
-    setSelectedSeason(seasonIndex);
+  const handleSeasonClick = (seasonNumber: number) => {
+    setSelectedSeason(seasonNumber);
   };
 
   const { data: seasonDetails, isLoading: episodesLoading, error: episodesError } = useTvSeasonDetails(item?.id, selectedSeason);
+
+  // Looked up once here, the nearest common parent, so the seasons list and the season
+  // overview read the same progress. One query either way — TanStack Query dedupes the
+  // key — but a single owner beats two components fetching the same thing.
+  const entry = useWatchListEntry(item?.id !== undefined ? { media_type: 'tv', id: item.id } : undefined);
+  const watchedBySeason: WatchedBySeason = entry?.media_type === 'tv' ? entry.watched : {};
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 0, m: 0 }}>
@@ -35,11 +47,17 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
         }}
       >
         {/*  Seasons List */}
-        <SeasonsList selectedSeason={selectedSeason} seasons={itemDetails?.seasons} onSeasonClick={handleSeasonClick} />
+        <SeasonsList
+          selectedSeason={selectedSeason}
+          seasons={itemDetails?.seasons}
+          watchedBySeason={watchedBySeason}
+          onSeasonClick={handleSeasonClick}
+        />
         {/* Season Overview */}
-        <SummaryModalSeasonOverview
+        <SeasonOverview
           tvId={item?.id}
           seasonNumber={selectedSeason}
+          watchedEpisodes={watchedBySeason[selectedSeason] ?? []}
           seasonDetails={seasonDetails}
           loading={episodesLoading}
           error={!!episodesError}
@@ -51,8 +69,21 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
 
 export default SummaryModalEpisodesTab;
 
-const SeasonItem = (props: { selected: boolean; season: Season; index: number; onSeasonClick: (index: number) => void }) => {
-  const { selected, season, index, onSeasonClick } = props;
+interface SeasonItemProps {
+  selected: boolean;
+  season: Season;
+  watchedEpisodes: number[];
+  onSeasonClick: (seasonNumber: number) => void;
+}
+
+const SeasonItem = (props: SeasonItemProps) => {
+  const { selected, season, watchedEpisodes, onSeasonClick } = props;
+  const { t } = useTranslation();
+
+  // Clamped: TMDB's episode_count can lag behind a season that's already been marked
+  // further ahead, which would otherwise render a bar past 100%.
+  const progress = season.episode_count ? Math.min(100, Math.round((watchedEpisodes.length / season.episode_count) * 100)) : 0;
+
   return (
     <ListItemButton
       sx={{
@@ -64,7 +95,9 @@ const SeasonItem = (props: { selected: boolean; season: Season; index: number; o
           border: '1px solid rgba(226, 168, 71, 0.50)',
         },
       }}
-      onClick={() => onSeasonClick(index)}
+      // The season number, not the array index: seasons[0] is season 1 on shows without
+      // a Specials season, and selectedSeason is used to fetch and highlight by number.
+      onClick={() => onSeasonClick(season.season_number)}
     >
       <ListItemAvatar>
         <Avatar
@@ -77,12 +110,12 @@ const SeasonItem = (props: { selected: boolean; season: Season; index: number; o
       <Box sx={{ width: '100%' }}>
         <ListItemText
           primary={`${season.name}`}
-          secondary={`${season.episode_count} episodes • ${season.air_date?.split('-')[0] || 'Unknown air date'}`}
+          secondary={`${season.episode_count} ${t('episodes')} • ${season.air_date?.split('-')[0] || t('airDateUnknown')}`}
         />
         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1 }}>
-          <LinearProgress variant='determinate' min={0} max={100} value={25} sx={{ width: '50%' }} />
+          <LinearProgress variant='determinate' min={0} max={100} value={progress} sx={{ width: '50%' }} />
           <Typography variant='caption' color='textSecondary' sx={{ width: '50%' }}>
-            25%
+            {watchedEpisodes.length}/{season.episode_count} • {progress}%
           </Typography>
         </Box>
       </Box>
@@ -90,20 +123,27 @@ const SeasonItem = (props: { selected: boolean; season: Season; index: number; o
   );
 };
 
-const SeasonsList = (props: { selectedSeason: number; seasons?: Season[]; onSeasonClick: (index: number) => void }) => {
-  const { selectedSeason, seasons, onSeasonClick } = props;
+interface SeasonsListProps {
+  selectedSeason: number;
+  seasons?: Season[];
+  watchedBySeason: WatchedBySeason;
+  onSeasonClick: (seasonNumber: number) => void;
+}
+
+const SeasonsList = (props: SeasonsListProps) => {
+  const { selectedSeason, seasons, watchedBySeason, onSeasonClick } = props;
 
   return (
     <List
       component='nav'
       sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '35%', p: 0, maxHeight: 'inherit', overflowY: 'auto' }}
     >
-      {seasons?.map((season, index) => (
+      {seasons?.map(season => (
         <SeasonItem
+          key={season.season_number}
           selected={season?.season_number === selectedSeason}
-          key={index}
           season={season}
-          index={index}
+          watchedEpisodes={watchedBySeason[season.season_number] ?? []}
           onSeasonClick={onSeasonClick}
         />
       ))}
