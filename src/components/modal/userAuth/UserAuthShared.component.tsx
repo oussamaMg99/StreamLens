@@ -4,7 +4,15 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import GoogleIcon from '@mui/icons-material/Google';
 import FacebookIcon from '@mui/icons-material/Facebook';
-import { FacebookAuthProvider, GoogleAuthProvider, OAuthProvider, signInWithPopup, type AuthProvider } from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
+import {
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  type AuthProvider,
+} from 'firebase/auth';
 import { auth, authErrorKey } from 'src/core/services/firebase.config';
 import colors from 'src/assets/themes/colors';
 import { useTranslation } from 'react-i18next';
@@ -176,7 +184,24 @@ export const ProviderRow = (props: ProviderRowProps) => {
       await signInWithPopup(auth, provider.create());
       onSuccess();
     } catch (error) {
-      onError(authErrorKey(error));
+      // Popups get blocked (browser settings, embedded webviews, some mobile browsers).
+      // Falling back to a redirect keeps sign-in possible: the page navigates away and
+      // comes back signed in, where the auth listener picks the user up. Errors from
+      // that leg surface in AppContext's getRedirectResult, since this modal is gone by
+      // then. Any other failure is reported here as usual.
+      // Only for a blocked popup: a popup the user closed themselves is a cancellation,
+      // and redirecting them away from the page would override that choice.
+      const code = error instanceof FirebaseError ? error.code : '';
+      if (code === 'auth/popup-blocked') {
+        try {
+          await signInWithRedirect(auth, provider.create());
+          return; // Navigating away; nothing left to do in this component.
+        } catch (redirectError) {
+          onError(authErrorKey(redirectError));
+        }
+      } else {
+        onError(authErrorKey(error));
+      }
     } finally {
       setPending('');
     }

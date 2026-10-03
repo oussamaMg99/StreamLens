@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { createContext, useEffect, useMemo, useReducer } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { getRedirectResult, onAuthStateChanged } from 'firebase/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { AppContextType, ThemeMode } from './types';
 import AppReducer from './AppReducer';
 import { AlertDialogProps } from 'src/core/models/alertDialog.model';
 import { SnackBarProps } from 'src/core/models/snackbar.model';
 import { User, toUser } from 'src/core/models/user.model';
-import { auth } from 'src/core/services/firebase.config';
+import { auth, authErrorKey } from 'src/core/services/firebase.config';
 import { WATCH_LIST_QUERY_ROOT } from 'src/core/services/watchList.service';
 // The provider sits outside the component tree's translation hooks, so this effect uses
 // the i18next instance directly.
@@ -42,6 +42,19 @@ export const AppContextProvider = ({ children }: any) => {
   useEffect(() => {
     // Older builds stored the whole Firebase user (refresh token included) here.
     sessionStorage.removeItem('_user');
+
+    // A provider sign-in that fell back to signInWithRedirect finishes here, after the
+    // page has reloaded and the auth modal is long gone. Success needs nothing (the
+    // listener below reports the user); only the failure would otherwise be silent.
+    getRedirectResult(auth).catch(error => {
+      const messageKey = authErrorKey(error);
+      if (!messageKey) return;
+      dispatch({
+        type: 'SET_SNACKBAR_PROPS',
+        payload: new SnackBarProps({ open: true, severity: 'error', message: i18n.t(messageKey) }),
+      });
+    });
+
     return onAuthStateChanged(auth, firebaseUser => {
       dispatch({ type: 'SET_USER', payload: firebaseUser ? toUser(firebaseUser) : undefined });
       // Sign-out cleanup lives here rather than in a sign-out button: revoked or expired

@@ -52,7 +52,18 @@ isAnalyticsSupported()
  */
 export const authErrorKey = (error: unknown) => {
   const code = error instanceof FirebaseError ? error.code : '';
+  // The mapped key alone can't tell a wrong password from a misconfigured project, so
+  // keep the real code in the console — that's what makes the next failure diagnosable.
+  if (code) console.warn(`[auth] ${code}`);
   switch (code) {
+    // Configuration problems, not user mistakes: the provider isn't enabled for this
+    // Firebase project, or the origin isn't in Authentication > Settings > Authorized
+    // domains (deploying to a new host, e.g. GitHub Pages, needs that domain added —
+    // otherwise the popup opens and closes immediately).
+    case 'auth/unauthorized-domain':
+    case 'auth/operation-not-allowed':
+    case 'auth/invalid-api-key':
+      return 'authSignInUnavailable';
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
     case 'auth/user-not-found':
