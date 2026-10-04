@@ -8,7 +8,7 @@ import SummaryModal from 'src/components/modal/summary/SummaryModal.component';
 import NavBar from 'src/components/navbar/Navbar';
 import MediaGrid from 'src/components/mediaGrid/MediaGrid.component';
 import colors from 'src/assets/themes/colors';
-import { navbarHeight } from 'src/utils/constants';
+import { hideFeature, navbarHeight } from 'src/utils/constants';
 import { useMovies } from 'src/core/hooks/useMovies';
 import { useTvShows } from 'src/core/hooks/useTvShows';
 import { Movie } from 'src/core/services/movie.service';
@@ -180,7 +180,7 @@ const HeroCarousel = ({ items, onItemClick, t }: HeroCarouselProps) => {
                 {item.overview}
               </Typography>
               <Stack direction='row' spacing={2} sx={{ flexWrap: 'wrap', rowGap: 1.5 }}>
-                {false && (
+                {!hideFeature && (
                   <Button
                     variant='contained'
                     color='primary'

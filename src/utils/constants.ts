@@ -23,3 +23,14 @@ const envFlag = (value: string | undefined) => value === 'true';
 export const GOOGLE_AUTH_ENABLED = envFlag(import.meta.env.VITE_AUTH_GOOGLE_ENABLED);
 export const FACEBOOK_AUTH_ENABLED = envFlag(import.meta.env.VITE_AUTH_FACEBOOK_ENABLED);
 export const APPLE_AUTH_ENABLED = envFlag(import.meta.env.VITE_AUTH_APPLE_ENABLED);
+
+/**
+ * Hides UI for features that are built but not finished, so half-working controls stay
+ * out of the way without their code being deleted. Flip to false to reveal them.
+ *
+ * Currently hides: "mark season watched" in SeasonOverview (needs a setSeasonWatched
+ * service function — one transaction per season — plus its mutation hook), and the hero
+ * carousel's "watch" button on Home. Note they share one flag, so revealing one reveals
+ * the other; split into per-feature flags (see *_AUTH_ENABLED above) if that bites.
+ */
+export const hideFeature = true;

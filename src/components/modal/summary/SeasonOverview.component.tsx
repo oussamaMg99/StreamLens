@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import CheckIcon from '@mui/icons-material/Check';
 import { SeasonDetails } from 'src/core/models/seasonDetails.model';
 import EpisodesList from './EpisodesList.component';
+import { hideFeature } from 'src/utils/constants';
 
 interface SeasonOverviewProps {
   /** TMDB id of the show — needed to write progress against the right watch-list entry. */
@@ -35,9 +36,11 @@ const SeasonOverview = (props: SeasonOverviewProps) => {
             {t('watched')}
           </Typography>
         </Box>
-        <Button size='small' variant='outlined' startIcon={<CheckIcon />}>
-          {t('markSeasonWatched')}
-        </Button>
+        {!hideFeature && (
+          <Button size='small' variant='outlined' startIcon={<CheckIcon />}>
+            {t('markSeasonWatched')}
+          </Button>
+        )}
       </Box>
       <Divider sx={{ borderColor: 'rgba(226, 168, 71, 0.25)' }} />
       <EpisodesList
