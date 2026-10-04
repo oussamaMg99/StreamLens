@@ -15,7 +15,7 @@ const WatchList = () => {
   return (
     <>
       <NavBar />
-      <Box sx={{ pt: theme => `calc(${navbarHeight} + ${theme.spacing(4)})`, px: { xs: 2, md: 6 }, minHeight: '60vh' }}>
+      <Box sx={{ pt: theme => `calc(${navbarHeight} + ${theme.spacing(4)})`, px: { xs: 2, md: 6 }, minHeight: '72vh' }}>
         <Typography variant='h3'>{t('watchList')}</Typography>
       </Box>
       <Footer />

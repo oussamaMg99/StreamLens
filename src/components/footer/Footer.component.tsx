@@ -6,6 +6,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { useTranslation } from 'react-i18next';
 import { RoutePaths } from 'src/types/Routes.type';
 import { NavLink } from 'react-router';
+import { hideFeature } from 'src/utils/constants';
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -61,16 +62,18 @@ const Footer = () => {
           >
             {t('tvShows')}
           </Link>
-          <Link
-            component={NavLink}
-            to={RoutePaths.ABOUT}
-            end
-            underline='none'
-            color='inherit'
-            sx={{ cursor: 'pointer', '&:hover': { color: colors.primary.main } }}
-          >
-            {t('about')}
-          </Link>
+          {!hideFeature && (
+            <Link
+              component={NavLink}
+              to={RoutePaths.ABOUT}
+              end
+              underline='none'
+              color='inherit'
+              sx={{ cursor: 'pointer', '&:hover': { color: colors.primary.main } }}
+            >
+              {t('about')}
+            </Link>
+          )}
         </Stack>
 
         <Stack direction='row' spacing={1}>
