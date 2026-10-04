@@ -145,7 +145,9 @@ const SummaryModal = (props: SummaryModalProps) => {
             </TabPanel>
             {isTvShow(item) && (
               <TabPanel sx={{ p: 0 }} value='2'>
-                {tvDetails && <SummaryModalEpisodesTab item={item} itemDetails={tvDetails} />}
+                {/* key by show: remounting resets the picked season, so opening another
+                    show doesn't inherit the previous one's selection. */}
+                {tvDetails && <SummaryModalEpisodesTab key={tvDetails.id} item={item} itemDetails={tvDetails} />}
               </TabPanel>
             )}
           </TabContext>

@@ -19,12 +19,20 @@ interface SummaryModalEpisodesTabProps {
 
 const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
   const { itemDetails, item } = props;
-  const [selectedSeason, setSelectedSeason] = useState(itemDetails?.seasons?.[0]?.season_number ?? 1);
+  // undefined until the user picks one; the show's first season then stands in. Not
+  // useState(seasons[0]) — itemDetails arrives after mount, so that initial value was
+  // always the fallback, which broke shows whose seasons don't start at 1 (a Specials
+  // season 0, or a partially listed show). SummaryModal keys this component by show id,
+  // so a previous pick doesn't leak into the next show.
+  const [pickedSeason, setPickedSeason] = useState<number>();
+  const selectedSeason = pickedSeason ?? itemDetails?.seasons?.[0]?.season_number;
 
   const handleSeasonClick = (seasonNumber: number) => {
-    setSelectedSeason(seasonNumber);
+    setPickedSeason(seasonNumber);
   };
 
+  // Stays dormant while selectedSeason is undefined (the hook gates on it), so nothing
+  // is fetched for a season that may not exist.
   const { data: seasonDetails, isLoading: episodesLoading, error: episodesError } = useTvSeasonDetails(item?.id, selectedSeason);
 
   // Looked up once here, the nearest common parent, so the seasons list and the season
@@ -57,7 +65,7 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
         <SeasonOverview
           tvId={item?.id}
           seasonNumber={selectedSeason}
-          watchedEpisodes={watchedBySeason[selectedSeason] ?? []}
+          watchedEpisodes={(selectedSeason !== undefined ? watchedBySeason[selectedSeason] : undefined) ?? []}
           seasonDetails={seasonDetails}
           loading={episodesLoading}
           error={!!episodesError}
@@ -124,7 +132,8 @@ const SeasonItem = (props: SeasonItemProps) => {
 };
 
 interface SeasonsListProps {
-  selectedSeason: number;
+  /** undefined before the show's seasons are known. */
+  selectedSeason?: number;
   seasons?: Season[];
   watchedBySeason: WatchedBySeason;
   onSeasonClick: (seasonNumber: number) => void;
