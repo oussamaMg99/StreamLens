@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Box, Button, IconButton, Drawer, useTheme, useMediaQuery, Link } from '@mui/material';
 import { NavLink } from 'react-router';
 import colors from 'src/assets/themes/colors';
-import { languageOptions, navbarHeight } from 'src/utils/constants';
+import { hideFeature, languageOptions, navbarHeight } from 'src/utils/constants';
 import { useContext, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -44,10 +44,15 @@ const Navbar = (props: NavbarProps) => {
     setAnchorEl(null);
   };
 
-  const handleLanguageChange = (code: string) => {
+  const handleLanguageChange = async (code: string) => {
     // Implement language change logic here
-    i18n.changeLanguage(code);
-    setAnchorEl(null);
+    try {
+      await i18n.changeLanguage(code);
+    } catch (error) {
+      console.error('Error changing language:', error);
+    } finally {
+      setAnchorEl(null);
+    }
   };
 
   const handleProfileModalDisplay = (action: 'open' | 'close') => {
@@ -118,6 +123,11 @@ const Navbar = (props: NavbarProps) => {
               </Button>
               <Button variant='text' component={NavLink} to={RoutePaths.TV_SHOWS} end>
                 {t('tvShows')}
+              </Button>
+              {/* Shown signed out too: the page itself handles the sign-in prompt via
+                  useWatchListGate, rather than the entry point vanishing. */}
+              <Button variant='text' component={NavLink} to={RoutePaths.WATCH_LIST} end>
+                {t('watchList')}
               </Button>
               <Button variant='text' component={NavLink} to={RoutePaths.ABOUT} end>
                 {t('about')}
@@ -216,8 +226,13 @@ const Navbar = (props: NavbarProps) => {
           <Button fullWidth component={NavLink} to={RoutePaths.TV_SHOWS} end onClick={() => setOpenMenu(prev => !prev)}>
             {t('tvShows')}
           </Button>
-          <Button fullWidth component={NavLink} to={RoutePaths.ABOUT} end onClick={() => setOpenMenu(prev => !prev)}>
-            {t('about')}
+          {!hideFeature && (
+            <Button fullWidth component={NavLink} to={RoutePaths.ABOUT} end onClick={() => setOpenMenu(prev => !prev)}>
+              {t('about')}
+            </Button>
+          )}
+          <Button fullWidth component={NavLink} to={RoutePaths.WATCH_LIST} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('watchList')}
           </Button>
         </Box>
       </Drawer>
