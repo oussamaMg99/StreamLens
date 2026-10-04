@@ -44,7 +44,7 @@ export type GetTvOptions = {
  * Methods implemented:
  *  - getTvShows(options) -> smart wrapper choosing search/discover/popular
  *  - getPopularTV(page)
- *  - getTVById(tvId, appendToResponse?)
+ *  - getTVById(tvId, appendToResponse?, language?)
  *  - searchTV(query, page)
  *  - discoverTV(options)
  *
@@ -65,8 +65,8 @@ export default class TvService extends TmdbListService<TvShow, TVShowDetails> {
     return this.popular(page, opts);
   }
 
-  public getTVById(tvId: number | string, appendToResponse?: string): Promise<TVShowDetails> {
-    return this.byId(tvId, appendToResponse);
+  public getTVById(tvId: number | string, appendToResponse?: string, language?: string): Promise<TVShowDetails> {
+    return this.byId(tvId, appendToResponse, language);
   }
 
   public searchTV(

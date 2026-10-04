@@ -43,7 +43,7 @@ export type GetMovieOptions = {
  * Methods implemented:
  *  - getMovies(options) -> smart wrapper choosing search/discover/popular
  *  - getPopularMovie(page)
- *  - getMovieById(movieId, appendToResponse?)
+ *  - getMovieById(movieId, appendToResponse?, language?)
  *  - searchMovie(query, page)
  *  - discoverMovies(options)
  *
@@ -64,8 +64,8 @@ export default class MovieService extends TmdbListService<Movie, MovieDetails> {
     return this.popular(page, opts);
   }
 
-  public getMovieById(movieId: number | string, appendToResponse?: string): Promise<MovieDetails> {
-    return this.byId(movieId, appendToResponse);
+  public getMovieById(movieId: number | string, appendToResponse?: string, language?: string): Promise<MovieDetails> {
+    return this.byId(movieId, appendToResponse, language);
   }
 
   public searchMovie(

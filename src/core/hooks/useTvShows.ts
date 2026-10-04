@@ -1,5 +1,6 @@
 // src/core/hooks/useTvShows.ts
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { tvService, TvListResponse, GetTvOptions } from 'src/core/services/tv.service';
 
 /**
@@ -11,9 +12,13 @@ import { tvService, TvListResponse, GetTvOptions } from 'src/core/services/tv.se
  * queryKey shape here instead of each hand-rolling their own useQuery call.
  */
 export function useTvShows(options: GetTvOptions = {}, queryOptions?: { enabled?: boolean }) {
+  // See useMovies: the UI language is part of the request, so it's part of the key.
+  const { i18n } = useTranslation();
+  const language = options.language ?? i18n.language;
+
   return useQuery<TvListResponse>({
-    queryKey: ['tv-shows', options],
-    queryFn: (): Promise<TvListResponse> => tvService.getTvShows(options),
+    queryKey: ['tv-shows', { ...options, language }],
+    queryFn: (): Promise<TvListResponse> => tvService.getTvShows({ ...options, language }),
     staleTime: 1000 * 60 * 5,
     enabled: queryOptions?.enabled,
   });

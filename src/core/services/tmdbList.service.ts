@@ -122,9 +122,11 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
    * @param id - TMDB id
    * @param appendToResponse - optional comma-separated string to append related data
    *                            (e.g., 'videos,credits,images')
+   * @param language - localizes title/name, overview and tagline. TMDB falls back to
+   *                   English per field when a title has no translation.
    */
-  protected async byId(id: number | string, appendToResponse?: string): Promise<TDetails> {
-    const params: Record<string, any> = {};
+  protected async byId(id: number | string, appendToResponse?: string, language = 'en'): Promise<TDetails> {
+    const params: Record<string, any> = { language };
     if (appendToResponse) params.append_to_response = appendToResponse;
     const details = await this.apiGet<Omit<TDetails, 'media_type'>>(`/${this.mediaType}/${id}`, {
       params,

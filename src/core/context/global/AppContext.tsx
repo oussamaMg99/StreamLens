@@ -72,7 +72,14 @@ export const AppContextProvider = ({ children }: any) => {
     const refreshVerification = async () => {
       const current = auth.currentUser;
       if (!current || current.emailVerified || document.visibilityState === 'hidden') return;
-      await current.reload();
+      try {
+        await current.reload();
+      } catch {
+        // Offline, or the session was revoked/deleted — in the latter case the auth
+        // listener reports the sign-out. Either way this is a background poll, so it
+        // must not surface an error or reject unhandled.
+        return;
+      }
       if (!current.emailVerified) return;
       dispatch({ type: 'SET_USER', payload: toUser(current) });
       dispatch({

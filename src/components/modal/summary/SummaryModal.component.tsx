@@ -37,7 +37,7 @@ interface SummaryModalProps {
 const SummaryModal = (props: SummaryModalProps) => {
   const { open, item, onClose } = props;
   const { setSnackBarProps } = useContext(AppContext);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [tabValue, setTabValue] = useState('1');
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -52,13 +52,15 @@ const SummaryModal = (props: SummaryModalProps) => {
     isLoading: loading,
     error,
   } = useQuery<SummaryModalDetails>({
-    queryKey: ['summary-modal-details', item?.media_type, item?.id],
+    // Language is part of the key: overview/tagline (and sometimes the title) come back
+    // localized, so a language switch has to refetch rather than reuse the cached copy.
+    queryKey: ['summary-modal-details', item?.media_type, item?.id, i18n.language],
     queryFn: (): Promise<SummaryModalDetails> => {
       if (isMovie(item)) {
-        return movieService.getMovieById(item.id, 'credits,videos,images');
+        return movieService.getMovieById(item.id, 'credits,videos,images', i18n.language);
       }
       if (isTvShow(item)) {
-        return tvService.getTVById(item.id, 'credits,videos,images');
+        return tvService.getTVById(item.id, 'credits,videos,images', i18n.language);
       }
       return Promise.resolve(undefined);
     },
