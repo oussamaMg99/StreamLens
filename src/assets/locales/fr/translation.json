@@ -106,5 +106,6 @@
   "verifyEmailToSaveHint": "Votre liste nécessite une adresse e-mail vérifiée. Cliquez sur le lien que nous vous avons envoyé, puis revenez — l'ajout fonctionnera aussitôt.",
   "emailVerifiedNow": "E-mail vérifié. Votre liste est prête.",
   "authSignInUnavailable": "La connexion via ce fournisseur est momentanément indisponible. Essayez une autre méthode ou revenez plus tard.",
-  "watchList": "Ma liste"
+  "watchList": "Ma liste",
+  "insights": "Statistiques"
 }

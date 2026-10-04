@@ -129,6 +129,9 @@ const Navbar = (props: NavbarProps) => {
               <Button variant='text' component={NavLink} to={RoutePaths.WATCH_LIST} end>
                 {t('watchList')}
               </Button>
+              <Button variant='text' component={NavLink} to={RoutePaths.INSIGHTS} end>
+                {t('insights')}
+              </Button>
               {!hideFeature && (
                 <Button variant='text' component={NavLink} to={RoutePaths.ABOUT} end>
                   {t('about')}
@@ -235,6 +238,9 @@ const Navbar = (props: NavbarProps) => {
           )}
           <Button fullWidth component={NavLink} to={RoutePaths.WATCH_LIST} end onClick={() => setOpenMenu(prev => !prev)}>
             {t('watchList')}
+          </Button>
+          <Button fullWidth component={NavLink} to={RoutePaths.INSIGHTS} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('insights')}
           </Button>
         </Box>
       </Drawer>

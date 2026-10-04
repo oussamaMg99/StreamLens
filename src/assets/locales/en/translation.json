@@ -106,5 +106,6 @@
   "verifyEmailToSaveHint": "Your watch list needs a verified email address. Click the link we sent you, then come back — saving will work right away.",
   "emailVerifiedNow": "Email verified. Your watch list is ready.",
   "authSignInUnavailable": "Sign-in with this provider is unavailable right now. Please try another method or come back later.",
-  "watchList": "Watch list"
+  "watchList": "Watch list",
+  "insights": "Insights"
 }
