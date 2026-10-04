@@ -100,9 +100,11 @@ const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
                 {watchListEntry ? t('removeFromWatchList') : t('saveToWatchList')}
               </Button>
             </Tooltip>
-            <Button variant='outlined' startIcon={<FormatListBulletedIcon />} onClick={() => {}}>
-              {t('browseEpisodes')}
-            </Button>
+            {isTvShow(itemDetails) && (
+              <Button variant='outlined' startIcon={<FormatListBulletedIcon />} onClick={() => {}}>
+                {t('browseEpisodes')}
+              </Button>
+            )}
           </Box>
           {trailerVideoId && <YouTubePlayer videoId={trailerVideoId} sx={{ display: 'flex', justifyContent: 'center' }} />}
         </Box>

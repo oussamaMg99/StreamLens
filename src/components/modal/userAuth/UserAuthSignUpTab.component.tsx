@@ -129,7 +129,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         value={displayName}
         onChange={updateField('displayName')}
         placeholder={t('displayNamePlaceholder')}
-        autoComplete='name'
+        /* autoComplete='name' */
       />
       <AuthField
         label={t('email')}
@@ -137,7 +137,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         value={email}
         onChange={updateField('email')}
         placeholder='you@example.com'
-        autoComplete='email'
+        /* autoComplete='email' */
         error={emailError}
       />
       <AuthField
@@ -146,7 +146,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         value={password}
         onChange={updateField('password')}
         placeholder='••••••••'
-        autoComplete='new-password'
+        /* autoComplete='new-password' */
       >
         <PasswordStrength password={password} />
       </AuthField>
@@ -156,7 +156,7 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         value={confirmPassword}
         onChange={updateField('confirmPassword')}
         placeholder='••••••••'
-        autoComplete='new-password'
+        /* autoComplete='new-password' */
         error={confirmError}
       />
       <FormControlLabel
@@ -170,15 +170,28 @@ const UserAuthSignUpTab = (props: UserAuthSignUpTabProps) => {
         }
         label={
           <Typography variant='body2' sx={{ fontSize: 13, color: 'rgba(255,255,227,0.7)' }}>
-            {t('agreeToTermsPrefix')} <Link href='/terms'>{t('termsOfService')}</Link> {t('and')}{' '}
-            <Link href='/privacy'>{t('privacyPolicy')}</Link>.
+            {/* No href while the pages don't exist: a bare href would also leave the app
+                entirely, since it ignores the /StreamLens/ basename. Rendered as spans so
+                they aren't focusable or clickable — give them `component={RouterLink} to`
+                once /terms and /privacy are routed. */}
+            {t('agreeToTermsPrefix')}{' '}
+            <Link component='span' underline='always' sx={{ cursor: 'default' }}>
+              {t('termsOfService')}
+            </Link>{' '}
+            {t('and')}{' '}
+            <Link component='span' underline='always' sx={{ cursor: 'default' }}>
+              {t('privacyPolicy')}
+            </Link>
+            .
           </Typography>
         }
       />
       <LoadingButton
         fullWidth
         loading={loading}
-        disabled={touched && !canSubmit}
+        // Terms are a hard gate: unlike the field errors (revealed on a first click via
+        // `touched`), there's nothing to explain — the checkbox sits right above.
+        disabled={!acceptedTerms || (touched && !canSubmit)}
         variant='contained'
         onClick={handleSignUp}
         sx={{ minHeight: 48, fontSize: 16, color: colors.onPrimary }}

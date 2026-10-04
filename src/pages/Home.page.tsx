@@ -180,15 +180,17 @@ const HeroCarousel = ({ items, onItemClick, t }: HeroCarouselProps) => {
                 {item.overview}
               </Typography>
               <Stack direction='row' spacing={2} sx={{ flexWrap: 'wrap', rowGap: 1.5 }}>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  startIcon={<PlayArrowIcon />}
-                  onClick={() => onItemClick(item)}
-                  sx={{ px: 4, py: 1, fontWeight: 700 }}
-                >
-                  {t('watch')}
-                </Button>
+                {false && (
+                  <Button
+                    variant='contained'
+                    color='primary'
+                    startIcon={<PlayArrowIcon />}
+                    onClick={() => onItemClick(item)}
+                    sx={{ px: 4, py: 1, fontWeight: 700 }}
+                  >
+                    {t('watch')}
+                  </Button>
+                )}
                 <Button
                   variant='outlined'
                   color='inherit'
