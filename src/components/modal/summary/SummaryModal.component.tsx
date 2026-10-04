@@ -4,8 +4,8 @@ import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
-import { movieService, Movie } from 'src/core/services/movie.service';
-import { tvService, TvShow } from 'src/core/services/tv.service';
+import { Movie } from 'src/core/services/movie.service';
+import { TvShow } from 'src/core/services/tv.service';
 import { useTranslation } from 'react-i18next';
 import colors from 'src/assets/themes/colors';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
@@ -20,7 +20,7 @@ import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import { isMovie, isTvShow } from 'src/utils/global.utils';
-import { useQuery } from '@tanstack/react-query';
+import { useMediaDetails } from 'src/core/hooks/useMediaDetails';
 
 // MovieDetails/TVShowDetails now carry their own media_type discriminant (see
 // common.model.ts's MediaDetails base), so this is just a convenience alias for the
@@ -37,36 +37,16 @@ interface SummaryModalProps {
 const SummaryModal = (props: SummaryModalProps) => {
   const { open, item, onClose } = props;
   const { setSnackBarProps } = useContext(AppContext);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [tabValue, setTabValue] = useState('1');
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setTabValue(newValue);
   };
 
-  // One query instead of a movie one and a tv one: the two services return different
-  // shapes, but the query itself (key/staleTime/enabled/error handling) is identical
-  // either way — only queryFn needs to branch on which endpoint to call.
-  const {
-    data,
-    isLoading: loading,
-    error,
-  } = useQuery<SummaryModalDetails>({
-    // Language is part of the key: overview/tagline (and sometimes the title) come back
-    // localized, so a language switch has to refetch rather than reuse the cached copy.
-    queryKey: ['summary-modal-details', item?.media_type, item?.id, i18n.language],
-    queryFn: (): Promise<SummaryModalDetails> => {
-      if (isMovie(item)) {
-        return movieService.getMovieById(item.id, 'credits,videos,images', i18n.language);
-      }
-      if (isTvShow(item)) {
-        return tvService.getTVById(item.id, 'credits,videos,images', i18n.language);
-      }
-      return Promise.resolve(undefined);
-    },
-    staleTime: 1000 * 60 * 5,
-    enabled: open && !!item,
-  });
+  // Shared with every other consumer of the same title (see useMediaDetails): the modal
+  // only adds `enabled: open`, so nothing is fetched for a closed dialog.
+  const { data, isLoading: loading, error } = useMediaDetails(item, { enabled: open });
   // Re-bound through a plain-union local: TanStack Query's inferred `data` type doesn't
   // narrow via `media_type` discriminant checks as cleanly as an ordinary union does.
   const itemDetails: SummaryModalDetails = data;
