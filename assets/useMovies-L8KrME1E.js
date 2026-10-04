@@ -1,1 +1,0 @@
-import{b as e}from"./AuthError.component-_q_IeakF.js";import{a as t,o as n}from"./MediaGrid.component-CshJw07V.js";function r(r={},i){let{i18n:a}=e(),o=r.language??a.language;return n({queryKey:[`movies`,{...r,language:o}],queryFn:()=>t.getMovies({...r,language:o}),staleTime:3e5,enabled:i?.enabled})}export{r as t};
