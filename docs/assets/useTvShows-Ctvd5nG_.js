@@ -1,0 +1,1 @@
+import{b as e}from"./AuthError.component-6xFQOp0x.js";import{i as t,o as n}from"./MediaGrid.component-DyhUhWmy.js";function r(r={},i){let{i18n:a}=e(),o=r.language??a.language;return n({queryKey:[`tv-shows`,{...r,language:o}],queryFn:()=>t.getTvShows({...r,language:o}),staleTime:3e5,enabled:i?.enabled})}export{r as t};
