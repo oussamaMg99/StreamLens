@@ -1,1 +1,0 @@
-import{i as e,o as t}from"./MediaGrid.component-Zh521aQ4.js";function n(n={},r){return t({queryKey:[`tv-shows`,n],queryFn:()=>e.getTvShows(n),staleTime:3e5,enabled:r?.enabled})}export{n as t};
