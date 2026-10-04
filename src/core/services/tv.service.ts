@@ -1,7 +1,7 @@
 // src/core/services/tv.service.ts
 
 import { TMDB_CONFIG } from './tmdb.config';
-import { TmdbListService, TmdbListResponse } from './tmdbList.service';
+import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TVShowDetails } from '../models/tvShowDetails.model';
 import { SeasonDetails } from '../models/seasonDetails.model';
 import { Media } from '../models/common.model';
@@ -91,8 +91,12 @@ export default class TvService extends TmdbListService<TvShow, TVShowDetails> {
     seasonNumber: number,
     opts: { language?: string; retry?: number } = {},
   ): Promise<SeasonDetails> {
-    const { language = 'en-US', retry = 0 } = opts;
+    const { language = 'en', retry = 0 } = opts;
     return this.apiGet<SeasonDetails>(`/tv/${tvId}/season/${seasonNumber}`, { params: { language }, retry });
+  }
+
+  public getTvGenres(language?: string): Promise<GenreListResponse> {
+    return this.genreList(language);
   }
 }
 

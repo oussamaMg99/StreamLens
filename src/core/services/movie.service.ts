@@ -1,7 +1,7 @@
 // src/core/services/movie.service.ts
 
 import { MovieDetails } from '../models/movieDetails.model';
-import { TmdbListService, TmdbListResponse } from './tmdbList.service';
+import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TMDB_CONFIG } from './tmdb.config';
 import { Media } from '../models/common.model';
 
@@ -78,6 +78,10 @@ export default class MovieService extends TmdbListService<Movie, MovieDetails> {
 
   public discoverMovies(options: GetMovieOptions = {}): Promise<MovieListResponse> {
     return this.discoverDirect(options);
+  }
+
+  public getMovieGenres(language?: string): Promise<GenreListResponse> {
+    return this.genreList(language);
   }
 }
 
