@@ -34,5 +34,7 @@ const colors = {
   success: {
     main: '#2EBFA5', // Teal Green
   },
+  /** Ink that passes contrast on the success (teal) fill, the counterpart of onPrimary. */
+  onSuccess: '#06221D',
 };
 export default colors;

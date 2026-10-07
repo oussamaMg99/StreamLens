@@ -19,3 +19,6 @@ export const isMovie = (item?: Movie | TvShow | MovieDetails | TVShowDetails): i
 export const isTvShow = (item?: Movie | TvShow | MovieDetails | TVShowDetails): item is TvShow => {
   return item?.media_type === MediaType.TVShow;
 };
+
+/** First word of a display name, for greetings; undefined when there's no usable name. */
+export const getFirstName = (name?: string): string | undefined => name?.trim().split(/\s+/)[0] || undefined;
