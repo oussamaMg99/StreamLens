@@ -1,1 +1,0 @@
-import{K as e}from"./Box-COfFL-Jv.js";import{r as t,t as n}from"./Navbar-BNvUqiXt.js";var r=e(),i=()=>(0,r.jsxs)(r.Fragment,{children:[(0,r.jsx)(n,{}),(0,r.jsx)(t,{})]});export{i as default};
