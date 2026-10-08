@@ -8,6 +8,7 @@
 
 import { MovieDetails } from 'src/core/models/movieDetails.model';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
+import { Episode } from 'src/core/models/seasonDetails.model';
 import { EntryMeta, WatchListEntry, WatchListMovieEntry, WatchListTvEntry } from 'src/core/models/watchList.model';
 
 type EntryRef = Pick<WatchListEntry, 'media_type' | 'id'>;
@@ -88,46 +89,87 @@ export const applyMovieWatched = (
   return entries.map(entry => (entry === existing ? { ...existing, ...movieMeta(meta), watched, updated_at: now } : entry));
 };
 
+/** An episode and its runtime in minutes (0 when TMDB doesn't know it). */
+export interface EpisodeRuntime {
+  episode: number;
+  runtime: number;
+}
+
 /**
- * Marks one episode watched or unwatched and keeps minutes_watched in step with it
- * (± that episode's runtime, back to 0 once nothing is watched). A season key disappears
- * once its last episode is unwatched; the show stays on the list until removeEntry.
+ * Marks several episodes of one season watched or unwatched in one go, and keeps
+ * minutes_watched in step (± the runtimes of the episodes that actually changed, back to
+ * 0 once nothing is watched). A season key disappears once its last episode is
+ * unwatched; the show stays on the list until removeEntry.
  *
- * A legacy entry (no minutes_watched yet) is left without one: adding a single episode's
- * runtime would undercount the episodes watched before, so the backfill estimates the
- * whole total instead.
+ * A legacy entry (no minutes_watched yet) is left without one: adding these runtimes
+ * would undercount the episodes watched before, so the backfill estimates the whole
+ * total instead.
  */
+export const applyEpisodesWatched = (
+  entries: WatchListEntry[],
+  change: { tvId: number; season: number; episodes: EpisodeRuntime[]; watched: boolean; meta?: EntryMeta },
+  now: number,
+): WatchListEntry[] => {
+  const { tvId, season, episodes, watched, meta } = change;
+  const sumRuntime = (list: EpisodeRuntime[]) => list.reduce((sum, item) => sum + item.runtime, 0);
+  const existing = entries.find((entry): entry is WatchListTvEntry => entry.media_type === 'tv' && entry.id === tvId);
+  // Nothing tracked for this show yet: watching creates it, unwatching is a no-op.
+  if (!existing) {
+    if (!watched || !episodes.length) return entries;
+    const numbers = [...new Set(episodes.map(item => item.episode))].sort((a, b) => a - b);
+    return [
+      ...entries,
+      {
+        media_type: 'tv',
+        id: tvId,
+        watched: { [season]: numbers },
+        ...tvMeta(meta),
+        minutes_watched: sumRuntime(episodes),
+        updated_at: now,
+      },
+    ];
+  }
+
+  const current = existing.watched[season] ?? [];
+  // Only the episodes whose state actually flips count towards the change and its minutes.
+  const changed = episodes.filter(
+    (item, index) => current.includes(item.episode) !== watched && episodes.findIndex(other => other.episode === item.episode) === index,
+  );
+  if (!changed.length) return entries;
+
+  const changedNumbers = changed.map(item => item.episode);
+  const nextEpisodes = watched
+    ? [...current, ...changedNumbers].sort((a, b) => a - b)
+    : current.filter(number => !changedNumbers.includes(number));
+  const nextWatched = { ...existing.watched };
+  if (nextEpisodes.length) nextWatched[season] = nextEpisodes;
+  else delete nextWatched[season];
+
+  const delta = sumRuntime(changed);
+  const next: WatchListTvEntry = { ...existing, ...tvMeta(meta), watched: nextWatched, updated_at: now };
+  if (!Object.keys(nextWatched).length) next.minutes_watched = 0;
+  else if (existing.minutes_watched !== undefined)
+    next.minutes_watched = Math.max(0, existing.minutes_watched + (watched ? delta : -delta));
+
+  return entries.map(entry => (entry === existing ? next : entry));
+};
+
+/** Marks one episode watched or unwatched — applyEpisodesWatched for a single episode. */
 export const applyEpisodeToggle = (
   entries: WatchListEntry[],
   toggle: { tvId: number; season: number; episode: number; watched: boolean; runtime: number; meta?: EntryMeta },
   now: number,
 ): WatchListEntry[] => {
-  const { tvId, season, episode, watched, runtime, meta } = toggle;
-  const existing = entries.find((entry): entry is WatchListTvEntry => entry.media_type === 'tv' && entry.id === tvId);
-  // Nothing tracked for this show yet: watching creates it, unwatching is a no-op.
-  if (!existing) {
-    if (!watched) return entries;
-    return [
-      ...entries,
-      { media_type: 'tv', id: tvId, watched: { [season]: [episode] }, ...tvMeta(meta), minutes_watched: runtime, updated_at: now },
-    ];
-  }
-
-  const episodes = existing.watched[season] ?? [];
-  if (episodes.includes(episode) === watched) return entries;
-
-  const nextEpisodes = watched ? [...episodes, episode].sort((a, b) => a - b) : episodes.filter(number => number !== episode);
-  const nextWatched = { ...existing.watched };
-  if (nextEpisodes.length) nextWatched[season] = nextEpisodes;
-  else delete nextWatched[season];
-
-  const next: WatchListTvEntry = { ...existing, ...tvMeta(meta), watched: nextWatched, updated_at: now };
-  if (!Object.keys(nextWatched).length) next.minutes_watched = 0;
-  else if (existing.minutes_watched !== undefined)
-    next.minutes_watched = Math.max(0, existing.minutes_watched + (watched ? runtime : -runtime));
-
-  return entries.map(entry => (entry === existing ? next : entry));
+  const { episode, runtime, ...rest } = toggle;
+  return applyEpisodesWatched(entries, { ...rest, episodes: [{ episode, runtime }] }, now);
 };
+
+/**
+ * Whether an episode has aired by `today` (local YYYY-MM-DD; ISO dates compare as
+ * strings). An episode with no air date counts as aired, like the checkboxes treat it.
+ */
+export const isEpisodeAired = (episode: Pick<Episode, 'air_date'>, today: string): boolean =>
+  !episode.air_date || episode.air_date <= today;
 
 /**
  * Typical episode length in minutes. TMDB often returns an empty episode_run_time, so

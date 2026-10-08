@@ -14,9 +14,11 @@ import {
   addToWatchList,
   removeEntry,
   setEpisodeWatched,
+  setEpisodesWatched,
   setMovieWatched,
 } from 'src/core/services/watchList.service';
 import { EntryMeta, WatchListEntry } from 'src/core/models/watchList.model';
+import { EpisodeRuntime } from 'src/utils/watchListMeta.utils';
 
 /**
  * Shared wiring for every watch-list mutation: run `write` for the signed-in user, then
@@ -60,4 +62,10 @@ export const useSetMovieWatched = () =>
 export const useSetEpisodeWatched = () =>
   useWatchListMutation<{ tvId: number; season: number; episode: number; watched: boolean; runtime: number; meta?: EntryMeta }>(
     (uid, toggle) => setEpisodeWatched(uid, toggle),
+  );
+
+/** Marks a batch of one season's episodes in one write ("mark all episodes"). */
+export const useSetEpisodesWatched = () =>
+  useWatchListMutation<{ tvId: number; season: number; episodes: EpisodeRuntime[]; watched: boolean; meta?: EntryMeta }>((uid, change) =>
+    setEpisodesWatched(uid, change),
   );

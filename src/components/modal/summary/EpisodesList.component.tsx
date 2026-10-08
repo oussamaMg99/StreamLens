@@ -1,6 +1,8 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import AppContext from 'src/core/context/global/AppContext';
 import { Avatar, Checkbox, CircularProgress, List, ListItemAvatar, ListItemButton, ListItemText, Rating, Tooltip } from '@mui/material';
 import { Episode } from 'src/core/models/seasonDetails.model';
 import { EntryMeta } from 'src/core/models/watchList.model';
@@ -23,6 +25,7 @@ interface EpisodeItemProps {
 const EpisodeItem = (props: EpisodeItemProps) => {
   const { episode, tvId, meta, seasonNumber, watched } = props;
   const { t } = useTranslation();
+  const { setSnackBarProps } = useContext(AppContext);
   const gate = useWatchListGate();
   const setEpisodeWatched = useSetEpisodeWatched();
 
@@ -30,15 +33,30 @@ const EpisodeItem = (props: EpisodeItemProps) => {
     // Signed out or unverified, the tick is the prompt — nothing is written.
     if (gate.promptIfBlocked()) return;
     if (tvId === undefined || seasonNumber === undefined) return;
-    setEpisodeWatched.mutate({
-      tvId,
-      season: seasonNumber,
-      episode: episode.episode_number,
-      watched: event.target.checked,
-      // Exact minutes for Insights; TMDB leaves some runtimes empty, which count as 0.
-      runtime: episode.runtime ?? 0,
-      meta,
-    });
+    const checked = event.target.checked;
+    setEpisodeWatched.mutate(
+      {
+        tvId,
+        season: seasonNumber,
+        episode: episode.episode_number,
+        watched: checked,
+        // Exact minutes for Insights; TMDB leaves some runtimes empty, which count as 0.
+        runtime: episode.runtime ?? 0,
+        meta,
+      },
+      {
+        // Failures already get the error snackbar from the mutation hook.
+        onSuccess: () =>
+          setSnackBarProps({
+            open: true,
+            severity: 'success',
+            message: t(checked ? 'episodeMarkedWatched' : 'episodeMarkedUnwatched', {
+              episode: episode.episode_number,
+              season: seasonNumber,
+            }),
+          }),
+      },
+    );
   };
 
   return (

@@ -21,7 +21,15 @@
 import { doc, getDoc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase.config';
 import { EntryMeta, WatchList, WatchListEntry, WatchListResponse } from '../models/watchList.model';
-import { BackfillPatch, applyAdd, applyBackfill, applyEpisodeToggle, applyMovieWatched } from 'src/utils/watchListMeta.utils';
+import {
+  BackfillPatch,
+  EpisodeRuntime,
+  applyAdd,
+  applyBackfill,
+  applyEpisodeToggle,
+  applyEpisodesWatched,
+  applyMovieWatched,
+} from 'src/utils/watchListMeta.utils';
 
 // Re-exported so existing callers keep importing it from the service.
 export { watchListEntryId } from 'src/utils/watchListMeta.utils';
@@ -91,6 +99,18 @@ export const setEpisodeWatched = (
 ): Promise<void> => {
   const now = Date.now();
   return updateEntries(uid, entries => applyEpisodeToggle(entries, toggle, now));
+};
+
+/**
+ * Marks several episodes of one season watched or unwatched in a single transaction
+ * ("mark all episodes"), with each episode's runtime keeping minutes_watched in step.
+ */
+export const setEpisodesWatched = (
+  uid: string,
+  change: { tvId: number; season: number; episodes: EpisodeRuntime[]; watched: boolean; meta?: EntryMeta },
+): Promise<void> => {
+  const now = Date.now();
+  return updateEntries(uid, entries => applyEpisodesWatched(entries, change, now));
 };
 
 /** Drops a title from the list entirely, along with whatever progress it held. */

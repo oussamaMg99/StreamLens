@@ -6,10 +6,12 @@ import {
   applyAdd,
   applyBackfill,
   applyEpisodeToggle,
+  applyEpisodesWatched,
   applyMovieWatched,
   backfillPatchFromDetails,
   entryMetaFromDetails,
   episodeRuntime,
+  isEpisodeAired,
   needsBackfill,
 } from './watchListMeta.utils';
 
@@ -91,6 +93,89 @@ describe('write helpers', () => {
   it('never writes undefined fields (Firestore rejects them)', () => {
     const [entry] = applyMovieWatched([], 1, true, undefined, NOW);
     expect(Object.values(entry).every(value => value !== undefined)).toBe(true);
+  });
+});
+
+describe('applyEpisodesWatched', () => {
+  const mark = (entries: WatchListEntry[], episodes: [number, number][], watched: boolean) =>
+    applyEpisodesWatched(
+      entries,
+      { tvId: 2, season: 1, episodes: episodes.map(([episode, runtime]) => ({ episode, runtime })), watched, meta: { genre_ids: [18] } },
+      NOW,
+    );
+
+  it('creates the entry with every episode and their summed minutes', () => {
+    expect(
+      mark(
+        [],
+        [
+          [2, 50],
+          [1, 40],
+        ],
+        true,
+      ),
+    ).toEqual([{ media_type: 'tv', id: 2, watched: { 1: [1, 2] }, genre_ids: [18], minutes_watched: 90, updated_at: NOW }]);
+  });
+
+  it('adds only episodes not yet watched, without double-counting their minutes', () => {
+    const entries = mark([], [[1, 40]], true);
+    const [next] = mark(
+      entries,
+      [
+        [1, 40],
+        [2, 50],
+        [3, 60],
+      ],
+      true,
+    );
+    expect(next).toMatchObject({ watched: { 1: [1, 2, 3] }, minutes_watched: 150 });
+  });
+
+  it('unwatching subtracts the marked episodes and resets minutes once nothing is left', () => {
+    const entries: WatchListEntry[] = [{ media_type: 'tv', id: 2, watched: { 1: [1, 2], 2: [1] }, minutes_watched: 130 }];
+    const [next] = mark(
+      entries,
+      [
+        [1, 40],
+        [2, 50],
+        [3, 60],
+      ],
+      false,
+    ); // episode 3 was never watched
+    expect(next).toMatchObject({ watched: { 2: [1] }, minutes_watched: 40 });
+    expect(next).not.toHaveProperty(['watched', '1']);
+    const [cleared] = applyEpisodesWatched(
+      [{ media_type: 'tv', id: 2, watched: { 1: [1] }, minutes_watched: 40 }],
+      { tvId: 2, season: 1, episodes: [{ episode: 1, runtime: 40 }], watched: false },
+      NOW,
+    );
+    expect(cleared).toMatchObject({ watched: {}, minutes_watched: 0 });
+  });
+
+  it('returns the same array when nothing changes', () => {
+    const entries = mark([], [[1, 40]], true);
+    expect(mark(entries, [[1, 40]], true)).toBe(entries);
+    expect(mark(entries, [], true)).toBe(entries);
+    expect(mark([], [[1, 40]], false)).toEqual([]);
+  });
+
+  it('leaves a legacy entry without minutes_watched for the backfill', () => {
+    const [next] = mark([{ media_type: 'tv', id: 2, watched: { 1: [1] } }], [[2, 50]], true);
+    expect(next).not.toHaveProperty('minutes_watched');
+  });
+
+  it('never writes undefined fields', () => {
+    const [entry] = applyEpisodesWatched([], { tvId: 2, season: 1, episodes: [{ episode: 1, runtime: 0 }], watched: true }, NOW);
+    expect(Object.values(entry).every(value => value !== undefined)).toBe(true);
+  });
+});
+
+describe('isEpisodeAired', () => {
+  it('compares the air date with today and treats a missing date as aired', () => {
+    expect(isEpisodeAired({ air_date: '2026-10-01' }, '2026-10-08')).toBe(true);
+    expect(isEpisodeAired({ air_date: '2026-10-08' }, '2026-10-08')).toBe(true);
+    expect(isEpisodeAired({ air_date: '2026-10-09' }, '2026-10-08')).toBe(false);
+    expect(isEpisodeAired({ air_date: '' }, '2026-10-08')).toBe(true);
   });
 });
 

@@ -28,10 +28,8 @@ export const APPLE_AUTH_ENABLED = envFlag(import.meta.env.VITE_AUTH_APPLE_ENABLE
  * Hides UI for features that are built but not finished, so half-working controls stay
  * out of the way without their code being deleted. Flip to false to reveal them.
  *
- * Currently hides: "mark season watched" in SeasonOverview (needs a setSeasonWatched
- * service function — one transaction per season — plus its mutation hook), and the hero
- * carousel's "watch" button on Home, and the About links in the navbar and footer (the
- * /about route itself stays reachable). Note they share one flag, so revealing one
+ * Currently hides: the hero carousel's "watch" button on Home, and the About links in
+ * the navbar and footer (the /about route itself stays reachable). Note they share one flag, so revealing one
  * reveals them all; split into per-feature flags (see *_AUTH_ENABLED above) if that
  * bites — "not ready to show" and "not built yet" won't always lift together.
  */
