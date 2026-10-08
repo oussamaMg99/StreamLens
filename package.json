@@ -8,7 +8,7 @@
     "build": "vite build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "deploy-win": "cmd /c publish-to-ghpages.bat",
+    "deploy-win": "cmd /c deployToGithubPages.bat",
     "preview": "vite preview",
     "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix",
     "typecheck": "tsc --noEmit",

@@ -25,7 +25,7 @@ Vitest is configured in `vite.config.ts` (`test.environment: 'node'`, no setup f
 
 **Type-checking is currently broken at the config level.** The installed TypeScript (~7.0) has removed two options `tsconfig.json` still uses (`baseUrl`, `moduleResolution: "node"`), so `npm run typecheck` fails before checking any code (TS5102/TS5108). Until `tsconfig.json` is fixed, type-check with a throwaway config that `include`s `src` with `"moduleResolution": "bundler"`, `"paths": { "*": ["./*"] }`, `"jsx": "react-jsx"`, `"types": ["vite/client"]`, `strict`, `skipLibCheck`, `noEmit`. Known pre-existing errors under that config (not regressions): `theme.ts` (`containedPrimary`), `AlertDialog.component.tsx` ×2, `SnackBar.component.tsx` (`TransitionComponent`), `api.service.ts` (axios interceptor type).
 
-Deployment: `npm run deploy` (gh-pages, POSIX) or `npm run deploy-win` (runs `publish-to-ghpages.bat`). The `docs/` directory holds a built output published via GitHub Pages — treat it as a build artifact, not source.
+Deployment: `npm run deploy` (gh-pages, POSIX) or `npm run deploy-win` (runs `deployToGithubPages.bat`: build, replace `docs/` with `dist/`, commit, push to `dev`). The `docs/` directory holds a built output published via GitHub Pages — treat it as a build artifact, not source.
 
 ## Environment
 
