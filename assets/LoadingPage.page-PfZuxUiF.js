@@ -1,1 +1,0 @@
-import{K as e,n as t,t as n}from"./Box-COfFL-Jv.js";var r=e(),i=()=>(0,r.jsx)(n,{sx:{width:`100%`,minHeight:`100vh`,display:`flex`,justifyContent:`center`,alignItems:`center`},children:(0,r.jsx)(t,{color:`primary`})});export{i as default};
