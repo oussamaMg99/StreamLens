@@ -1,12 +1,13 @@
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
 import { TvShow } from 'src/core/services/tv.service';
 import { Avatar, Box, LinearProgress, List, ListItemAvatar, ListItemButton, ListItemText, Rating, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Season, TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { useTvSeasonDetails } from 'src/core/hooks/useTvSeasonDetails';
 import { useWatchListEntry } from 'src/core/hooks/useWatchList';
 import NoPoster from 'src/assets/images/no-movie.png';
+import { entryMetaFromDetails } from 'src/utils/watchListMeta.utils';
 import SeasonOverview from './SeasonOverview.component';
 
 /** season_number -> the episode numbers marked watched in it. */
@@ -40,6 +41,8 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
   // key — but a single owner beats two components fetching the same thing.
   const entry = useWatchListEntry(item?.id !== undefined ? { media_type: 'tv', id: item.id } : undefined);
   const watchedBySeason: WatchedBySeason = entry?.media_type === 'tv' ? entry.watched : {};
+  // Stored with every episode toggle (genres, season sizes), so Insights needn't fetch it.
+  const meta = useMemo(() => (itemDetails ? entryMetaFromDetails(itemDetails) : undefined), [itemDetails]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 0, m: 0 }}>
@@ -64,6 +67,7 @@ const SummaryModalEpisodesTab = (props: SummaryModalEpisodesTabProps) => {
         {/* Season Overview */}
         <SeasonOverview
           tvId={item?.id}
+          meta={meta}
           seasonNumber={selectedSeason}
           watchedEpisodes={(selectedSeason !== undefined ? watchedBySeason[selectedSeason] : undefined) ?? []}
           seasonDetails={seasonDetails}

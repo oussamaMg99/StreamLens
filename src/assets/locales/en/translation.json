@@ -154,5 +154,9 @@
   "aboutDaysOfScreenTime_zero": "Less than a day of screen time",
   "percentValue": "{{value}}%",
   "hoursUnit": "h",
-  "mediaTypeLabel": "Movies or TV shows"
+  "mediaTypeLabel": "Movies or TV shows",
+  "markAsWatched": "Mark as watched",
+  "markedAsWatched": "Watched",
+  "movieMarkedWatched": "Marked as watched.",
+  "movieMarkedUnwatched": "Marked as not watched."
 }

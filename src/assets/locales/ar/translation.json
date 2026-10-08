@@ -173,5 +173,9 @@
   "seasonsFinishedCount_other": "{{count}} موسم مكتمل",
   "percentValue": "{{value}}%",
   "hoursUnit": "س",
-  "mediaTypeLabel": "أفلام أو مسلسلات"
+  "mediaTypeLabel": "أفلام أو مسلسلات",
+  "markAsWatched": "تحديد كمشاهَد",
+  "markedAsWatched": "تمت المشاهدة",
+  "movieMarkedWatched": "تم التحديد كمشاهَد.",
+  "movieMarkedUnwatched": "تم إلغاء تحديد المشاهدة."
 }

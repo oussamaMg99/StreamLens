@@ -5,12 +5,15 @@ import Divider from '@mui/material/Divider';
 import { useTranslation } from 'react-i18next';
 import CheckIcon from '@mui/icons-material/Check';
 import { SeasonDetails } from 'src/core/models/seasonDetails.model';
+import { EntryMeta } from 'src/core/models/watchList.model';
 import EpisodesList from './EpisodesList.component';
 import { hideFeature } from 'src/utils/constants';
 
 interface SeasonOverviewProps {
   /** TMDB id of the show — needed to write progress against the right watch-list entry. */
   tvId?: number;
+  /** The show's metadata, stored with each episode toggle (entryMetaFromDetails). */
+  meta?: EntryMeta;
   seasonNumber?: number;
   /** Episode numbers marked watched in this season; owned by SummaryModalEpisodesTab. */
   watchedEpisodes?: number[];
@@ -20,7 +23,7 @@ interface SeasonOverviewProps {
 }
 
 const SeasonOverview = (props: SeasonOverviewProps) => {
-  const { tvId, seasonNumber, watchedEpisodes = [], seasonDetails, loading, error } = props;
+  const { tvId, meta, seasonNumber, watchedEpisodes = [], seasonDetails, loading, error } = props;
   const { t } = useTranslation();
 
   return (
@@ -46,6 +49,7 @@ const SeasonOverview = (props: SeasonOverviewProps) => {
       <EpisodesList
         episodes={seasonDetails?.episodes}
         tvId={tvId}
+        meta={meta}
         seasonNumber={seasonNumber}
         watchedEpisodes={watchedEpisodes}
         loading={loading}

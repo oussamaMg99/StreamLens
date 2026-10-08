@@ -1,6 +1,7 @@
 // src/core/models/insights.model.ts
 // Aggregated shapes the Insights page renders. Produced by useInsightsSummary from the
-// watch list + TMDB details (mock-backed for now, see src/core/mocks/insights.mock.ts).
+// watch list (its entries carry the needed TMDB metadata) and the localized genre
+// lists, via buildInsightsSummary (src/utils/insights.utils.ts).
 
 export interface InsightGenre {
   /** TMDB genre id. Movie and TV genre ids differ, so they're never mixed. */
@@ -10,9 +11,9 @@ export interface InsightGenre {
   count: number;
 }
 
+/** A started, unfinished show. No title: the card shows the localized one from TMDB. */
 export interface ResumeShow {
   id: number;
-  title: string;
   nextSeason: number;
   nextEpisode: number;
   watchedEpisodes: number;
@@ -24,10 +25,20 @@ export interface InsightsSummary {
   movies: number;
   /** TV entries with at least one watched episode — a show counts once, like a movie. */
   tvShows: number;
-  /** Seasons whose watched episodes equal Season.episode_count. */
+  /** Seasons whose watched episodes reach the stored episode count. */
   seasonsFinished: number;
-  /** Movie runtimes + watched episode runtimes, in hours. */
+  /** Movie runtimes + TV minutes_watched, in hours. */
   hoursWatched: number;
   topGenres: { movie: InsightGenre[]; tv: InsightGenre[] };
   resume: ResumeShow[];
 }
+
+/** Nothing watched yet, or the watch list isn't readable (signed out / unverified). */
+export const EMPTY_INSIGHTS: InsightsSummary = {
+  movies: 0,
+  tvShows: 0,
+  seasonsFinished: 0,
+  hoursWatched: 0,
+  topGenres: { movie: [], tv: [] },
+  resume: [],
+};

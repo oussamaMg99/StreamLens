@@ -121,7 +121,7 @@ const SummaryModal = (props: SummaryModalProps) => {
             </TabList>
 
             <TabPanel sx={{ p: 0 }} value='1'>
-              <SummaryModalOverviewTab itemDetails={itemDetails} />
+              <SummaryModalOverviewTab itemDetails={itemDetails} onBrowseEpisodes={() => setTabValue('2')} />
             </TabPanel>
             {isTvShow(item) && (
               <TabPanel sx={{ p: 0 }} value='2'>

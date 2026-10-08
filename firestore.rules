@@ -18,7 +18,9 @@ service cloud.firestore {
     // Shape check on the document being written. Rules can't iterate an array, so
     // individual entries can't be validated here — this is the whole document the
     // client is allowed to write: exactly { uid, watch_list }, uid matching the path,
-    // and a list that can't grow without bound.
+    // and a list that can't grow without bound. Entries also carry client-written
+    // metadata for Insights (genre_ids, runtime, episode_counts, minutes_watched,
+    // updated_at); it only feeds the owner's own stats, so it needs no server check.
     function isValidWatchList(data, uid) {
       return data.keys().hasOnly(['uid', 'watch_list'])
         && data.keys().hasAll(['uid', 'watch_list'])

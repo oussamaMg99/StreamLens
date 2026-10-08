@@ -16,7 +16,7 @@ import {
   setEpisodeWatched,
   setMovieWatched,
 } from 'src/core/services/watchList.service';
-import { WatchListEntry } from 'src/core/models/watchList.model';
+import { EntryMeta, WatchListEntry } from 'src/core/models/watchList.model';
 
 /**
  * Shared wiring for every watch-list mutation: run `write` for the signed-in user, then
@@ -41,16 +41,23 @@ const useWatchListMutation = <TVariables>(write: (uid: string, variables: TVaria
 
 type EntryRef = Pick<WatchListEntry, 'media_type' | 'id'>;
 
+// `meta` is the title's EntryMeta (entryMetaFromDetails): every write passes it when the
+// details are at hand, so the entry carries what Insights needs.
+
 /** Adds a title with no progress yet. */
-export const useAddToWatchList = () => useWatchListMutation<EntryRef>((uid, entry) => addToWatchList(uid, entry));
+export const useAddToWatchList = () =>
+  useWatchListMutation<EntryRef & { meta?: EntryMeta }>((uid, { meta, ...entry }) => addToWatchList(uid, entry, meta));
 
 /** Removes a title and its progress. */
 export const useRemoveFromWatchList = () => useWatchListMutation<EntryRef>((uid, entry) => removeEntry(uid, entry));
 
 export const useSetMovieWatched = () =>
-  useWatchListMutation<{ id: number; watched: boolean }>((uid, { id, watched }) => setMovieWatched(uid, id, watched));
+  useWatchListMutation<{ id: number; watched: boolean; meta?: EntryMeta }>((uid, { id, watched, meta }) =>
+    setMovieWatched(uid, id, watched, meta),
+  );
 
+/** `runtime` is the toggled episode's length in minutes (0 when TMDB doesn't know it). */
 export const useSetEpisodeWatched = () =>
-  useWatchListMutation<{ tvId: number; season: number; episode: number; watched: boolean }>((uid, { tvId, season, episode, watched }) =>
-    setEpisodeWatched(uid, tvId, season, episode, watched),
+  useWatchListMutation<{ tvId: number; season: number; episode: number; watched: boolean; runtime: number; meta?: EntryMeta }>(
+    (uid, toggle) => setEpisodeWatched(uid, toggle),
   );

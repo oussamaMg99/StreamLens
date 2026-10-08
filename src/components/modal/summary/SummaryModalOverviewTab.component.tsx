@@ -7,7 +7,10 @@ import { useTranslation } from 'react-i18next';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import NoPoster from 'src/assets/images/no-movie.png';
+import colors from 'src/assets/themes/colors';
 import { Result } from 'src/core/models/common.model';
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
 import { YouTubePlayer } from 'src/components/player/YouTubePlayer.component';
@@ -15,15 +18,18 @@ import { SummaryModalDetails } from './SummaryModal.component';
 import { isMovie, isTvShow } from 'src/utils/global.utils';
 import AppContext from 'src/core/context/global/AppContext';
 import { useWatchListEntry } from 'src/core/hooks/useWatchList';
-import { useAddToWatchList, useRemoveFromWatchList } from 'src/core/hooks/useWatchListMutations';
+import { useAddToWatchList, useRemoveFromWatchList, useSetMovieWatched } from 'src/core/hooks/useWatchListMutations';
 import { useWatchListGate } from 'src/core/hooks/useWatchListGate';
+import { entryMetaFromDetails } from 'src/utils/watchListMeta.utils';
 
 interface SummaryModalOverviewTabProps {
   itemDetails?: SummaryModalDetails;
+  /** Switches the modal to its Episodes tab (TV only); the tab state lives in SummaryModal. */
+  onBrowseEpisodes?: () => void;
 }
 
 const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
-  const { itemDetails } = props;
+  const { itemDetails, onBrowseEpisodes } = props;
   const { t } = useTranslation();
   const { setSnackBarProps } = useContext(AppContext);
   const [trailerVideoId, setTrailerVideoId] = useState<string | null>(null);
@@ -32,7 +38,9 @@ const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
   const watchListEntry = useWatchListEntry(itemDetails);
   const addToList = useAddToWatchList();
   const removeFromList = useRemoveFromWatchList();
-  const watchListPending = addToList.isPending || removeFromList.isPending;
+  const setMovieWatched = useSetMovieWatched();
+  const watchListPending = addToList.isPending || removeFromList.isPending || setMovieWatched.isPending;
+  const movieWatched = watchListEntry?.media_type === 'movie' && watchListEntry.watched;
 
   /**
    * Blocked (signed out, or signed in but unverified — firestore.rules requires a
@@ -43,11 +51,23 @@ const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
     if (gate.promptIfBlocked()) return;
     if (!itemDetails) return;
     const entryRef = { media_type: itemDetails.media_type, id: itemDetails.id };
-    const mutation = watchListEntry ? removeFromList : addToList;
-    const messageKey = watchListEntry ? 'removedFromWatchList' : 'savedToWatchList';
-    mutation.mutate(entryRef, {
-      onSuccess: () => setSnackBarProps({ open: true, severity: 'success', message: t(messageKey) }),
-    });
+    const onSuccess = (messageKey: string) => () => setSnackBarProps({ open: true, severity: 'success', message: t(messageKey) });
+    if (watchListEntry) removeFromList.mutate(entryRef, { onSuccess: onSuccess('removedFromWatchList') });
+    else addToList.mutate({ ...entryRef, meta: entryMetaFromDetails(itemDetails) }, { onSuccess: onSuccess('savedToWatchList') });
+  };
+
+  /** Movies only: toggles watched, which also puts the movie on the list if needed. */
+  const handleMovieWatchedClick = () => {
+    if (gate.promptIfBlocked()) return;
+    if (!isMovie(itemDetails)) return;
+    const watched = !movieWatched;
+    setMovieWatched.mutate(
+      { id: itemDetails.id, watched, meta: entryMetaFromDetails(itemDetails) },
+      {
+        onSuccess: () =>
+          setSnackBarProps({ open: true, severity: 'success', message: t(watched ? 'movieMarkedWatched' : 'movieMarkedUnwatched') }),
+      },
+    );
   };
 
   const isOfficialYoutubeTrailer = (video: Result) => {
@@ -100,8 +120,22 @@ const SummaryModalOverviewTab = (props: SummaryModalOverviewTabProps) => {
                 {watchListEntry ? t('removeFromWatchList') : t('saveToWatchList')}
               </Button>
             </Tooltip>
+            {isMovie(itemDetails) && (
+              <Tooltip title={gate.blockedHint}>
+                <Button
+                  variant={movieWatched ? 'contained' : 'outlined'}
+                  aria-pressed={movieWatched}
+                  startIcon={movieWatched ? <CheckCircleIcon /> : <CheckCircleOutlinedIcon />}
+                  disabled={gate.access === 'loading' || watchListPending}
+                  onClick={handleMovieWatchedClick}
+                  sx={movieWatched ? { color: colors.onPrimary } : undefined}
+                >
+                  {movieWatched ? t('markedAsWatched') : t('markAsWatched')}
+                </Button>
+              </Tooltip>
+            )}
             {isTvShow(itemDetails) && (
-              <Button variant='outlined' startIcon={<FormatListBulletedIcon />} onClick={() => {}}>
+              <Button variant='outlined' startIcon={<FormatListBulletedIcon />} onClick={onBrowseEpisodes}>
                 {t('browseEpisodes')}
               </Button>
             )}

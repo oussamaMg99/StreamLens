@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Checkbox, CircularProgress, List, ListItemAvatar, ListItemButton, ListItemText, Rating, Tooltip } from '@mui/material';
 import { Episode } from 'src/core/models/seasonDetails.model';
+import { EntryMeta } from 'src/core/models/watchList.model';
 import NoPoster from 'src/assets/images/no-movie.png';
 import { useSetEpisodeWatched } from 'src/core/hooks/useWatchListMutations';
 import { useWatchListGate } from 'src/core/hooks/useWatchListGate';
@@ -10,6 +11,7 @@ import { useWatchListGate } from 'src/core/hooks/useWatchListGate';
 interface EpisodeItemProps {
   episode: Episode;
   tvId?: number;
+  meta?: EntryMeta;
   seasonNumber?: number;
   watched: boolean;
 }
@@ -19,7 +21,7 @@ interface EpisodeItemProps {
  * which supplies the ids and the watched flag from the season's entry.
  */
 const EpisodeItem = (props: EpisodeItemProps) => {
-  const { episode, tvId, seasonNumber, watched } = props;
+  const { episode, tvId, meta, seasonNumber, watched } = props;
   const { t } = useTranslation();
   const gate = useWatchListGate();
   const setEpisodeWatched = useSetEpisodeWatched();
@@ -28,7 +30,15 @@ const EpisodeItem = (props: EpisodeItemProps) => {
     // Signed out or unverified, the tick is the prompt — nothing is written.
     if (gate.promptIfBlocked()) return;
     if (tvId === undefined || seasonNumber === undefined) return;
-    setEpisodeWatched.mutate({ tvId, season: seasonNumber, episode: episode.episode_number, watched: event.target.checked });
+    setEpisodeWatched.mutate({
+      tvId,
+      season: seasonNumber,
+      episode: episode.episode_number,
+      watched: event.target.checked,
+      // Exact minutes for Insights; TMDB leaves some runtimes empty, which count as 0.
+      runtime: episode.runtime ?? 0,
+      meta,
+    });
   };
 
   return (
@@ -72,6 +82,8 @@ const EpisodeItem = (props: EpisodeItemProps) => {
 interface EpisodesListProps {
   episodes?: Episode[];
   tvId?: number;
+  /** The show's metadata, stored with each toggle. */
+  meta?: EntryMeta;
   seasonNumber?: number;
   /** Episode numbers marked watched in this season; owned by SummaryModalEpisodesTab. */
   watchedEpisodes?: number[];
@@ -81,7 +93,7 @@ interface EpisodesListProps {
 
 /** The season's episodes with their watched ticks, plus the loading/error states. */
 const EpisodesList = (props: EpisodesListProps) => {
-  const { episodes, tvId, seasonNumber, watchedEpisodes = [], loading, error } = props;
+  const { episodes, tvId, meta, seasonNumber, watchedEpisodes = [], loading, error } = props;
   const { t } = useTranslation();
 
   if (loading) {
@@ -107,6 +119,7 @@ const EpisodesList = (props: EpisodesListProps) => {
           key={episode.id}
           episode={episode}
           tvId={tvId}
+          meta={meta}
           seasonNumber={seasonNumber}
           watched={watchedEpisodes.includes(episode.episode_number)}
         />

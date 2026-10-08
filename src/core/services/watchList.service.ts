@@ -13,10 +13,18 @@
 // runTransaction — otherwise a second tab (or another device) editing at the same time
 // silently overwrites the first one's changes. The 1MB document ceiling is thousands of
 // entries away, so size isn't a concern.
+//
+// Writes also store the title's metadata (EntryMeta: genre_ids, runtime /
+// episode_counts) and stamp updated_at, so Insights reads everything from this document.
+// The array logic itself lives in src/utils/watchListMeta.utils.ts, where it's tested.
 
 import { doc, getDoc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase.config';
-import { WatchList, WatchListEntry, WatchListMovieEntry, WatchListResponse, WatchListTvEntry } from '../models/watchList.model';
+import { EntryMeta, WatchList, WatchListEntry, WatchListResponse } from '../models/watchList.model';
+import { BackfillPatch, applyAdd, applyBackfill, applyEpisodeToggle, applyMovieWatched } from 'src/utils/watchListMeta.utils';
+
+// Re-exported so existing callers keep importing it from the service.
+export { watchListEntryId } from 'src/utils/watchListMeta.utils';
 
 const WATCH_LISTS_COLLECTION = 'watchLists';
 
@@ -28,12 +36,6 @@ const WATCH_LISTS_COLLECTION = 'watchLists';
 export const WATCH_LIST_QUERY_ROOT = 'watch-list';
 
 const watchListRef = (uid: string) => doc(db, WATCH_LISTS_COLLECTION, uid);
-
-/**
- * Stable key for a single entry, used client-side for React keys and lookups. A movie
- * and a TV show can share the same numeric TMDB id, so media_type has to be part of it.
- */
-export const watchListEntryId = (entry: Pick<WatchListEntry, 'media_type' | 'id'>): string => `${entry.media_type}_${entry.id}`;
 
 export const getWatchList = async (uid: string): Promise<WatchListResponse> => {
   const snapshot = await getDoc(watchListRef(uid));
@@ -66,45 +68,30 @@ const updateEntries = async (uid: string, update: (entries: WatchListEntry[]) =>
  * there. The per-episode/per-movie setters can't express this: they'd have to mark
  * something watched to create the entry.
  */
-export const addToWatchList = (uid: string, entry: Pick<WatchListEntry, 'media_type' | 'id'>): Promise<void> =>
-  updateEntries(uid, entries => {
-    if (entries.some(current => current.media_type === entry.media_type && current.id === entry.id)) return entries;
-    const created: WatchListEntry =
-      entry.media_type === 'movie'
-        ? { media_type: 'movie', id: entry.id, watched: false }
-        : { media_type: 'tv', id: entry.id, watched: {} };
-    return [...entries, created];
-  });
+export const addToWatchList = (uid: string, entry: Pick<WatchListEntry, 'media_type' | 'id'>, meta?: EntryMeta): Promise<void> => {
+  // Read once outside the transaction body, which may run more than once.
+  const now = Date.now();
+  return updateEntries(uid, entries => applyAdd(entries, entry, meta, now));
+};
 
 /** Marks a movie watched or unwatched, adding it to the list if it isn't there yet. */
-export const setMovieWatched = (uid: string, id: number, watched: boolean): Promise<void> =>
-  updateEntries(uid, entries => {
-    const existing = entries.find((entry): entry is WatchListMovieEntry => entry.media_type === 'movie' && entry.id === id);
-    if (!existing) return [...entries, { media_type: 'movie', id, watched }];
-    if (existing.watched === watched) return entries;
-    return entries.map(entry => (entry === existing ? { ...existing, watched } : entry));
-  });
+export const setMovieWatched = (uid: string, id: number, watched: boolean, meta?: EntryMeta): Promise<void> => {
+  const now = Date.now();
+  return updateEntries(uid, entries => applyMovieWatched(entries, id, watched, meta, now));
+};
 
 /**
- * Marks one episode of a season watched or unwatched. A season key disappears once its
- * last episode is unwatched; the show itself stays on the list until removeEntry.
+ * Marks one episode of a season watched or unwatched; `runtime` (minutes) keeps the
+ * show's minutes_watched in step. A season key disappears once its last episode is
+ * unwatched; the show itself stays on the list until removeEntry.
  */
-export const setEpisodeWatched = (uid: string, tvId: number, season: number, episode: number, watched: boolean): Promise<void> =>
-  updateEntries(uid, entries => {
-    const existing = entries.find((entry): entry is WatchListTvEntry => entry.media_type === 'tv' && entry.id === tvId);
-    // Nothing tracked for this show yet: watching creates it, unwatching is a no-op.
-    if (!existing) return watched ? [...entries, { media_type: 'tv', id: tvId, watched: { [season]: [episode] } }] : entries;
-
-    const episodes = existing.watched[season] ?? [];
-    if (episodes.includes(episode) === watched) return entries;
-
-    const nextEpisodes = watched ? [...episodes, episode].sort((a, b) => a - b) : episodes.filter(number => number !== episode);
-    const nextWatched = { ...existing.watched };
-    if (nextEpisodes.length) nextWatched[season] = nextEpisodes;
-    else delete nextWatched[season];
-
-    return entries.map(entry => (entry === existing ? { ...existing, watched: nextWatched } : entry));
-  });
+export const setEpisodeWatched = (
+  uid: string,
+  toggle: { tvId: number; season: number; episode: number; watched: boolean; runtime: number; meta?: EntryMeta },
+): Promise<void> => {
+  const now = Date.now();
+  return updateEntries(uid, entries => applyEpisodeToggle(entries, toggle, now));
+};
 
 /** Drops a title from the list entirely, along with whatever progress it held. */
 export const removeEntry = (uid: string, entry: Pick<WatchListEntry, 'media_type' | 'id'>): Promise<void> =>
@@ -112,3 +99,11 @@ export const removeEntry = (uid: string, entry: Pick<WatchListEntry, 'media_type
     const next = entries.filter(current => !(current.media_type === entry.media_type && current.id === entry.id));
     return next.length === entries.length ? entries : next;
   });
+
+/**
+ * One-time migration: fills the metadata of entries saved before it existed, keyed by
+ * watchListEntryId. Only missing fields are written (see applyBackfill), so it's safe to
+ * run twice or alongside another tab.
+ */
+export const backfillEntryMeta = (uid: string, patches: Record<string, BackfillPatch>): Promise<void> =>
+  updateEntries(uid, entries => applyBackfill(entries, patches));
