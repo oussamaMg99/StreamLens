@@ -18,7 +18,6 @@ import { FirebaseError, initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { initializeUI } from '@firebase-oss/ui-core';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -33,7 +32,6 @@ const firebaseConfig = {
 export const firebaseApp = initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
-export const ui = initializeUI({ app: firebaseApp, auth });
 
 // getAnalytics() throws where measurement isn't available (unsupported browsers, blocked
 // scripts, non-browser environments), so it's guarded rather than called outright.

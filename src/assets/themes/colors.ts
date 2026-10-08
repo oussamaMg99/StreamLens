@@ -1,5 +1,3 @@
-import { light } from '@mui/material/styles/createPalette';
-
 const colors = {
   whiteSmoke: '#F5F5F5',
   white: '#FFFFFF',
