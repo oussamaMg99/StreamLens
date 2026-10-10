@@ -1,1 +1,0 @@
-import{b as e}from"./AuthError.component-ABCR3Ehe.js";import{o as t,p as n}from"./MediaCard.component-CREyF_WK.js";function r(r={},i){let{i18n:a}=e(),o=r.language??a.language;return n({queryKey:[`tv-shows`,{...r,language:o}],queryFn:()=>t.getTvShows({...r,language:o}),staleTime:3e5,enabled:i?.enabled})}export{r as t};
