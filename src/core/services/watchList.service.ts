@@ -125,5 +125,8 @@ export const removeEntry = (uid: string, entry: Pick<WatchListEntry, 'media_type
  * watchListEntryId. Only missing fields are written (see applyBackfill), so it's safe to
  * run twice or alongside another tab.
  */
-export const backfillEntryMeta = (uid: string, patches: Record<string, BackfillPatch>): Promise<void> =>
-  updateEntries(uid, entries => applyBackfill(entries, patches));
+export const backfillEntryMeta = (uid: string, patches: Record<string, BackfillPatch>): Promise<void> => {
+  // Read once outside the transaction body, which may run more than once.
+  const now = Date.now();
+  return updateEntries(uid, entries => applyBackfill(entries, patches, now));
+};

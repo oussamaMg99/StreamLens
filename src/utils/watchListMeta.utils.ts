@@ -23,9 +23,19 @@ export const watchListEntryId = (entry: EntryRef): string => `${entry.media_type
 export const isEntryWatched = (entry: WatchListEntry): boolean =>
   entry.media_type === 'movie' ? entry.watched : Object.values(entry.watched).some(episodes => episodes.length > 0);
 
+/** Year from a TMDB date ('1994-09-23' → 1994); 0 when the date is missing or malformed. */
+export const releaseYear = (date: string | undefined): number => {
+  const year = Number(date?.slice(0, 4));
+  return Number.isInteger(year) && year > 1800 ? year : 0;
+};
+
 /** What a write stores from the title's details: language-neutral ids and numbers only. */
 export const entryMetaFromDetails = (details: MovieDetails | TVShowDetails): EntryMeta => {
-  const meta: EntryMeta = { genre_ids: (details.genres ?? []).map(genre => genre.id) };
+  const meta: EntryMeta = {
+    genre_ids: (details.genres ?? []).map(genre => genre.id),
+    // 0 is stored for "no date" on purpose: it marks the entry as done for the backfill.
+    release_year: releaseYear(details.media_type === 'movie' ? details.release_date : details.first_air_date),
+  };
   if (details.media_type === 'movie') {
     if (typeof details.runtime === 'number') meta.runtime = details.runtime;
   } else {
@@ -38,10 +48,14 @@ export const entryMetaFromDetails = (details: MovieDetails | TVShowDetails): Ent
   return meta;
 };
 
-/** A watched entry saved before the metadata fields existed. */
+/**
+ * An entry saved before its metadata fields existed, watched or not: saved-but-unwatched
+ * titles need their runtime / episode counts too. Only watched entries need an
+ * updated_at (see applyBackfill), so its absence on an unwatched one isn't flagged.
+ */
 export const needsBackfill = (entry: WatchListEntry): boolean => {
-  if (!isEntryWatched(entry)) return false;
-  if (!entry.genre_ids) return true;
+  if (!entry.genre_ids || entry.release_year === undefined) return true;
+  if (entry.updated_at === undefined && isEntryWatched(entry)) return true;
   return entry.media_type === 'movie'
     ? entry.runtime === undefined
     : entry.episode_counts === undefined || entry.minutes_watched === undefined;
@@ -50,12 +64,14 @@ export const needsBackfill = (entry: WatchListEntry): boolean => {
 /** The meta fields that apply to a movie entry, omitting absent ones. */
 const movieMeta = (meta?: EntryMeta): Partial<WatchListMovieEntry> => ({
   ...(meta?.genre_ids && { genre_ids: meta.genre_ids }),
+  ...(meta?.release_year !== undefined && { release_year: meta.release_year }),
   ...(meta?.runtime !== undefined && { runtime: meta.runtime }),
 });
 
 /** The meta fields that apply to a TV entry, omitting absent ones. */
 const tvMeta = (meta?: EntryMeta): Partial<WatchListTvEntry> => ({
   ...(meta?.genre_ids && { genre_ids: meta.genre_ids }),
+  ...(meta?.release_year !== undefined && { release_year: meta.release_year }),
   ...(meta?.episode_counts && { episode_counts: meta.episode_counts }),
 });
 
@@ -206,15 +222,19 @@ export type BackfillPatch = EntryMeta & { minutes_watched?: number };
 /**
  * Fills metadata on entries saved before it existed. Only fields that are still missing
  * are set, so running it twice, or after another tab already wrote them, changes nothing.
- * updated_at is left alone: a migration isn't activity.
+ * A watched entry missing updated_at gets the migration time `now`: the real date of the
+ * last change is unknown. Unwatched entries keep it absent until they're next changed,
+ * and an existing updated_at is never touched.
  */
-export const applyBackfill = (entries: WatchListEntry[], patches: Record<string, BackfillPatch>): WatchListEntry[] => {
+export const applyBackfill = (entries: WatchListEntry[], patches: Record<string, BackfillPatch>, now: number): WatchListEntry[] => {
   let changed = false;
   const next = entries.map(entry => {
     const patch = patches[watchListEntryId(entry)];
     if (!patch) return entry;
     const filled: WatchListEntry = { ...entry };
     if (filled.genre_ids === undefined && patch.genre_ids) filled.genre_ids = patch.genre_ids;
+    if (filled.release_year === undefined && patch.release_year !== undefined) filled.release_year = patch.release_year;
+    if (filled.updated_at === undefined && isEntryWatched(filled)) filled.updated_at = now;
     if (filled.media_type === 'movie') {
       if (filled.runtime === undefined && patch.runtime !== undefined) filled.runtime = patch.runtime;
     } else {

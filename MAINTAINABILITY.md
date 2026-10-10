@@ -67,6 +67,12 @@ This report was generated from a full sweep of `src/` (UI layer + services/hooks
 - [ ] **Watch-list entries aren't validated server-side.** Firestore rules can't iterate arrays, so the rules check only the document shape (`{ uid, watch_list }`, list, size <= 2000). A client could still write malformed entries into its own list. Per-entry validation would need the subcollection layout (one doc per title) or a Cloud Function.
 - [ ] **No tests** exist for any of this (or anything else) — see CLAUDE.md for the missing Vitest setup.
 
+## 📊 Insights follow-ups
+
+- [ ] **Arabic strings for Decades / Hidden gems need a native-speaker review.** They came with the Claude Design handoff (`insights-v2`) and were not checked by a fluent reader.
+- [ ] **Hidden gems may run short.** `useHiddenGems` excludes every top genre (TMDB's comma-separated `without_genres` means "none of these"). If users with broad tastes see too few gems, exclude only the #1 genre per type.
+- [ ] **Remove the backfill once the watch list is migrated.** There is a single watch-list document today. The backfill now migrates every entry, watched or not, and stamps a missing `updated_at` with the migration time on watched entries only (unwatched ones get it on their next change). After the next Insights visit, check in the Firebase console that every entry has `release_year` and `runtime` (movies) or `episode_counts` + `minutes_watched` (TV), and every watched entry `updated_at`; then `useWatchListBackfill`, `needsBackfill`, `applyBackfill`, `backfillPatchFromDetails`, `estimateMinutesWatched` and `backfillEntryMeta` are dead code — every new write carries full metadata.
+
 ## Suggested priority
 
 1. ~~Fix the `clearSession` bug~~ ✅ done

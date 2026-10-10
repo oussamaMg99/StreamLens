@@ -19,6 +19,8 @@ interface WatchListEntryMeta {
   genre_ids?: number[];
   /** Epoch ms of the last change to this entry — "Pick up where you left off" order. */
   updated_at?: number;
+  /** Year of release (movie) or first air date (TV), for "Decades you watch". 0 = TMDB has no date. */
+  release_year?: number;
 }
 
 export interface WatchListMovieEntry extends WatchListEntryMeta {
@@ -43,7 +45,7 @@ export interface WatchListTvEntry extends WatchListEntryMeta {
 export type WatchListEntry = WatchListMovieEntry | WatchListTvEntry;
 
 /** What a write captures from the title's TMDB details (see entryMetaFromDetails). */
-export type EntryMeta = Pick<WatchListMovieEntry, 'genre_ids' | 'runtime'> & Pick<WatchListTvEntry, 'episode_counts'>;
+export type EntryMeta = Pick<WatchListMovieEntry, 'genre_ids' | 'runtime' | 'release_year'> & Pick<WatchListTvEntry, 'episode_counts'>;
 
 export interface WatchList {
   uid: string;

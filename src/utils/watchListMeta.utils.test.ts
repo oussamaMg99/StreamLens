@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MovieDetails } from 'src/core/models/movieDetails.model';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
-import { WatchListEntry, WatchListTvEntry } from 'src/core/models/watchList.model';
+import { WatchListEntry, WatchListMovieEntry, WatchListTvEntry } from 'src/core/models/watchList.model';
 import {
   applyAdd,
   applyBackfill,
@@ -13,6 +13,7 @@ import {
   episodeRuntime,
   isEpisodeAired,
   needsBackfill,
+  releaseYear,
 } from './watchListMeta.utils';
 
 // Fixtures carry only the fields these helpers read; the casts stand in for the rest of
@@ -33,24 +34,69 @@ const showDetails = (id: number, seasons: Record<number, number>, options: { run
 const NOW = 1_000;
 
 describe('entryMetaFromDetails', () => {
+  // The fixtures carry no dates, so release_year is the "unknown" 0.
   it('keeps genre ids and runtime for a movie', () => {
-    expect(entryMetaFromDetails(movieDetails(1, 120, [18, 53]))).toEqual({ genre_ids: [18, 53], runtime: 120 });
+    expect(entryMetaFromDetails(movieDetails(1, 120, [18, 53]))).toEqual({ genre_ids: [18, 53], release_year: 0, runtime: 120 });
   });
 
   it('keeps genre ids and regular-season episode counts for a show', () => {
-    expect(entryMetaFromDetails(showDetails(1, { 0: 3, 1: 8, 2: 10, 3: 0 }))).toEqual({ genre_ids: [18], episode_counts: { 1: 8, 2: 10 } });
+    expect(entryMetaFromDetails(showDetails(1, { 0: 3, 1: 8, 2: 10, 3: 0 }))).toEqual({
+      genre_ids: [18],
+      release_year: 0,
+      episode_counts: { 1: 8, 2: 10 },
+    });
+  });
+
+  it('takes release_year from the release date (movie) or first air date (tv)', () => {
+    expect(entryMetaFromDetails({ ...movieDetails(1, 120), release_date: '1994-09-23' }).release_year).toBe(1994);
+    expect(entryMetaFromDetails({ ...showDetails(1, { 1: 8 }), first_air_date: '2019-03-01' }).release_year).toBe(2019);
+  });
+});
+
+describe('releaseYear', () => {
+  it('reads the year and returns 0 for a missing or malformed date', () => {
+    expect(releaseYear('1994-09-23')).toBe(1994);
+    expect(releaseYear('')).toBe(0);
+    expect(releaseYear(undefined)).toBe(0);
+    expect(releaseYear('n/a')).toBe(0);
   });
 });
 
 describe('needsBackfill', () => {
-  it('flags watched entries missing metadata only', () => {
+  const completeMovie: WatchListMovieEntry = {
+    media_type: 'movie',
+    id: 1,
+    watched: true,
+    genre_ids: [],
+    runtime: 90,
+    release_year: 1999,
+    updated_at: 5,
+  };
+
+  it('flags entries missing metadata, watched or not', () => {
     expect(needsBackfill({ media_type: 'movie', id: 1, watched: true })).toBe(true);
-    expect(needsBackfill({ media_type: 'movie', id: 1, watched: false })).toBe(false);
-    expect(needsBackfill({ media_type: 'movie', id: 1, watched: true, genre_ids: [], runtime: 90 })).toBe(false);
-    expect(needsBackfill({ media_type: 'tv', id: 2, watched: { 1: [1] }, genre_ids: [], episode_counts: { 1: 8 } })).toBe(true);
-    expect(
-      needsBackfill({ media_type: 'tv', id: 2, watched: { 1: [1] }, genre_ids: [], episode_counts: { 1: 8 }, minutes_watched: 40 }),
-    ).toBe(false);
+    // Saved but never watched: still needs its runtime and year.
+    expect(needsBackfill({ media_type: 'movie', id: 1, watched: false })).toBe(true);
+    expect(needsBackfill({ media_type: 'tv', id: 2, watched: {} })).toBe(true);
+    expect(needsBackfill(completeMovie)).toBe(false);
+    expect(needsBackfill({ ...completeMovie, watched: false })).toBe(false);
+  });
+
+  it('flags an entry missing just release_year or updated_at', () => {
+    const { release_year: _year, ...noYear } = completeMovie;
+    const { updated_at: _updated, ...noUpdatedAt } = completeMovie;
+    expect(needsBackfill(noYear)).toBe(true);
+    expect(needsBackfill(noUpdatedAt)).toBe(true);
+    // Unwatched entries don't get updated_at from the backfill, so its absence isn't flagged.
+    expect(needsBackfill({ ...noUpdatedAt, watched: false })).toBe(false);
+    // 0 means "TMDB has no date": done, not missing, so the backfill doesn't retry it.
+    expect(needsBackfill({ ...completeMovie, release_year: 0 })).toBe(false);
+  });
+
+  it('needs episode counts and minutes for a show', () => {
+    const show: WatchListTvEntry = { media_type: 'tv', id: 2, watched: { 1: [1] }, genre_ids: [], release_year: 2019, updated_at: 5 };
+    expect(needsBackfill({ ...show, episode_counts: { 1: 8 } })).toBe(true);
+    expect(needsBackfill({ ...show, episode_counts: { 1: 8 }, minutes_watched: 40 })).toBe(false);
   });
 });
 
@@ -185,6 +231,7 @@ describe('backfill', () => {
     expect(episodeRuntime(showDetails(2, { 1: 8 }, { lastRuntime: 30 }))).toBe(30);
     expect(backfillPatchFromDetails(legacy, showDetails(2, { 1: 8 }, { runTime: [40, 50] }))).toEqual({
       genre_ids: [18],
+      release_year: 0,
       episode_counts: { 1: 8 },
       minutes_watched: 135, // 3 regular episodes × 45 min; the special is ignored
     });
@@ -199,11 +246,21 @@ describe('backfill', () => {
       movie_1: { genre_ids: [18], runtime: 100 },
       tv_2: { genre_ids: [18], episode_counts: { 1: 8 }, minutes_watched: 45 },
     };
-    const filled = applyBackfill(entries, patches);
+    const filled = applyBackfill(entries, patches, NOW);
     expect(filled).toEqual([
-      { media_type: 'movie', id: 1, watched: true, genre_ids: [99], runtime: 100 },
+      // No updated_at yet: it gets the migration time.
+      { media_type: 'movie', id: 1, watched: true, genre_ids: [99], runtime: 100, updated_at: NOW },
+      // An existing updated_at is kept.
       { media_type: 'tv', id: 2, watched: { 1: [1] }, updated_at: 5, genre_ids: [18], episode_counts: { 1: 8 }, minutes_watched: 45 },
     ]);
-    expect(applyBackfill(filled, patches)).toBe(filled);
+    expect(applyBackfill(filled, patches, NOW + 1)).toBe(filled);
+  });
+
+  it('applyBackfill migrates a saved-but-unwatched entry, without stamping updated_at', () => {
+    const entries: WatchListEntry[] = [{ media_type: 'movie', id: 3, watched: false }];
+    const [filled] = applyBackfill(entries, { movie_3: { genre_ids: [35], release_year: 2004, runtime: 98 } }, NOW);
+    expect(filled).toEqual({ media_type: 'movie', id: 3, watched: false, genre_ids: [35], release_year: 2004, runtime: 98 });
+    // Done for good: no updated_at, but an unwatched entry isn't expected to have one.
+    expect(needsBackfill(filled)).toBe(false);
   });
 });

@@ -20,6 +20,12 @@ export interface ResumeShow {
   totalEpisodes: number;
 }
 
+/** Watched titles released in one decade (decade = first year, e.g. 1990). */
+export interface DecadeCount {
+  decade: number;
+  count: number;
+}
+
 export interface InsightsSummary {
   /** Movies with watched === true. */
   movies: number;
@@ -31,6 +37,8 @@ export interface InsightsSummary {
   hoursWatched: number;
   topGenres: { movie: InsightGenre[]; tv: InsightGenre[] };
   resume: ResumeShow[];
+  /** Watched titles per release decade, oldest first. Titles without a known year are left out. */
+  decades: DecadeCount[];
 }
 
 /** Nothing watched yet, or the watch list isn't readable (signed out / unverified). */
@@ -41,4 +49,5 @@ export const EMPTY_INSIGHTS: InsightsSummary = {
   hoursWatched: 0,
   topGenres: { movie: [], tv: [] },
   resume: [],
+  decades: [],
 };

@@ -1,7 +1,7 @@
 // src/core/services/movie.service.ts
 
 import { MovieDetails } from '../models/movieDetails.model';
-import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
+import { DiscoverFilters, GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TMDB_CONFIG } from './tmdb.config';
 import { Media } from '../models/common.model';
 
@@ -26,7 +26,7 @@ export type MovieListResponse = TmdbListResponse<Movie>;
  * - Authentication is performed via Authorization: Bearer <VITE_TMDB_READ_ACCESS_TOKEN>
  * - No api_key query parameter is required when using Bearer token.
  */
-export type GetMovieOptions = {
+export type GetMovieOptions = DiscoverFilters & {
   page?: number;
   language?: string;
   query?: string; // if present -> /search/movie

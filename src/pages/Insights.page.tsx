@@ -10,6 +10,8 @@ import WatchSplit from 'src/components/insights/WatchSplit.component';
 import GenresInsight from 'src/components/insights/GenresInsight.component';
 import GenreSuggestionRow from 'src/components/insights/GenreSuggestionRow.component';
 import ResumeShowCard from 'src/components/insights/ResumeShowCard.component';
+import DecadesInsight from 'src/components/insights/DecadesInsight.component';
+import HiddenGems from 'src/components/insights/HiddenGems.component';
 import InsightsEmptyState from 'src/components/insights/InsightsEmptyState.component';
 import InsightsGatePrompt from 'src/components/insights/InsightsGatePrompt.component';
 import AppContext from 'src/core/context/global/AppContext';
@@ -81,6 +83,8 @@ const Insights = () => {
 
         <GenresInsight topGenres={summary.topGenres} movies={summary.movies} tvShows={summary.tvShows} />
 
+        <DecadesInsight decades={summary.decades} />
+
         {suggestionRows.length > 0 && (
           <InsightSection bleedRight title={t('pickedForYou')} description={t('pickedForYouHint')}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, md: 2.75 } }}>
@@ -98,6 +102,8 @@ const Insights = () => {
             </Box>
           </InsightSection>
         )}
+
+        <HiddenGems topGenres={summary.topGenres} excludeKeys={excludeKeys} onItemClick={openItem} />
 
         {summary.resume.length > 0 && (
           <InsightSection dashed bleedRight title={t('pickUpWhereYouLeftOff')} badge={<InsightBadge label={t('new')} />}>
