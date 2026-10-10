@@ -14,6 +14,7 @@ import SearchBar, { SearchResultItem } from '../search/SearchBar.component';
 import PersonIcon from '@mui/icons-material/Person';
 import UserProfileModal from '../modal/userProfile/UserProfileModal.component';
 import AppContext from 'src/core/context/global/AppContext';
+import StreamLensLogo from 'src/components/logo/StreamLensLogo.component';
 
 interface NavbarProps {
   enableSearch?: boolean;
@@ -97,17 +98,14 @@ const Navbar = (props: NavbarProps) => {
               width: '100%',
             }}
           >
-            {/* Logo placeholder */}
             <Link
               component={NavLink}
               to={RoutePaths.Default}
               end
               underline='none'
-              color='inherit'
-              variant='h4'
-              sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' }, fontWeight: 800, color: colors.primary.main }}
+              sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' } }}
             >
-              {t('appName')}
+              <StreamLensLogo title={t('appName')} />
             </Link>
 
             {/* nav links (hide on small screens if desired) */}
