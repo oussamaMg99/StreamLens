@@ -14,22 +14,14 @@
 // silently overwrites the first one's changes. The 1MB document ceiling is thousands of
 // entries away, so size isn't a concern.
 //
-// Writes also store the title's metadata (EntryMeta: genre_ids, runtime /
+// Writes also store the title's metadata (EntryMeta: genre_ids, release_year, runtime /
 // episode_counts) and stamp updated_at, so Insights reads everything from this document.
 // The array logic itself lives in src/utils/watchListMeta.utils.ts, where it's tested.
 
 import { doc, getDoc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase.config';
 import { EntryMeta, WatchList, WatchListEntry, WatchListResponse } from '../models/watchList.model';
-import {
-  BackfillPatch,
-  EpisodeRuntime,
-  applyAdd,
-  applyBackfill,
-  applyEpisodeToggle,
-  applyEpisodesWatched,
-  applyMovieWatched,
-} from 'src/utils/watchListMeta.utils';
+import { EpisodeRuntime, applyAdd, applyEpisodeToggle, applyEpisodesWatched, applyMovieWatched } from 'src/utils/watchListMeta.utils';
 
 // Re-exported so existing callers keep importing it from the service.
 export { watchListEntryId } from 'src/utils/watchListMeta.utils';
@@ -119,14 +111,3 @@ export const removeEntry = (uid: string, entry: Pick<WatchListEntry, 'media_type
     const next = entries.filter(current => !(current.media_type === entry.media_type && current.id === entry.id));
     return next.length === entries.length ? entries : next;
   });
-
-/**
- * One-time migration: fills the metadata of entries saved before it existed, keyed by
- * watchListEntryId. Only missing fields are written (see applyBackfill), so it's safe to
- * run twice or alongside another tab.
- */
-export const backfillEntryMeta = (uid: string, patches: Record<string, BackfillPatch>): Promise<void> => {
-  // Read once outside the transaction body, which may run more than once.
-  const now = Date.now();
-  return updateEntries(uid, entries => applyBackfill(entries, patches, now));
-};

@@ -6,12 +6,12 @@
 // with no renaming.
 //
 // Besides progress, each entry carries a little TMDB metadata captured at write time
-// (genre_ids, runtime / episode_counts, minutes_watched, updated_at), so Insights can be
-// computed from the document alone instead of fetching every title's details. Only
-// language-neutral values are stored — ids and numbers, never names or titles — so a
-// language switch never shows text frozen in the language it was saved in.
-// The metadata fields are optional: entries saved before they existed lack them until
-// useWatchListBackfill fills them in.
+// (genre_ids, release_year, runtime / episode_counts, minutes_watched, updated_at), so
+// Insights can be computed from the document alone instead of fetching every title's
+// details. Only language-neutral values are stored — ids and numbers, never names or
+// titles — so a language switch never shows text frozen in the language it was saved in.
+// The metadata fields are optional: runtime is only stored when TMDB has one, and an
+// unwatched entry may have no updated_at.
 
 /** Metadata shared by both entry kinds. */
 interface WatchListEntryMeta {

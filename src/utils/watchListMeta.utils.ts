@@ -19,10 +19,6 @@ type EntryRef = Pick<WatchListEntry, 'media_type' | 'id'>;
  */
 export const watchListEntryId = (entry: EntryRef): string => `${entry.media_type}_${entry.id}`;
 
-/** Movie: marked watched. TV: at least one episode marked watched. */
-export const isEntryWatched = (entry: WatchListEntry): boolean =>
-  entry.media_type === 'movie' ? entry.watched : Object.values(entry.watched).some(episodes => episodes.length > 0);
-
 /** Year from a TMDB date ('1994-09-23' → 1994); 0 when the date is missing or malformed. */
 export const releaseYear = (date: string | undefined): number => {
   const year = Number(date?.slice(0, 4));
@@ -33,7 +29,7 @@ export const releaseYear = (date: string | undefined): number => {
 export const entryMetaFromDetails = (details: MovieDetails | TVShowDetails): EntryMeta => {
   const meta: EntryMeta = {
     genre_ids: (details.genres ?? []).map(genre => genre.id),
-    // 0 is stored for "no date" on purpose: it marks the entry as done for the backfill.
+    // 0 means TMDB has no date; Insights' decade count skips it.
     release_year: releaseYear(details.media_type === 'movie' ? details.release_date : details.first_air_date),
   };
   if (details.media_type === 'movie') {
@@ -46,19 +42,6 @@ export const entryMetaFromDetails = (details: MovieDetails | TVShowDetails): Ent
     );
   }
   return meta;
-};
-
-/**
- * An entry saved before its metadata fields existed, watched or not: saved-but-unwatched
- * titles need their runtime / episode counts too. Only watched entries need an
- * updated_at (see applyBackfill), so its absence on an unwatched one isn't flagged.
- */
-export const needsBackfill = (entry: WatchListEntry): boolean => {
-  if (!entry.genre_ids || entry.release_year === undefined) return true;
-  if (entry.updated_at === undefined && isEntryWatched(entry)) return true;
-  return entry.media_type === 'movie'
-    ? entry.runtime === undefined
-    : entry.episode_counts === undefined || entry.minutes_watched === undefined;
 };
 
 /** The meta fields that apply to a movie entry, omitting absent ones. */
@@ -117,9 +100,9 @@ export interface EpisodeRuntime {
  * 0 once nothing is watched). A season key disappears once its last episode is
  * unwatched; the show stays on the list until removeEntry.
  *
- * A legacy entry (no minutes_watched yet) is left without one: adding these runtimes
- * would undercount the episodes watched before, so the backfill estimates the whole
- * total instead.
+ * An entry without minutes_watched is left without one: adding only these runtimes would
+ * undercount the episodes watched before it. (Every stored entry has it since the
+ * metadata migration; the guard keeps the field honest if one ever doesn't.)
  */
 export const applyEpisodesWatched = (
   entries: WatchListEntry[],
@@ -186,64 +169,3 @@ export const applyEpisodeToggle = (
  */
 export const isEpisodeAired = (episode: Pick<Episode, 'air_date'>, today: string): boolean =>
   !episode.air_date || episode.air_date <= today;
-
-/**
- * Typical episode length in minutes. TMDB often returns an empty episode_run_time, so
- * fall back to the latest aired episode's runtime, then to 0 (adds no minutes).
- */
-export const episodeRuntime = (show: TVShowDetails): number => {
-  const runTimes = (show.episode_run_time ?? []).filter((value): value is number => typeof value === 'number' && value > 0);
-  if (runTimes.length) return runTimes.reduce((sum, value) => sum + value, 0) / runTimes.length;
-  return show.last_episode_to_air?.runtime ?? 0;
-};
-
-/**
- * minutes_watched for a legacy show: its watched regular-season episodes × the typical
- * episode length. An estimate — old entries never recorded each episode's runtime — that
- * later toggles keep adjusting with exact values.
- */
-export const estimateMinutesWatched = (entry: WatchListTvEntry, show: TVShowDetails): number => {
-  const episodes = Object.entries(entry.watched)
-    .filter(([season]) => Number(season) > 0)
-    .reduce((sum, [, watched]) => sum + watched.length, 0);
-  return Math.round(episodes * episodeRuntime(show));
-};
-
-/** Backfill patch for one legacy entry: its metadata, plus the minutes estimate for a show. */
-export const backfillPatchFromDetails = (entry: WatchListEntry, details: MovieDetails | TVShowDetails): BackfillPatch => {
-  const patch: BackfillPatch = entryMetaFromDetails(details);
-  if (entry.media_type === 'tv' && details.media_type === 'tv') patch.minutes_watched = estimateMinutesWatched(entry, details);
-  return patch;
-};
-
-/** Patch for one legacy entry, keyed by watchListEntryId in applyBackfill. */
-export type BackfillPatch = EntryMeta & { minutes_watched?: number };
-
-/**
- * Fills metadata on entries saved before it existed. Only fields that are still missing
- * are set, so running it twice, or after another tab already wrote them, changes nothing.
- * A watched entry missing updated_at gets the migration time `now`: the real date of the
- * last change is unknown. Unwatched entries keep it absent until they're next changed,
- * and an existing updated_at is never touched.
- */
-export const applyBackfill = (entries: WatchListEntry[], patches: Record<string, BackfillPatch>, now: number): WatchListEntry[] => {
-  let changed = false;
-  const next = entries.map(entry => {
-    const patch = patches[watchListEntryId(entry)];
-    if (!patch) return entry;
-    const filled: WatchListEntry = { ...entry };
-    if (filled.genre_ids === undefined && patch.genre_ids) filled.genre_ids = patch.genre_ids;
-    if (filled.release_year === undefined && patch.release_year !== undefined) filled.release_year = patch.release_year;
-    if (filled.updated_at === undefined && isEntryWatched(filled)) filled.updated_at = now;
-    if (filled.media_type === 'movie') {
-      if (filled.runtime === undefined && patch.runtime !== undefined) filled.runtime = patch.runtime;
-    } else {
-      if (filled.episode_counts === undefined && patch.episode_counts) filled.episode_counts = patch.episode_counts;
-      if (filled.minutes_watched === undefined && patch.minutes_watched !== undefined) filled.minutes_watched = patch.minutes_watched;
-    }
-    const entryChanged = Object.keys(filled).length !== Object.keys(entry).length;
-    changed ||= entryChanged;
-    return entryChanged ? filled : entry;
-  });
-  return changed ? next : entries;
-};

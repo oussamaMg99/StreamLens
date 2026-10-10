@@ -75,8 +75,8 @@ const resumePoint = (entry: WatchListTvEntry, episodeCounts: Record<number, numb
  * counting rules are unit-tested (insights.utils.test.ts).
  *
  * Only watched titles count: a saved-but-unwatched movie or a show with no watched
- * episode contributes nothing. A watched entry missing metadata (saved before it existed
- * and not yet backfilled) still counts in movies/tvShows, adding only what it has.
+ * episode contributes nothing. A watched entry missing a metadata field (e.g. no runtime
+ * on TMDB) still counts in movies/tvShows, adding only what it has.
  */
 export function buildInsightsSummary(entries: WatchListEntry[], genreName: GenreNameLookup): InsightsSummary {
   let movies = 0;
