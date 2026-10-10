@@ -19,12 +19,6 @@ export type GenreListResponse = {
 };
 
 /**
- * Options accepted by the smart list()/discoverDirect() wrappers.
- *
- * `region` only applies to endpoints that support it (currently movie); subclasses
- * that don't support it simply never populate/forward the field.
- */
-/**
  * Extra /discover filters. TMDB spells them with dots (vote_average.gte), which can't be
  * option keys, so they're mapped by discoverFilterParams. Only discoverDirect sends them.
  */
@@ -32,21 +26,30 @@ export type DiscoverFilters = {
   vote_average_gte?: number;
   vote_count_gte?: number;
   vote_count_lte?: number;
-  /** Comma-separated: excludes titles carrying any of these genres. */
-  without_genres?: number[] | string;
+  /** YYYY-MM-DD: only titles first released on or before this date. */
+  released_before?: string;
+  /** TMDB keyword ids; titles carrying any of them are left out. */
+  without_keywords?: number[];
 };
 
-const discoverFilterParams = (filters: DiscoverFilters): Record<string, string | number> => {
+const discoverFilterParams = (filters: DiscoverFilters, mediaType: 'movie' | 'tv'): Record<string, string | number> => {
   const params: Record<string, string | number> = {};
   if (filters.vote_average_gte !== undefined) params['vote_average.gte'] = filters.vote_average_gte;
   if (filters.vote_count_gte !== undefined) params['vote_count.gte'] = filters.vote_count_gte;
   if (filters.vote_count_lte !== undefined) params['vote_count.lte'] = filters.vote_count_lte;
-  if (filters.without_genres && filters.without_genres.length) {
-    params.without_genres = Array.isArray(filters.without_genres) ? filters.without_genres.join(',') : filters.without_genres;
-  }
+  // TMDB names the release-date filter differently per type.
+  if (filters.released_before) params[mediaType === 'movie' ? 'primary_release_date.lte' : 'first_air_date.lte'] = filters.released_before;
+  // Pipe-joined means "any of these": a title carrying even one is excluded.
+  if (filters.without_keywords?.length) params.without_keywords = filters.without_keywords.join('|');
   return params;
 };
 
+/**
+ * Options accepted by the smart list()/discoverDirect() wrappers.
+ *
+ * `region` only applies to endpoints that support it (currently movie); subclasses
+ * that don't support it simply never populate/forward the field.
+ */
 export type TmdbListParams = DiscoverFilters & {
   page?: number;
   language?: string;
@@ -191,7 +194,7 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
     if (region) params.region = region;
     if (with_genres) params.with_genres = Array.isArray(with_genres) ? with_genres.join(',') : with_genres;
     if (sort_by) params.sort_by = sort_by;
-    Object.assign(params, discoverFilterParams(options));
+    Object.assign(params, discoverFilterParams(options, this.mediaType));
 
     const response = await this.apiGet<TmdbListResponse<Omit<TItem, 'media_type'>>>(`/discover/${this.mediaType}`, {
       params,

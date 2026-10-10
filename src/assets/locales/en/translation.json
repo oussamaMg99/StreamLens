@@ -177,7 +177,7 @@
   "decadeCountItem": "{{decade}}: {{count}}",
   "decadesChartAria": "Titles watched by release decade: {{list}}. Mostly {{decade}}.",
   "hiddenGems": "Hidden gems",
-  "hiddenGemsHint": "Highly rated, little known, outside your usual genres.",
+  "hiddenGemsHint": "Highly rated, little known, from your favorite genres.",
   "topGem": "#1 gem",
   "topGemAria": "Top hidden gem: {{details}}",
   "score": "Score",

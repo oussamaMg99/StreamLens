@@ -34,3 +34,30 @@ export const APPLE_AUTH_ENABLED = envFlag(import.meta.env.VITE_AUTH_APPLE_ENABLE
  * bites — "not ready to show" and "not built yet" won't always lift together.
  */
 export const hideFeature = true;
+
+/**
+ * TMDB keyword ids whose titles Hidden gems leaves out (sent as discover's
+ * without_keywords, pipe-joined = "none of these"). The most-used keywords for titles
+ * centred on gay and lesbian relationships, by how many titles carry them. TMDB keywords
+ * are community-tagged, so an untagged title still gets through. Look ids up with
+ * /search/keyword?query=…; /keyword/{id} returns the name.
+ */
+export const EXCLUDED_KEYWORD_IDS = [
+  158718, // lgbt
+  258533, // gay theme
+  250606, // queer
+  264386, // lesbian
+  9833, // lesbian relationship
+  240305, // gay romance
+  163037, // lgbt teen
+  10180, // male homosexuality
+  265777, // gay relationship
+  275157, // homosexuality
+  363345, // gay
+  15136, // female homosexuality
+  272617, // homosexual
+  319872, // lesbian romance
+  15130, // gay marriage
+  324058, // gay couple
+  315382, // lesbian couple
+];

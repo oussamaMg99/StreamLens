@@ -204,7 +204,7 @@
   "decadeCountItem": "{{decade}}: {{count}}",
   "decadesChartAria": "الأعمال المشاهدة حسب عقد الإصدار: {{list}}. معظمها من {{decade}}.",
   "hiddenGems": "جواهر مخفية",
-  "hiddenGemsHint": "تقييم مرتفع، شهرة محدودة، من خارج أنواعك المعتادة.",
+  "hiddenGemsHint": "تقييم مرتفع، شهرة محدودة، من أنواعك المفضلة.",
   "topGem": "أبرز جوهرة",
   "topGemAria": "أبرز جوهرة: {{details}}",
   "score": "التقييم",

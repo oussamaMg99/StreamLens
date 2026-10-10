@@ -177,7 +177,7 @@
   "decadeCountItem": "{{decade}} : {{count}}",
   "decadesChartAria": "Titres vus par décennie de sortie : {{list}}. Surtout les {{decade}}.",
   "hiddenGems": "Pépites méconnues",
-  "hiddenGemsHint": "Très bien notés, peu connus, hors de vos genres habituels.",
+  "hiddenGemsHint": "Très bien notés, peu connus, dans vos genres préférés.",
   "topGem": "Pépite n° 1",
   "topGemAria": "Pépite n° 1 : {{details}}",
   "score": "Note",
