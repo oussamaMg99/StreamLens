@@ -1,7 +1,7 @@
 // src/core/services/tv.service.ts
 
 import { TMDB_CONFIG } from './tmdb.config';
-import { DiscoverFilters, GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
+import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TVShowDetails } from '../models/tvShowDetails.model';
 import { SeasonDetails } from '../models/seasonDetails.model';
 import { Media } from '../models/common.model';
@@ -28,7 +28,7 @@ export type TvListResponse = TmdbListResponse<TvShow>;
  * - No api_key query parameter is required when using Bearer token.
  * - Unlike movies, TMDB's /tv endpoints don't accept a `region` filter.
  */
-export type GetTvOptions = DiscoverFilters & {
+export type GetTvOptions = {
   page?: number;
   language?: string;
   query?: string; // if present -> /search/tv

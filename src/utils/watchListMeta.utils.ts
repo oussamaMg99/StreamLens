@@ -34,6 +34,8 @@ export const entryMetaFromDetails = (details: MovieDetails | TVShowDetails): Ent
   };
   if (details.media_type === 'movie') {
     if (typeof details.runtime === 'number') meta.runtime = details.runtime;
+    // 0 means "not part of a series", as opposed to absent (entry not written since the field existed).
+    meta.collection_id = details.belongs_to_collection?.id ?? 0;
   } else {
     meta.episode_counts = Object.fromEntries(
       (details.seasons ?? [])
@@ -49,6 +51,7 @@ const movieMeta = (meta?: EntryMeta): Partial<WatchListMovieEntry> => ({
   ...(meta?.genre_ids && { genre_ids: meta.genre_ids }),
   ...(meta?.release_year !== undefined && { release_year: meta.release_year }),
   ...(meta?.runtime !== undefined && { runtime: meta.runtime }),
+  ...(meta?.collection_id !== undefined && { collection_id: meta.collection_id }),
 });
 
 /** The meta fields that apply to a TV entry, omitting absent ones. */

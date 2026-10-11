@@ -36,11 +36,12 @@ export const APPLE_AUTH_ENABLED = envFlag(import.meta.env.VITE_AUTH_APPLE_ENABLE
 export const hideFeature = true;
 
 /**
- * TMDB keyword ids whose titles Hidden gems leaves out (sent as discover's
- * without_keywords, pipe-joined = "none of these"). The most-used keywords for titles
- * centred on gay and lesbian relationships, by how many titles carry them. TMDB keywords
- * are community-tagged, so an untagged title still gets through. Look ids up with
- * /search/keyword?query=…; /keyword/{id} returns the name.
+ * TMDB keyword ids for titles centred on gay and lesbian relationships: the most-used
+ * keywords, by how many titles carry them. Not applied anywhere yet; kept for excluding
+ * such titles from discover-based sections such as "Picked for you", via TMDB discover's
+ * without_keywords (pipe-joined = "none of these"). TMDB keywords are community-tagged,
+ * so an untagged title still gets through. Look ids up with /search/keyword?query=…;
+ * /keyword/{id} returns the name.
  */
 export const EXCLUDED_KEYWORD_IDS = [
   158718, // lgbt

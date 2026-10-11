@@ -28,9 +28,20 @@ const showDetails = (id: number, seasons: Record<number, number>) =>
 const NOW = 1_000;
 
 describe('entryMetaFromDetails', () => {
-  // The fixtures carry no dates, so release_year is the "unknown" 0.
+  // The fixtures carry no dates or collection, so release_year and collection_id are 0.
   it('keeps genre ids and runtime for a movie', () => {
-    expect(entryMetaFromDetails(movieDetails(1, 120, [18, 53]))).toEqual({ genre_ids: [18, 53], release_year: 0, runtime: 120 });
+    expect(entryMetaFromDetails(movieDetails(1, 120, [18, 53]))).toEqual({
+      genre_ids: [18, 53],
+      release_year: 0,
+      runtime: 120,
+      collection_id: 0,
+    });
+  });
+
+  it("stores a movie's collection id, and 0 for a standalone film", () => {
+    const series = { id: 119, name: 'The Lord of the Rings Collection', poster_path: '', backdrop_path: '' };
+    expect(entryMetaFromDetails({ ...movieDetails(1, 120), belongs_to_collection: series }).collection_id).toBe(119);
+    expect(entryMetaFromDetails({ ...movieDetails(1, 120), belongs_to_collection: null }).collection_id).toBe(0);
   });
 
   it('keeps genre ids and regular-season episode counts for a show', () => {

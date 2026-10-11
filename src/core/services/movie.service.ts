@@ -1,7 +1,8 @@
 // src/core/services/movie.service.ts
 
 import { MovieDetails } from '../models/movieDetails.model';
-import { DiscoverFilters, GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
+import { Collection } from '../models/collection.model';
+import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TMDB_CONFIG } from './tmdb.config';
 import { Media } from '../models/common.model';
 
@@ -26,7 +27,7 @@ export type MovieListResponse = TmdbListResponse<Movie>;
  * - Authentication is performed via Authorization: Bearer <VITE_TMDB_READ_ACCESS_TOKEN>
  * - No api_key query parameter is required when using Bearer token.
  */
-export type GetMovieOptions = DiscoverFilters & {
+export type GetMovieOptions = {
   page?: number;
   language?: string;
   query?: string; // if present -> /search/movie
@@ -46,6 +47,7 @@ export type GetMovieOptions = DiscoverFilters & {
  *  - getMovieById(movieId, appendToResponse?, language?)
  *  - searchMovie(query, page)
  *  - discoverMovies(options)
+ *  - getCollection(collectionId, opts) -> a film series and its movies
  *
  * All requests are authenticated automatically by ApiService via tokenProvider that
  * returns VITE_TMDB_READ_ACCESS_TOKEN (Bearer token).
@@ -82,6 +84,16 @@ export default class MovieService extends TmdbListService<Movie, MovieDetails> {
 
   public getMovieGenres(language?: string): Promise<GenreListResponse> {
     return this.genreList(language);
+  }
+
+  /**
+   * A film series and its movies (/collection/{id}). Not a list endpoint, so the parts
+   * get media_type stamped here — the Summary modal narrows on it when one is opened.
+   */
+  public async getCollection(collectionId: number, opts: { language?: string; retry?: number } = {}): Promise<Collection> {
+    const { language = 'en', retry = 0 } = opts;
+    const collection = await this.apiGet<Collection>(`/collection/${collectionId}`, { params: { language }, retry });
+    return { ...collection, parts: (collection.parts ?? []).map(part => ({ ...part, media_type: 'movie' as const })) };
   }
 }
 

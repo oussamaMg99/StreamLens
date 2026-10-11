@@ -6,7 +6,8 @@
 // with no renaming.
 //
 // Besides progress, each entry carries a little TMDB metadata captured at write time
-// (genre_ids, release_year, runtime / episode_counts, minutes_watched, updated_at), so
+// (genre_ids, release_year, runtime / collection_id / episode_counts, minutes_watched,
+// updated_at), so
 // Insights can be computed from the document alone instead of fetching every title's
 // details. Only language-neutral values are stored — ids and numbers, never names or
 // titles — so a language switch never shows text frozen in the language it was saved in.
@@ -29,6 +30,8 @@ export interface WatchListMovieEntry extends WatchListEntryMeta {
   watched: boolean;
   /** Runtime in minutes. */
   runtime?: number;
+  /** TMDB collection (film series) id, for "Finish the collection". 0 = not part of one. */
+  collection_id?: number;
 }
 
 export interface WatchListTvEntry extends WatchListEntryMeta {
@@ -45,7 +48,8 @@ export interface WatchListTvEntry extends WatchListEntryMeta {
 export type WatchListEntry = WatchListMovieEntry | WatchListTvEntry;
 
 /** What a write captures from the title's TMDB details (see entryMetaFromDetails). */
-export type EntryMeta = Pick<WatchListMovieEntry, 'genre_ids' | 'runtime' | 'release_year'> & Pick<WatchListTvEntry, 'episode_counts'>;
+export type EntryMeta = Pick<WatchListMovieEntry, 'genre_ids' | 'runtime' | 'release_year' | 'collection_id'> &
+  Pick<WatchListTvEntry, 'episode_counts'>;
 
 export interface WatchList {
   uid: string;
