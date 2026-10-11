@@ -1,0 +1,1 @@
+import{b as e}from"./AuthError.component-Dk4nnGsQ.js";import{a as t,f as n}from"./MediaCard.component-CrKWuzES.js";function r(r={},i){let{i18n:a}=e(),o=r.language??a.language;return n({queryKey:[`movies`,{...r,language:o}],queryFn:()=>t.getMovies({...r,language:o}),staleTime:3e5,enabled:i?.enabled})}export{r as t};
