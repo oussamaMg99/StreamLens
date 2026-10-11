@@ -179,5 +179,21 @@
   "finishTheCollection": "Terminez la saga",
   "finishTheCollectionHint": "Les sagas que vous avez commencées sans les terminer.",
   "collectionProgress": "{{watched}} sur {{total}} vus",
-  "nextInCollection": "Ensuite : {{title}}"
+  "nextInCollection": "Ensuite : {{title}}",
+  "upNextPart": "À suivre · Partie {{part}} sur {{total}}",
+  "nextTag": "Suivant",
+  "moreToFinish": "À terminer aussi",
+  "partsLeft_one": "encore {{count}}",
+  "partsLeft_other": "encore {{count}}",
+  "comingYear": "Sortie en {{year}}",
+  "comingSoon": "Bientôt",
+  "viewDetails": "Voir les détails",
+  "partStatusWatched": "vu",
+  "partStatusNext": "à suivre",
+  "partStatusTodo": "pas encore vu",
+  "partStatusComing": "pas encore sorti",
+  "partAria": "Partie {{part}}, {{title}}, {{year}}, {{status}}",
+  "collectionStripAria": "Films de {{name}} : {{progress}}",
+  "collectionAria": "{{name}}, {{progress}}. À suivre : {{title}}, {{year}}",
+  "loadingCollections": "Chargement de vos sagas"
 }

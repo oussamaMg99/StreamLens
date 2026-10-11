@@ -9,6 +9,14 @@ import type { Movie } from 'src/core/services/movie.service';
 /** Cards shown at most, like "Pick up where you left off". */
 const MAX_COLLECTIONS = 4;
 
+/** One released part of a series, in release order. */
+export interface CollectionPart {
+  movie: Movie;
+  watched: boolean;
+  /** Position among the released parts, 1-based ("Part 6"). */
+  number: number;
+}
+
 export interface UnfinishedCollection {
   collection: Collection;
   /** Released parts the user has watched. */
@@ -17,6 +25,10 @@ export interface UnfinishedCollection {
   total: number;
   /** The earliest-released part not watched yet. */
   next: Movie;
+  /** Every released part, oldest first, for the poster strip. */
+  parts: CollectionPart[];
+  /** Dated parts released after today, oldest first. Shown as "Coming 2027", never counted. */
+  upcoming: Movie[];
 }
 
 /** Distinct, non-zero collection ids of the watched movies: the series worth fetching. */
@@ -44,7 +56,11 @@ export const unfinishedCollections = (entries: WatchListEntry[], collections: Co
       const watched = released.filter(part => watchedMovieIds.has(part.id)).length;
       const next = released.find(part => !watchedMovieIds.has(part.id));
       if (released.length < 2 || watched === 0 || !next) return [];
-      return [{ collection, watched, total: released.length, next }];
+      const parts = released.map((movie, index) => ({ movie, watched: watchedMovieIds.has(movie.id), number: index + 1 }));
+      const upcoming = collection.parts
+        .filter(part => part.release_date && part.release_date > today)
+        .sort((a, b) => a.release_date.localeCompare(b.release_date));
+      return [{ collection, watched, total: released.length, next, parts, upcoming }];
     })
     .sort((a, b) => b.watched / b.total - a.watched / a.total || b.watched - a.watched)
     .slice(0, MAX_COLLECTIONS);

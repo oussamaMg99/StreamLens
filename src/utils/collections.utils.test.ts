@@ -67,4 +67,14 @@ describe('unfinishedCollections', () => {
     ];
     expect(unfinishedCollections(entries, collections, TODAY).map(item => item.collection.id)).toEqual([4, 3, 2, 1]);
   });
+
+  it('lists released parts in order with watched flags, and upcoming parts separately', () => {
+    const upcoming = collection(40, [part(403, '2027-05-01'), part(402, '2021-01-01'), part(401, '2020-01-01'), part(404, '')]);
+    const [result] = unfinishedCollections([watchedMovie(401)], [upcoming], TODAY);
+    expect(result.parts.map(item => [item.movie.id, item.watched, item.number])).toEqual([
+      [401, true, 1],
+      [402, false, 2],
+    ]);
+    expect(result.upcoming.map(movie => movie.id)).toEqual([403]);
+  });
 });
