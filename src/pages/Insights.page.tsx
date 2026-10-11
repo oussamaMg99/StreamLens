@@ -8,6 +8,7 @@ import InsightsHero from 'src/components/insights/InsightsHero.component';
 import InsightSection, { InsightBadge } from 'src/components/insights/InsightSection.component';
 import WatchSplit from 'src/components/insights/WatchSplit.component';
 import GenresInsight from 'src/components/insights/GenresInsight.component';
+import WatchingRhythm from 'src/components/insights/rhythm/WatchingRhythm.component';
 import GenreSuggestionRow from 'src/components/insights/GenreSuggestionRow.component';
 import ResumeShowCard from 'src/components/insights/ResumeShowCard.component';
 import FinishCollections from 'src/components/insights/FinishCollections.component';
@@ -81,6 +82,8 @@ const Insights = () => {
         </InsightSection>
 
         <GenresInsight topGenres={summary.topGenres} movies={summary.movies} tvShows={summary.tvShows} />
+
+        <WatchingRhythm entries={watchList?.watch_list} />
 
         {suggestionRows.length > 0 && (
           <InsightSection bleedRight title={t('pickedForYou')} description={t('pickedForYouHint')}>

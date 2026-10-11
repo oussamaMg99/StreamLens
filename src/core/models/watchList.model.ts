@@ -7,7 +7,7 @@
 //
 // Besides progress, each entry carries a little TMDB metadata captured at write time
 // (genre_ids, release_year, runtime / collection_id / episode_counts, minutes_watched,
-// updated_at), so
+// updated_at, watched_at), so
 // Insights can be computed from the document alone instead of fetching every title's
 // details. Only language-neutral values are stored — ids and numbers, never names or
 // titles — so a language switch never shows text frozen in the language it was saved in.
@@ -36,6 +36,11 @@ export interface WatchListMovieEntry extends WatchListEntryMeta {
   runtime?: number;
   /** TMDB collection (film series) id, for "Finish the collection". 0 = not part of one. */
   collection_id?: number;
+  /**
+   * Epoch ms (device clock) of when it was marked watched, for "Watching rhythm". Present
+   * only while watched; unmarking deletes it. Absent on marks made before it existed.
+   */
+  watched_at?: number;
 }
 
 export interface WatchListTvEntry extends WatchListEntryMeta {
@@ -47,6 +52,12 @@ export interface WatchListTvEntry extends WatchListEntryMeta {
   episode_counts?: Record<number, number>;
   /** Σ runtime (minutes) of the watched episodes, kept in step with each toggle. */
   minutes_watched?: number;
+  /**
+   * "season:episode" (episodeKey) -> epoch ms (device clock) of when that episode was
+   * marked watched, for "Watching rhythm". A key is deleted when its episode is unmarked,
+   * and the whole field once empty. Episodes marked before it existed have no key.
+   */
+  watched_at?: Record<string, number>;
 }
 
 export type WatchListEntry = WatchListMovieEntry | WatchListTvEntry;

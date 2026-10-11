@@ -86,10 +86,16 @@ export const applyMovieWatched = (
   now: number,
 ): WatchListEntry[] => {
   const existing = entries.find((entry): entry is WatchListMovieEntry => entry.media_type === 'movie' && entry.id === id);
-  if (!existing) return [...entries, { media_type: 'movie', id, watched, ...movieMeta(meta), updated_at: now }];
+  // watched_at is the moment it was marked; it's dropped when unmarked (never left stale).
+  const watchedAt = watched ? { watched_at: now } : {};
+  if (!existing) return [...entries, { media_type: 'movie', id, watched, ...movieMeta(meta), ...watchedAt, updated_at: now }];
   if (existing.watched === watched) return entries;
-  return entries.map(entry => (entry === existing ? { ...existing, ...movieMeta(meta), watched, updated_at: now } : entry));
+  const { watched_at: _previous, ...rest } = existing;
+  return entries.map(entry => (entry === existing ? { ...rest, ...movieMeta(meta), watched, ...watchedAt, updated_at: now } : entry));
 };
+
+/** Key of one episode in a TV entry's watched_at map: "season:episode", e.g. "1:3". */
+export const episodeKey = (season: number, episode: number) => `${season}:${episode}`;
 
 /** An episode and its runtime in minutes (0 when TMDB doesn't know it). */
 export interface EpisodeRuntime {
@@ -102,6 +108,10 @@ export interface EpisodeRuntime {
  * minutes_watched in step (± the runtimes of the episodes that actually changed, back to
  * 0 once nothing is watched). A season key disappears once its last episode is
  * unwatched; the show stays on the list until removeEntry.
+ *
+ * watched_at gets a `now` key for each episode that becomes watched and loses the key of
+ * each one unmarked; episodes already in the target state keep their date. An empty map
+ * is removed rather than stored as {}.
  *
  * An entry without minutes_watched is left without one: adding only these runtimes would
  * undercount the episodes watched before it. (Every stored entry has it since the
@@ -127,6 +137,7 @@ export const applyEpisodesWatched = (
         watched: { [season]: numbers },
         ...tvMeta(meta),
         minutes_watched: sumRuntime(episodes),
+        watched_at: Object.fromEntries(numbers.map(episode => [episodeKey(season, episode), now])),
         updated_at: now,
       },
     ];
@@ -147,8 +158,16 @@ export const applyEpisodesWatched = (
   if (nextEpisodes.length) nextWatched[season] = nextEpisodes;
   else delete nextWatched[season];
 
+  const nextWatchedAt = { ...existing.watched_at };
+  for (const number of changedNumbers) {
+    if (watched) nextWatchedAt[episodeKey(season, number)] = now;
+    else delete nextWatchedAt[episodeKey(season, number)];
+  }
+
   const delta = sumRuntime(changed);
-  const next: WatchListTvEntry = { ...existing, ...tvMeta(meta), watched: nextWatched, updated_at: now };
+  const { watched_at: _previous, ...rest } = existing;
+  const next: WatchListTvEntry = { ...rest, ...tvMeta(meta), watched: nextWatched, updated_at: now };
+  if (Object.keys(nextWatchedAt).length) next.watched_at = nextWatchedAt;
   if (!Object.keys(nextWatched).length) next.minutes_watched = 0;
   else if (existing.minutes_watched !== undefined)
     next.minutes_watched = Math.max(0, existing.minutes_watched + (watched ? delta : -delta));

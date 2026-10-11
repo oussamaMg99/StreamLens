@@ -78,7 +78,9 @@ describe('write helpers', () => {
 
   it('applyMovieWatched creates or updates the entry with metadata', () => {
     const created = applyMovieWatched([], 1, true, { genre_ids: [18], runtime: 100 }, NOW);
-    expect(created).toEqual([{ media_type: 'movie', id: 1, watched: true, genre_ids: [18], runtime: 100, updated_at: NOW }]);
+    expect(created).toEqual([
+      { media_type: 'movie', id: 1, watched: true, genre_ids: [18], runtime: 100, watched_at: NOW, updated_at: NOW },
+    ]);
     expect(applyMovieWatched(created, 1, true, undefined, NOW + 1)).toBe(created);
     expect(applyMovieWatched(created, 1, false, undefined, NOW + 1)[0]).toMatchObject({ watched: false, updated_at: NOW + 1 });
   });
@@ -127,7 +129,17 @@ describe('applyEpisodesWatched', () => {
         ],
         true,
       ),
-    ).toEqual([{ media_type: 'tv', id: 2, watched: { 1: [1, 2] }, genre_ids: [18], minutes_watched: 90, updated_at: NOW }]);
+    ).toEqual([
+      {
+        media_type: 'tv',
+        id: 2,
+        watched: { 1: [1, 2] },
+        genre_ids: [18],
+        minutes_watched: 90,
+        watched_at: { '1:1': NOW, '1:2': NOW },
+        updated_at: NOW,
+      },
+    ]);
   });
 
   it('adds only episodes not yet watched, without double-counting their minutes', () => {
@@ -189,5 +201,48 @@ describe('isEpisodeAired', () => {
     expect(isEpisodeAired({ air_date: '2026-10-08' }, '2026-10-08')).toBe(true);
     expect(isEpisodeAired({ air_date: '2026-10-09' }, '2026-10-08')).toBe(false);
     expect(isEpisodeAired({ air_date: '' }, '2026-10-08')).toBe(true);
+  });
+});
+
+describe('watched_at', () => {
+  const LATER = NOW + 86_400_000;
+
+  it('dates a movie when marked, keeps the date on a repeat mark and drops it when unmarked', () => {
+    const marked = applyMovieWatched([], 1, true, undefined, NOW);
+    expect(marked[0]).toMatchObject({ watched_at: NOW });
+    expect(applyMovieWatched(marked, 1, true, undefined, LATER)).toBe(marked);
+    const [unmarked] = applyMovieWatched(marked, 1, false, undefined, LATER);
+    expect(unmarked).not.toHaveProperty('watched_at');
+    expect(applyMovieWatched([unmarked], 1, true, undefined, LATER)[0]).toMatchObject({ watched_at: LATER });
+  });
+
+  it('never dates a title that is only saved, or created as unwatched', () => {
+    expect(applyAdd([], { media_type: 'movie', id: 1 }, undefined, NOW)[0]).not.toHaveProperty('watched_at');
+    expect(applyMovieWatched([], 1, false, undefined, NOW)[0]).not.toHaveProperty('watched_at');
+  });
+
+  it('dates each episode that changes, and leaves the others alone', () => {
+    const mark = (entries: WatchListEntry[], season: number, episodes: number[], watched: boolean, now: number) =>
+      applyEpisodesWatched(entries, { tvId: 2, season, episodes: episodes.map(episode => ({ episode, runtime: 0 })), watched }, now);
+    let entries = mark([], 1, [1], true, NOW);
+    // A bulk mark: 1:1 is already watched and keeps its date; 1:2 and 1:3 share LATER.
+    entries = mark(entries, 1, [1, 2, 3], true, LATER);
+    expect(entries[0]).toMatchObject({ watched_at: { '1:1': NOW, '1:2': LATER, '1:3': LATER } });
+    entries = mark(entries, 0, [1], true, LATER); // a special counts too
+    entries = mark(entries, 1, [2], false, LATER);
+    expect((entries[0] as WatchListTvEntry).watched_at).toEqual({ '1:1': NOW, '1:3': LATER, '0:1': LATER });
+  });
+
+  it('removes the map once its last episode is unmarked', () => {
+    const entries = applyEpisodeToggle([], { tvId: 2, season: 1, episode: 1, watched: true, runtime: 0 }, NOW);
+    const [cleared] = applyEpisodeToggle(entries, { tvId: 2, season: 1, episode: 1, watched: false, runtime: 0 }, LATER);
+    expect(cleared).not.toHaveProperty('watched_at');
+  });
+
+  it('gives an older entry a map holding only the newly marked episodes', () => {
+    const legacy: WatchListEntry[] = [{ media_type: 'tv', id: 2, watched: { 1: [1, 2] }, minutes_watched: 90 }];
+    const [next] = applyEpisodeToggle(legacy, { tvId: 2, season: 1, episode: 3, watched: true, runtime: 45 }, NOW);
+    expect((next as WatchListTvEntry).watched_at).toEqual({ '1:3': NOW });
+    expect(Object.values(next).every(value => value !== undefined)).toBe(true);
   });
 });
