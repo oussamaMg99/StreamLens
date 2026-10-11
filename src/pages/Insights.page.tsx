@@ -10,7 +10,6 @@ import WatchSplit from 'src/components/insights/WatchSplit.component';
 import GenresInsight from 'src/components/insights/GenresInsight.component';
 import GenreSuggestionRow from 'src/components/insights/GenreSuggestionRow.component';
 import ResumeShowCard from 'src/components/insights/ResumeShowCard.component';
-import DecadesInsight from 'src/components/insights/DecadesInsight.component';
 import FinishCollections from 'src/components/insights/FinishCollections.component';
 import InsightsEmptyState from 'src/components/insights/InsightsEmptyState.component';
 import InsightsGatePrompt from 'src/components/insights/InsightsGatePrompt.component';
@@ -82,8 +81,6 @@ const Insights = () => {
         </InsightSection>
 
         <GenresInsight topGenres={summary.topGenres} movies={summary.movies} tvShows={summary.tvShows} />
-
-        <DecadesInsight decades={summary.decades} />
 
         {suggestionRows.length > 0 && (
           <InsightSection bleedRight title={t('pickedForYou')} description={t('pickedForYouHint')}>

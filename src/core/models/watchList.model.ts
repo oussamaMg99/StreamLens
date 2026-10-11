@@ -20,7 +20,11 @@ interface WatchListEntryMeta {
   genre_ids?: number[];
   /** Epoch ms of the last change to this entry — "Pick up where you left off" order. */
   updated_at?: number;
-  /** Year of release (movie) or first air date (TV), for "Decades you watch". 0 = TMDB has no date. */
+  /**
+   * Year of release (movie) or first air date (TV). 0 = TMDB has no date. Nothing reads it
+   * since "Decades you watch" was removed; kept so a future feature (filters, a timeline)
+   * doesn't need another migration.
+   */
   release_year?: number;
 }
 

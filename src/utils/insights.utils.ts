@@ -24,13 +24,6 @@ const countGenres = (counts: Map<number, number>, genreIds: number[] | undefined
   for (const id of genreIds ?? []) counts.set(id, (counts.get(id) ?? 0) + 1);
 };
 
-/** Release decade of a title (1994 → 1990). Unknown years (0 / missing) are skipped. */
-const countDecade = (counts: Map<number, number>, year: number | undefined) => {
-  if (!year) return;
-  const decade = Math.floor(year / 10) * 10;
-  counts.set(decade, (counts.get(decade) ?? 0) + 1);
-};
-
 /** Top genres by count, then name; ids the genre list can't name are skipped. */
 const topOf = (counts: Map<number, number>, type: 'movie' | 'tv', genreName: GenreNameLookup): InsightGenre[] =>
   [...counts.entries()]
@@ -86,7 +79,6 @@ export function buildInsightsSummary(entries: WatchListEntry[], genreName: Genre
   const movieGenres = new Map<number, number>();
   const tvGenres = new Map<number, number>();
   const resume: (ResumeShow & { updatedAt: number })[] = [];
-  const decades = new Map<number, number>();
 
   for (const entry of entries) {
     if (entry.media_type === 'movie') {
@@ -94,7 +86,6 @@ export function buildInsightsSummary(entries: WatchListEntry[], genreName: Genre
       movies++;
       minutes += entry.runtime ?? 0;
       countGenres(movieGenres, entry.genre_ids);
-      countDecade(decades, entry.release_year);
       continue;
     }
 
@@ -103,7 +94,6 @@ export function buildInsightsSummary(entries: WatchListEntry[], genreName: Genre
     tvShows++;
     minutes += entry.minutes_watched ?? 0;
     countGenres(tvGenres, entry.genre_ids);
-    countDecade(decades, entry.release_year);
     if (!entry.episode_counts) continue;
 
     seasonsFinished += countFinishedSeasons(watchedSeasons, entry.episode_counts);
@@ -117,7 +107,6 @@ export function buildInsightsSummary(entries: WatchListEntry[], genreName: Genre
     seasonsFinished,
     hoursWatched: Math.round(minutes / 60),
     topGenres: { movie: topOf(movieGenres, 'movie', genreName), tv: topOf(tvGenres, 'tv', genreName) },
-    decades: [...decades.entries()].sort(([a], [b]) => a - b).map(([decade, count]) => ({ decade, count })),
     // Most recently watched first: that's the show you were in the middle of.
     resume: resume
       .sort((a, b) => b.updatedAt - a.updatedAt)

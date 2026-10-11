@@ -86,20 +86,4 @@ describe('buildInsightsSummary', () => {
     const entries = [movie(1), show(2, { 1: [1, 2] })];
     expect(buildInsightsSummary(entries, genreName)).toEqual({ ...EMPTY_INSIGHTS, movies: 1, tvShows: 1 });
   });
-
-  it('groups watched titles by release decade, oldest first, skipping unknown years and unwatched titles', () => {
-    const entries = [
-      movie(1, { release_year: 1994 }),
-      movie(2, { release_year: 1999 }),
-      movie(3, { release_year: 2015 }),
-      movie(4, { release_year: 0 }),
-      movie(5, { release_year: 2001, watched: false }),
-      show(6, { 1: [1] }, { release_year: 2019 }),
-      show(7, {}, { release_year: 1985 }),
-    ];
-    expect(buildInsightsSummary(entries, genreName).decades).toEqual([
-      { decade: 1990, count: 2 },
-      { decade: 2010, count: 2 },
-    ]);
-  });
 });
