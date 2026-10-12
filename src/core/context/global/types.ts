@@ -31,3 +31,14 @@ export type AppContextActions = {
 };
 
 export type AppContextType = AppContextState & AppContextActions;
+
+/**
+ * Every action AppReducer handles, each with its own payload type, so a misspelled type or
+ * a wrong payload is a compile error. An undefined dialog/snackbar payload resets it.
+ */
+export type AppAction =
+  | { type: 'SET_THEME_MODE'; payload: ThemeMode }
+  | { type: 'SET_USER'; payload: User | undefined }
+  | { type: 'SET_AUTH_MODAL_OPEN'; payload: boolean }
+  | { type: 'SET_ALERT_DIALOG_PROPS'; payload: AlertDialogProps | undefined }
+  | { type: 'SET_SNACKBAR_PROPS'; payload: SnackBarProps | undefined };
