@@ -5,10 +5,12 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosR
  */
 export class ApiError extends Error {
   public status?: number;
-  public data?: any;
-  public original?: any;
+  /** The response body, if the server sent one. Its shape depends on the API: narrow before use. */
+  public data?: unknown;
+  /** The underlying error (an AxiosError, a cancellation…). */
+  public original?: unknown;
 
-  constructor(message: string, status?: number, data?: any, original?: any) {
+  constructor(message: string, status?: number, data?: unknown, original?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -16,6 +18,12 @@ export class ApiError extends Error {
     this.original = original;
   }
 }
+
+/** Query-string parameters; undefined values are left out of the URL by axios. */
+export type QueryParams = Record<string, string | number | boolean | undefined>;
+
+/** A request config that remembers it has already been retried after a token refresh. */
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 /**
  * Request options passed to ApiService methods
@@ -146,7 +154,7 @@ export class ApiService {
     return cfg;
   }
 
-  private onRequestError(error: any) {
+  private onRequestError(error: unknown) {
     return Promise.reject(error);
   }
 
@@ -154,13 +162,13 @@ export class ApiService {
     return response;
   }
 
-  private async onResponseError(error: any) {
+  private async onResponseError(error: unknown) {
     /**
      * If a 401 occurs and refreshTokenFn is provided, attempt once to refresh.
      */
-    const originalRequest = error?.config;
+    const originalRequest = axios.isAxiosError(error) ? (error.config as RetriableConfig | undefined) : undefined;
 
-    if (error?.response?.status === 401 && this.refreshTokenFn && !originalRequest?._retry) {
+    if (axios.isAxiosError(error) && error.response?.status === 401 && this.refreshTokenFn && originalRequest && !originalRequest._retry) {
       try {
         originalRequest._retry = true;
         await this.refreshTokenFn();
@@ -174,10 +182,10 @@ export class ApiService {
   }
 
   // --- Centralized runner ---
-  public async apiRun<T = any>(
+  public async apiRun<T = unknown>(
     method: 'get' | 'post' | 'put' | 'delete' | 'patch',
     url: string,
-    data?: any,
+    data?: unknown,
     opts: ApiOptions = {},
   ): Promise<T> {
     const { signal, headers = {}, axiosConfig = {}, retry = 0, retryDelay = 300, throwOnError = true } = opts;
@@ -200,21 +208,24 @@ export class ApiService {
       try {
         const response = await this.axios.request<T>(config);
         return response.data as T;
-      } catch (err: any) {
+      } catch (err: unknown) {
         attempt++;
 
         // Handle cancellation
-        if (axios.isCancel && axios.isCancel(err)) {
+        if (axios.isCancel(err)) {
           const cancelErr = new ApiError('Request cancelled', undefined, undefined, err);
           if (throwOnError) throw cancelErr;
           return Promise.reject(cancelErr);
         }
 
-        const status = err?.response?.status;
-        const respData = err?.response?.data;
+        // Only an AxiosError carries a response; anything else is treated as a network error.
+        const response = axios.isAxiosError(err) ? err.response : undefined;
+        const status = response?.status;
+        const respData: unknown = response?.data;
 
-        const isNetworkError = !err?.response;
-        const shouldRetry = attempt <= retry && (isNetworkError || (status >= 500 && status < 600) || status === 429);
+        const isNetworkError = !response;
+        const isServerError = status !== undefined && status >= 500 && status < 600;
+        const shouldRetry = attempt <= retry && (isNetworkError || isServerError || status === 429);
 
         if (shouldRetry) {
           const delayMs = retryDelay * Math.pow(2, attempt - 1);
@@ -222,7 +233,7 @@ export class ApiService {
           continue;
         }
 
-        const message = err?.message ?? 'API request failed';
+        const message = err instanceof Error ? err.message : 'API request failed';
         const apiErr = new ApiError(message, status, respData, err);
 
         if (throwOnError) throw apiErr;
@@ -232,21 +243,21 @@ export class ApiService {
   }
 
   // --- Convenience helpers ---
-  public apiGet<T = any>(url: string, opts?: ApiOptions & { params?: Record<string, any> }): Promise<T> {
+  public apiGet<T = unknown>(url: string, opts?: ApiOptions & { params?: QueryParams }): Promise<T> {
     const { params, ...rest } = opts ?? {};
     const axiosConfig = params ? { params } : undefined;
     return this.apiRun<T>('get', url, undefined, { ...(rest as ApiOptions), axiosConfig });
   }
 
-  public apiPost<T = any>(url: string, body?: any, opts?: ApiOptions): Promise<T> {
+  public apiPost<T = unknown>(url: string, body?: unknown, opts?: ApiOptions): Promise<T> {
     return this.apiRun<T>('post', url, body, opts);
   }
 
-  public apiPut<T = any>(url: string, body?: any, opts?: ApiOptions): Promise<T> {
+  public apiPut<T = unknown>(url: string, body?: unknown, opts?: ApiOptions): Promise<T> {
     return this.apiRun<T>('put', url, body, opts);
   }
 
-  public apiDelete<T = any>(url: string, opts?: ApiOptions & { params?: Record<string, any> }): Promise<T> {
+  public apiDelete<T = unknown>(url: string, opts?: ApiOptions & { params?: QueryParams }): Promise<T> {
     const { params, ...rest } = opts ?? {};
     const axiosConfig = params ? { params } : undefined;
     return this.apiRun<T>('delete', url, undefined, { ...(rest as ApiOptions), axiosConfig });

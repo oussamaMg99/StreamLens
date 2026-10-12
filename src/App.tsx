@@ -24,7 +24,7 @@ const App = () => {
     setAlertDialogProps(new AlertDialogProps());
   };
   const handleConfirmAlertDialog = async () => {
-    await alertDialogProps.onConfirm();
+    await alertDialogProps.onConfirm?.();
     setAlertDialogProps(new AlertDialogProps());
   };
 

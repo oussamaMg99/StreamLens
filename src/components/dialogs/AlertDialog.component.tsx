@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -11,8 +11,8 @@ import { Typography } from '@mui/material';
 interface Props {
   loadingAnimation?: boolean;
   open: boolean;
-  title: any;
-  content: any;
+  title: ReactNode;
+  content: ReactNode;
   closeLabel?: string;
   confirmLabel?: string;
   onClose: () => Promise<void>;
