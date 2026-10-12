@@ -14,7 +14,8 @@ export interface BelongsToCollection {
  */
 export interface MovieDetails extends MediaDetails {
   media_type: 'movie';
-  belongs_to_collection: BelongsToCollection;
+  /** null for a standalone film. */
+  belongs_to_collection: BelongsToCollection | null;
   budget: number;
   imdb_id: string;
   original_title: string;

@@ -199,6 +199,13 @@ const UserProfileModal = (props: UserProfileModalProps) => {
               }
             />
           </Box>
+
+          {/* Says what verification unlocks, so the chip isn't just a status badge. */}
+          {!emailVerified && (
+            <Typography variant='caption' sx={{ display: 'block', mt: 1, color: 'rgba(255,255,227,0.55)' }}>
+              {t('verifyEmailToSaveHint')}
+            </Typography>
+          )}
         </Box>
 
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.75, px: 3.5, py: 2.5 }}>

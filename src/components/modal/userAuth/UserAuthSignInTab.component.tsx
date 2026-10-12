@@ -131,7 +131,8 @@ const UserAuthSignInTab = (props: UserAuthSignInTabProps) => {
             cursor: 'pointer',
           }}
         >
-          <ArrowBackIcon fontSize='small' />
+          {/* MUI icons don't mirror on their own: "back" points right in RTL. */}
+          <ArrowBackIcon fontSize='small' sx={theme => ({ transform: theme.direction === 'rtl' ? 'scaleX(-1)' : 'none' })} />
           <Typography sx={{ fontWeight: 500, fontSize: 14, color: 'inherit' }}>{t('backToSignIn')}</Typography>
         </Box>
         <Box>

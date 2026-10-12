@@ -1,7 +1,8 @@
 // src/core/services/movie.service.ts
 
 import { MovieDetails } from '../models/movieDetails.model';
-import { TmdbListService, TmdbListResponse } from './tmdbList.service';
+import { Collection } from '../models/collection.model';
+import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TMDB_CONFIG } from './tmdb.config';
 import { Media } from '../models/common.model';
 
@@ -43,9 +44,10 @@ export type GetMovieOptions = {
  * Methods implemented:
  *  - getMovies(options) -> smart wrapper choosing search/discover/popular
  *  - getPopularMovie(page)
- *  - getMovieById(movieId, appendToResponse?)
+ *  - getMovieById(movieId, appendToResponse?, language?)
  *  - searchMovie(query, page)
  *  - discoverMovies(options)
+ *  - getCollection(collectionId, opts) -> a film series and its movies
  *
  * All requests are authenticated automatically by ApiService via tokenProvider that
  * returns VITE_TMDB_READ_ACCESS_TOKEN (Bearer token).
@@ -64,8 +66,8 @@ export default class MovieService extends TmdbListService<Movie, MovieDetails> {
     return this.popular(page, opts);
   }
 
-  public getMovieById(movieId: number | string, appendToResponse?: string): Promise<MovieDetails> {
-    return this.byId(movieId, appendToResponse);
+  public getMovieById(movieId: number | string, appendToResponse?: string, language?: string): Promise<MovieDetails> {
+    return this.byId(movieId, appendToResponse, language);
   }
 
   public searchMovie(
@@ -78,6 +80,20 @@ export default class MovieService extends TmdbListService<Movie, MovieDetails> {
 
   public discoverMovies(options: GetMovieOptions = {}): Promise<MovieListResponse> {
     return this.discoverDirect(options);
+  }
+
+  public getMovieGenres(language?: string): Promise<GenreListResponse> {
+    return this.genreList(language);
+  }
+
+  /**
+   * A film series and its movies (/collection/{id}). Not a list endpoint, so the parts
+   * get media_type stamped here — the Summary modal narrows on it when one is opened.
+   */
+  public async getCollection(collectionId: number, opts: { language?: string; retry?: number } = {}): Promise<Collection> {
+    const { language = 'en', retry = 0 } = opts;
+    const collection = await this.apiGet<Collection>(`/collection/${collectionId}`, { params: { language }, retry });
+    return { ...collection, parts: (collection.parts ?? []).map(part => ({ ...part, media_type: 'movie' as const })) };
   }
 }
 

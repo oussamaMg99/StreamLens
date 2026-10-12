@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -11,8 +11,8 @@ import { Typography } from '@mui/material';
 interface Props {
   loadingAnimation?: boolean;
   open: boolean;
-  title: any;
-  content: any;
+  title: ReactNode;
+  content: ReactNode;
   closeLabel?: string;
   confirmLabel?: string;
   onClose: () => Promise<void>;
@@ -44,13 +44,13 @@ export default function AlertDialog(props: Readonly<Props>) {
     <div>
       <Dialog fullWidth={true} open={open} onClose={onClose}>
         <DialogTitle>
-          <Typography color='primary' align='center' fontSize={24} fontWeight={600}>
+          <Typography color='primary' align='center' sx={{ fontSize: 24, fontWeight: 600 }}>
             {title}
           </Typography>
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <Typography align='center' fontSize={14}>
+            <Typography align='center' sx={{ fontSize: 14 }}>
               {content}
             </Typography>
           </DialogContentText>

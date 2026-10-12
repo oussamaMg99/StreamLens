@@ -18,7 +18,6 @@ import { FirebaseError, initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { initializeUI } from '@firebase-oss/ui-core';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -33,7 +32,6 @@ const firebaseConfig = {
 export const firebaseApp = initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
-export const ui = initializeUI({ app: firebaseApp, auth });
 
 // getAnalytics() throws where measurement isn't available (unsupported browsers, blocked
 // scripts, non-browser environments), so it's guarded rather than called outright.
@@ -52,7 +50,18 @@ isAnalyticsSupported()
  */
 export const authErrorKey = (error: unknown) => {
   const code = error instanceof FirebaseError ? error.code : '';
+  // The mapped key alone can't tell a wrong password from a misconfigured project, so
+  // keep the real code in the console — that's what makes the next failure diagnosable.
+  if (code) console.warn(`[auth] ${code}`);
   switch (code) {
+    // Configuration problems, not user mistakes: the provider isn't enabled for this
+    // Firebase project, or the origin isn't in Authentication > Settings > Authorized
+    // domains (deploying to a new host, e.g. GitHub Pages, needs that domain added —
+    // otherwise the popup opens and closes immediately).
+    case 'auth/unauthorized-domain':
+    case 'auth/operation-not-allowed':
+    case 'auth/invalid-api-key':
+      return 'authSignInUnavailable';
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
     case 'auth/user-not-found':

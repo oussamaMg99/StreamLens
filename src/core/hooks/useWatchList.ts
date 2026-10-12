@@ -1,10 +1,10 @@
 // src/core/hooks/useWatchList.ts
+import { useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getWatchList } from 'src/core/services/watchList.service';
-import { WatchListResponse } from 'src/core/models/watchList.model';
-
-/** Root of every user-scoped watch-list query key: ['watch-list', uid]. */
-export const WATCH_LIST_QUERY_ROOT = 'watch-list';
+import { WATCH_LIST_QUERY_ROOT, getWatchList } from 'src/core/services/watchList.service';
+import { WatchListEntry, WatchListResponse } from 'src/core/models/watchList.model';
+import AppContext from 'src/core/context/global/AppContext';
+import { useWatchListGate } from './useWatchListGate';
 
 /**
  * useWatchList - the signed-in user's watch list.
@@ -20,4 +20,18 @@ export function useWatchList(uid?: string, queryOptions?: { enabled?: boolean })
     staleTime: 1000 * 60 * 5,
     enabled: (queryOptions?.enabled ?? true) && uid !== undefined,
   });
+}
+
+/**
+ * The signed-in user's entry for one title, or undefined when it isn't on the list (or
+ * nobody is signed in). Saves every caller from repeating the uid + find dance.
+ */
+export function useWatchListEntry(item?: Pick<WatchListEntry, 'media_type' | 'id'>) {
+  const { user } = useContext(AppContext);
+  const { access } = useWatchListGate();
+  // Unverified users are denied by firestore.rules, so don't spend a request (and a
+  // retry) finding that out on every render.
+  const { data } = useWatchList(user?.uid, { enabled: access === 'ready' });
+  if (!item) return undefined;
+  return data?.watch_list.find(entry => entry.media_type === item.media_type && entry.id === item.id);
 }

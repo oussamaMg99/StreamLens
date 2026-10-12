@@ -3,19 +3,16 @@ services:
     build: .
     ports:
       - '8000:8000'
-    develop:
-      # we specify the files to watch for changes
-      watch:
-        # it'll watch for changes in package.json and package-lock.json and rebuild the container if there are any changes
-        - path: ./package.json
-          action: rebuild
-        - path: ./package-lock.json
-          action: rebuild
-        # it'll watch for changes in the frontend directory and sync the changes with the container real time
-        - path: .
-          target: /app
-          action: sync
     volumes:
+      # The source is bind-mounted, so edits reach the dev server without any sync step.
       - .:/usr/src/app
+      # node_modules gets its own volume: the container needs Linux builds of the packages,
+      # not the host's. Compose keeps this volume across rebuilds, so it can fall behind
+      # package-lock.json — the command below catches that.
       - /usr/src/app/node_modules
-    command: npm run dev
+    # Reinstall only when package-lock.json differs from the copy saved at the last install
+    # (node_modules/.installed-lock, also written by the Dockerfile), then start Vite.
+    command: >
+      sh -c "{ cmp -s package-lock.json node_modules/.installed-lock ||
+      { echo 'package-lock.json changed: reinstalling dependencies' && npm ci --no-audit --no-fund && cp package-lock.json node_modules/.installed-lock; }; } &&
+      exec npm run dev"

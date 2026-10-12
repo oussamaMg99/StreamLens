@@ -6,6 +6,8 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { useTranslation } from 'react-i18next';
 import { RoutePaths } from 'src/types/Routes.type';
 import { NavLink } from 'react-router';
+import { hideFeature } from 'src/utils/constants';
+import StreamLensLogo from '../logo/StreamLensLogo.component';
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -28,16 +30,8 @@ const Footer = () => {
           gap: 2,
         }}
       >
-        <Link
-          component={NavLink}
-          to={RoutePaths.Default}
-          end
-          underline='none'
-          color='inherit'
-          variant='h4'
-          sx={{ cursor: 'pointer', fontWeight: 800, color: colors.primary.main }}
-        >
-          {t('appName')}
+        <Link component={NavLink} to={RoutePaths.Default} end underline='none' sx={{ cursor: 'pointer' }}>
+          <StreamLensLogo title={t('appName')} />
         </Link>
 
         <Stack direction='row' spacing={3}>
@@ -61,16 +55,18 @@ const Footer = () => {
           >
             {t('tvShows')}
           </Link>
-          <Link
-            component={NavLink}
-            to={RoutePaths.ABOUT}
-            end
-            underline='none'
-            color='inherit'
-            sx={{ cursor: 'pointer', '&:hover': { color: colors.primary.main } }}
-          >
-            {t('about')}
-          </Link>
+          {!hideFeature && (
+            <Link
+              component={NavLink}
+              to={RoutePaths.ABOUT}
+              end
+              underline='none'
+              color='inherit'
+              sx={{ cursor: 'pointer', '&:hover': { color: colors.primary.main } }}
+            >
+              {t('about')}
+            </Link>
+          )}
         </Stack>
 
         <Stack direction='row' spacing={1}>

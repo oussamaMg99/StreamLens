@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Box, Button, IconButton, Drawer, useTheme, useMediaQuery, Link } from '@mui/material';
 import { NavLink } from 'react-router';
 import colors from 'src/assets/themes/colors';
-import { languageOptions, navbarHeight } from 'src/utils/constants';
+import { hideFeature, languageOptions, navbarHeight } from 'src/utils/constants';
 import { useContext, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -12,9 +12,9 @@ import i18n from 'src/assets/locales/i18n';
 import { RoutePaths } from 'src/types/Routes.type';
 import SearchBar, { SearchResultItem } from '../search/SearchBar.component';
 import PersonIcon from '@mui/icons-material/Person';
-import UserAuthModal from '../modal/userAuth/UserAuthModal.component';
 import UserProfileModal from '../modal/userProfile/UserProfileModal.component';
 import AppContext from 'src/core/context/global/AppContext';
+import StreamLensLogo from 'src/components/logo/StreamLensLogo.component';
 
 interface NavbarProps {
   enableSearch?: boolean;
@@ -28,12 +28,11 @@ interface NavbarProps {
 const Navbar = (props: NavbarProps) => {
   const { enableSearch, onSearch, searchResults, searchLoading, searchError, onSelectSearchResult } = props;
   const [openMenu, setOpenMenu] = useState(false);
-  const [openAuthModal, setOpenAuthModal] = useState(false);
   const [openProfileModal, setOpenProfileModal] = useState(false);
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const { t } = useTranslation();
-  const { user, authReady } = useContext(AppContext);
+  const { user, authReady, setAuthModalOpen } = useContext(AppContext);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -46,22 +45,14 @@ const Navbar = (props: NavbarProps) => {
     setAnchorEl(null);
   };
 
-  const handleLanguageChange = (code: string) => {
-    // Implement language change logic here
-    i18n.changeLanguage(code);
-    setAnchorEl(null);
-  };
-
-  const handleAuthModalDisplay = (action: 'open' | 'close') => {
-    switch (action) {
-      case 'open':
-        setOpenAuthModal(true);
-        break;
-      case 'close':
-        setOpenAuthModal(false);
-        break;
-      default:
-        break;
+  const handleLanguageChange = async (code: string) => {
+    // Text direction (<html dir>) follows automatically: see the languageChanged listener in i18n.js.
+    try {
+      await i18n.changeLanguage(code);
+    } catch (error) {
+      console.error('Error changing language:', error);
+    } finally {
+      setAnchorEl(null);
     }
   };
 
@@ -84,7 +75,6 @@ const Navbar = (props: NavbarProps) => {
   return (
     <>
       <UserProfileModal open={openProfileModal} onClose={() => handleProfileModalDisplay('close')} />
-      <UserAuthModal open={openAuthModal} onClose={() => handleAuthModalDisplay('close')} />
       <AppBar
         position='fixed'
         elevation={3}
@@ -108,17 +98,14 @@ const Navbar = (props: NavbarProps) => {
               width: '100%',
             }}
           >
-            {/* Logo placeholder */}
             <Link
               component={NavLink}
               to={RoutePaths.Default}
               end
               underline='none'
-              color='inherit'
-              variant='h4'
-              sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' }, fontWeight: 800, color: colors.primary.main }}
+              sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' } }}
             >
-              {t('appName')}
+              <StreamLensLogo title={t('appName')} />
             </Link>
 
             {/* nav links (hide on small screens if desired) */}
@@ -135,9 +122,21 @@ const Navbar = (props: NavbarProps) => {
               <Button variant='text' component={NavLink} to={RoutePaths.TV_SHOWS} end>
                 {t('tvShows')}
               </Button>
-              <Button variant='text' component={NavLink} to={RoutePaths.ABOUT} end>
-                {t('about')}
+              {/* Shown signed out too: the page itself handles the sign-in prompt via
+                  useWatchListGate, rather than the entry point vanishing. */}
+              {!hideFeature && (
+                <Button variant='text' component={NavLink} to={RoutePaths.WATCH_LIST} end>
+                  {t('watchList')}
+                </Button>
+              )}
+              <Button variant='text' component={NavLink} to={RoutePaths.INSIGHTS} end>
+                {t('insights')}
               </Button>
+              {!hideFeature && (
+                <Button variant='text' component={NavLink} to={RoutePaths.ABOUT} end>
+                  {t('about')}
+                </Button>
+              )}
             </Box>
             <Box
               sx={{
@@ -167,7 +166,7 @@ const Navbar = (props: NavbarProps) => {
                 />
               )}
               {/* Disabled until the session is restored, so a signed-in visitor clicking during load doesn't get the sign-in modal. */}
-              <IconButton disabled={!authReady} onClick={() => (user ? handleProfileModalDisplay('open') : handleAuthModalDisplay('open'))}>
+              <IconButton disabled={!authReady} onClick={() => (user ? handleProfileModalDisplay('open') : setAuthModalOpen(true))}>
                 <PersonIcon color='primary' />
               </IconButton>
 
@@ -232,8 +231,18 @@ const Navbar = (props: NavbarProps) => {
           <Button fullWidth component={NavLink} to={RoutePaths.TV_SHOWS} end onClick={() => setOpenMenu(prev => !prev)}>
             {t('tvShows')}
           </Button>
-          <Button fullWidth component={NavLink} to={RoutePaths.ABOUT} end onClick={() => setOpenMenu(prev => !prev)}>
-            {t('about')}
+          {!hideFeature && (
+            <Button fullWidth component={NavLink} to={RoutePaths.ABOUT} end onClick={() => setOpenMenu(prev => !prev)}>
+              {t('about')}
+            </Button>
+          )}
+          {!hideFeature && (
+            <Button fullWidth component={NavLink} to={RoutePaths.WATCH_LIST} end onClick={() => setOpenMenu(prev => !prev)}>
+              {t('watchList')}
+            </Button>
+          )}
+          <Button fullWidth component={NavLink} to={RoutePaths.INSIGHTS} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('insights')}
           </Button>
         </Box>
       </Drawer>

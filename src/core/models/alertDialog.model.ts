@@ -1,16 +1,19 @@
+import type { ReactNode } from 'react';
+
 export class AlertDialogProps {
   loadingAnimation?: boolean;
   open?: boolean;
-  title?: any;
-  content?: any;
+  title?: ReactNode;
+  content?: ReactNode;
   closeLabel?: string;
   confirmLabel?: string;
   showCancelButton?: boolean;
 
-  onConfirm: () => Promise<boolean | undefined> | boolean;
+  /** Optional: a reset dialog (`new AlertDialogProps()`) has no action to confirm. */
+  onConfirm?: () => Promise<boolean | undefined> | boolean;
   onClose?: () => void;
 
-  constructor(state?: AlertDialogProps | any) {
+  constructor(state?: Partial<AlertDialogProps>) {
     this.loadingAnimation = state?.loadingAnimation;
     this.open = Boolean(state?.open);
     this.title = state?.title;

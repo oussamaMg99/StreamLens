@@ -1,7 +1,7 @@
 // src/core/services/tmdbList.service.ts
 
-import { ApiService } from './api.service';
-import { Media, MediaDetails } from '../models/common.model';
+import { ApiService, QueryParams } from './api.service';
+import { Genre, Media, MediaDetails } from '../models/common.model';
 
 /**
  * Shared TMDB v3 "list" envelope shape, returned by /popular, /search/*, and /discover/*.
@@ -11,6 +11,11 @@ export type TmdbListResponse<TItem> = {
   results: TItem[];
   total_pages: number;
   total_results: number;
+};
+
+/** Envelope returned by /genre/{movie,tv}/list. */
+export type GenreListResponse = {
+  genres: Genre[];
 };
 
 /**
@@ -60,9 +65,9 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
    *  - /{mediaType}/popular otherwise
    */
   protected async list(options: TmdbListParams = {}): Promise<TmdbListResponse<TItem>> {
-    const { page = 1, language = 'en-US', query, with_genres, sort_by, include_adult = false, region, retry = 0 } = options;
+    const { page = 1, language = 'en', query, with_genres, sort_by, include_adult = false, region, retry = 0 } = options;
 
-    const params: Record<string, any> = {
+    const params: QueryParams = {
       page,
       language,
       include_adult,
@@ -100,12 +105,9 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
   /**
    * popular - convenience wrapper for /{mediaType}/popular
    */
-  protected async popular(
-    page = 1,
-    opts: { language?: string; region?: string; retry?: number } = {},
-  ): Promise<TmdbListResponse<TItem>> {
-    const { language = 'en-US', region, retry = 0 } = opts;
-    const params: Record<string, any> = { page, language };
+  protected async popular(page = 1, opts: { language?: string; region?: string; retry?: number } = {}): Promise<TmdbListResponse<TItem>> {
+    const { language = 'en', region, retry = 0 } = opts;
+    const params: QueryParams = { page, language };
     if (region) params.region = region;
     const response = await this.apiGet<TmdbListResponse<Omit<TItem, 'media_type'>>>(`/${this.mediaType}/popular`, {
       params,
@@ -120,9 +122,11 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
    * @param id - TMDB id
    * @param appendToResponse - optional comma-separated string to append related data
    *                            (e.g., 'videos,credits,images')
+   * @param language - localizes title/name, overview and tagline. TMDB falls back to
+   *                   English per field when a title has no translation.
    */
-  protected async byId(id: number | string, appendToResponse?: string): Promise<TDetails> {
-    const params: Record<string, any> = {};
+  protected async byId(id: number | string, appendToResponse?: string, language = 'en'): Promise<TDetails> {
+    const params: QueryParams = { language };
     if (appendToResponse) params.append_to_response = appendToResponse;
     const details = await this.apiGet<Omit<TDetails, 'media_type'>>(`/${this.mediaType}/${id}`, {
       params,
@@ -139,8 +143,8 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
     page = 1,
     opts: { language?: string; include_adult?: boolean; region?: string; retry?: number } = {},
   ): Promise<TmdbListResponse<TItem>> {
-    const { language = 'en-US', include_adult = false, region, retry = 0 } = opts;
-    const params: Record<string, any> = { query: query.trim(), page, language, include_adult };
+    const { language = 'en', include_adult = false, region, retry = 0 } = opts;
+    const params: QueryParams = { query: query.trim(), page, language, include_adult };
     if (region) params.region = region;
     const response = await this.apiGet<TmdbListResponse<Omit<TItem, 'media_type'>>>(`/search/${this.mediaType}`, {
       params,
@@ -153,9 +157,9 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
    * discoverDirect - direct discover wrapper with flexible options
    */
   protected async discoverDirect(options: TmdbListParams = {}): Promise<TmdbListResponse<TItem>> {
-    const { page = 1, language = 'en-US', with_genres, sort_by, include_adult = false, region, retry = 0 } = options;
+    const { page = 1, language = 'en', with_genres, sort_by, include_adult = false, region, retry = 0 } = options;
 
-    const params: Record<string, any> = {
+    const params: QueryParams = {
       page,
       language,
       include_adult,
@@ -170,5 +174,14 @@ export abstract class TmdbListService<TItem extends Media, TDetails extends Medi
       retry,
     });
     return this.tagResults(response);
+  }
+
+  /**
+   * genreList - the official genres for this media type. Language-dependent (the names
+   * are localized), so cache it per language.
+   * @param language - Language code (e.g., 'en', 'fr', 'ar')
+   */
+  protected genreList(language = 'en'): Promise<GenreListResponse> {
+    return this.apiGet<GenreListResponse>(`/genre/${this.mediaType}/list`, { params: { language }, retry: 0 });
   }
 }

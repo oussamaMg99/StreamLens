@@ -1,7 +1,7 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, Direction, ThemeOptions } from '@mui/material/styles';
 import colors from './colors';
 
-const theme = createTheme({
+const themeOptions: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
@@ -117,18 +117,8 @@ const theme = createTheme({
             boxShadow: '0px 6px 14px rgba(0, 0, 0, 0.15)',
           },
         },
-        containedPrimary: {
-          backgroundColor: '#E2A847',
-          '&:hover': {
-            backgroundColor: '#C7943E',
-          },
-        },
-        containedSecondary: {
-          backgroundColor: '#3B4CCA',
-          '&:hover': {
-            backgroundColor: '#2F3EA8',
-          },
-        },
+        // No containedPrimary/containedSecondary here: MUI 9 dropped those combined keys, and
+        // a contained primary button already uses palette.primary.main, with .dark on hover.
       },
     },
 
@@ -232,6 +222,11 @@ const theme = createTheme({
       },
     },
   },
-});
+};
 
-export default theme;
+/**
+ * The theme for one text direction ('rtl' for Arabic). `direction` is what MUI components
+ * read to mirror themselves; it only works together with the RTL Emotion cache that
+ * `AppThemeProvider` pairs it with.
+ */
+export const createAppTheme = (direction: Direction) => createTheme({ ...themeOptions, direction });

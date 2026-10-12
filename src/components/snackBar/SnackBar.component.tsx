@@ -25,7 +25,7 @@ const SnackbarComponent = (props: SnackbarComponentProps) => {
       autoHideDuration={autoHideDuration ?? defaultAutoHideDuration}
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      TransitionComponent={TransitionSlide}
+      slots={{ transition: TransitionSlide }}
     >
       <Alert onClose={onClose} severity={severity} sx={{ width: '100%' }}>
         {message}

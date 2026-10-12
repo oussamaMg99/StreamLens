@@ -1,5 +1,3 @@
-import { light } from '@mui/material/styles/createPalette';
-
 const colors = {
   whiteSmoke: '#F5F5F5',
   white: '#FFFFFF',
@@ -34,5 +32,7 @@ const colors = {
   success: {
     main: '#2EBFA5', // Teal Green
   },
+  /** Ink that passes contrast on the success (teal) fill, the counterpart of onPrimary. */
+  onSuccess: '#06221D',
 };
 export default colors;

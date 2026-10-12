@@ -55,10 +55,12 @@ const SummaryModalInfoBar = (props: SummaryModalInfoBarProps) => {
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
           <LayersIcon />
           <Typography variant='h5'>
-            {tvDetails.number_of_seasons ? `${tvDetails.number_of_seasons} ${t('seasons')}` : 'N/A'}
+            {tvDetails.number_of_seasons ? t('seasonCount', { count: tvDetails.number_of_seasons }) : 'N/A'}
           </Typography>{' '}
           {'•'}
-          <Typography variant='h5'>{tvDetails.number_of_episodes ? `${tvDetails.number_of_episodes} ${t('episodes')}` : 'N/A'}</Typography>
+          <Typography variant='h5'>
+            {tvDetails.number_of_episodes ? t('episodeCount', { count: tvDetails.number_of_episodes }) : 'N/A'}
+          </Typography>
         </Box>
       )}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>

@@ -8,7 +8,7 @@ import SummaryModal from 'src/components/modal/summary/SummaryModal.component';
 import NavBar from 'src/components/navbar/Navbar';
 import MediaGrid from 'src/components/mediaGrid/MediaGrid.component';
 import colors from 'src/assets/themes/colors';
-import { navbarHeight } from 'src/utils/constants';
+import { hideFeature, navbarHeight } from 'src/utils/constants';
 import { useMovies } from 'src/core/hooks/useMovies';
 import { useTvShows } from 'src/core/hooks/useTvShows';
 import { Movie } from 'src/core/services/movie.service';
@@ -180,15 +180,17 @@ const HeroCarousel = ({ items, onItemClick, t }: HeroCarouselProps) => {
                 {item.overview}
               </Typography>
               <Stack direction='row' spacing={2} sx={{ flexWrap: 'wrap', rowGap: 1.5 }}>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  startIcon={<PlayArrowIcon />}
-                  onClick={() => onItemClick(item)}
-                  sx={{ px: 4, py: 1, fontWeight: 700 }}
-                >
-                  {t('watch')}
-                </Button>
+                {!hideFeature && (
+                  <Button
+                    variant='contained'
+                    color='primary'
+                    startIcon={<PlayArrowIcon />}
+                    onClick={() => onItemClick(item)}
+                    sx={{ px: 4, py: 1, fontWeight: 700 }}
+                  >
+                    {t('watch')}
+                  </Button>
+                )}
                 <Button
                   variant='outlined'
                   color='inherit'

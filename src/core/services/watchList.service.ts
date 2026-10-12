@@ -4,26 +4,110 @@
 // subclasses — ApiService wraps axios for REST, which doesn't apply to the Firestore
 // SDK, so this is a plain module of functions instead.
 //
-// Layout: watchLists/{uid}/entries/{entryId} — one document per tracked title rather
-// than a single array document, so marking one episode watched rewrites one small doc
-// instead of read-modify-writing the whole list (which would also risk losing
-// concurrent updates from another tab or device).
+// Layout: one document per user, watchLists/{uid}, holding the whole watch_list array
+// (the WatchList model, stored as-is). The document is absent until the user's first
+// entry, which reads as an empty list rather than an error — nothing seeds it at
+// sign-up, since the first write creates it under that same watchLists/{uid} id.
+//
+// Consequence: every write rewrites the whole array, so writes must go through
+// runTransaction — otherwise a second tab (or another device) editing at the same time
+// silently overwrites the first one's changes. The 1MB document ceiling is thousands of
+// entries away, so size isn't a concern.
+//
+// Writes also store the title's metadata (EntryMeta: genre_ids, release_year, runtime /
+// episode_counts) and stamp updated_at, so Insights reads everything from this document.
+// The array logic itself lives in src/utils/watchListMeta.utils.ts, where it's tested.
 
-import { collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase.config';
-import { WatchListEntry, WatchListResponse } from '../models/watchList.model';
+import { EntryMeta, WatchList, WatchListEntry, WatchListResponse } from '../models/watchList.model';
+import { EpisodeRuntime, applyAdd, applyEpisodeToggle, applyEpisodesWatched, applyMovieWatched } from 'src/utils/watchListMeta.utils';
+
+// Re-exported so existing callers keep importing it from the service.
+export { watchListEntryId } from 'src/utils/watchListMeta.utils';
 
 const WATCH_LISTS_COLLECTION = 'watchLists';
-const ENTRIES_SUBCOLLECTION = 'entries';
 
 /**
- * Document id for a single entry. A movie and a TV show can share the same numeric
- * TMDB id, so media_type has to be part of the key to keep them distinct.
+ * Root of every user-scoped watch-list query key: ['watch-list', uid]. It lives here
+ * rather than in the hook so AppContext can invalidate on sign-out without importing a
+ * hook that imports AppContext back.
  */
-export const watchListEntryId = (entry: Pick<WatchListEntry, 'media_type' | 'id'>): string =>
-  `${entry.media_type}_${entry.id}`;
+export const WATCH_LIST_QUERY_ROOT = 'watch-list';
 
-export async function getWatchList(uid: string): Promise<WatchListResponse> {
-  const snapshot = await getDocs(collection(db, WATCH_LISTS_COLLECTION, uid, ENTRIES_SUBCOLLECTION));
-  return snapshot.docs.map(entry => entry.data() as WatchListEntry);
-}
+const watchListRef = (uid: string) => doc(db, WATCH_LISTS_COLLECTION, uid);
+
+export const getWatchList = async (uid: string): Promise<WatchListResponse> => {
+  const snapshot = await getDoc(watchListRef(uid));
+  // No document yet just means the user hasn't tracked anything.
+  return snapshot.exists() ? (snapshot.data() as WatchList) : { uid, watch_list: [] };
+};
+
+/**
+ * Every write is read-modify-write on the one document, so it runs in a transaction:
+ * Firestore re-runs `update` if the document changed in between, which is what stops a
+ * second tab's edit from being overwritten. The first write creates the document under
+ * the same watchLists/{uid} id.
+ *
+ * `update` must be pure (it can run more than once) and should return the array it was
+ * given when nothing changed — that skips the write entirely.
+ */
+const updateEntries = async (uid: string, update: (entries: WatchListEntry[]) => WatchListEntry[]): Promise<void> => {
+  await runTransaction(db, async transaction => {
+    const ref = watchListRef(uid);
+    const snapshot = await transaction.get(ref);
+    const current = snapshot.exists() ? (snapshot.data() as WatchList).watch_list : [];
+    const next = update(current);
+    if (next === current) return;
+    transaction.set(ref, { uid, watch_list: next });
+  });
+};
+
+/**
+ * Puts a title on the list with no progress yet ("want to watch"); no-op if it's already
+ * there. The per-episode/per-movie setters can't express this: they'd have to mark
+ * something watched to create the entry.
+ */
+export const addToWatchList = (uid: string, entry: Pick<WatchListEntry, 'media_type' | 'id'>, meta?: EntryMeta): Promise<void> => {
+  // Read once outside the transaction body, which may run more than once.
+  const now = Date.now();
+  return updateEntries(uid, entries => applyAdd(entries, entry, meta, now));
+};
+
+/** Marks a movie watched or unwatched, adding it to the list if it isn't there yet. */
+export const setMovieWatched = (uid: string, id: number, watched: boolean, meta?: EntryMeta): Promise<void> => {
+  const now = Date.now();
+  return updateEntries(uid, entries => applyMovieWatched(entries, id, watched, meta, now));
+};
+
+/**
+ * Marks one episode of a season watched or unwatched; `runtime` (minutes) keeps the
+ * show's minutes_watched in step. A season key disappears once its last episode is
+ * unwatched; the show itself stays on the list until removeEntry.
+ */
+export const setEpisodeWatched = (
+  uid: string,
+  toggle: { tvId: number; season: number; episode: number; watched: boolean; runtime: number; meta?: EntryMeta },
+): Promise<void> => {
+  const now = Date.now();
+  return updateEntries(uid, entries => applyEpisodeToggle(entries, toggle, now));
+};
+
+/**
+ * Marks several episodes of one season watched or unwatched in a single transaction
+ * ("mark all episodes"), with each episode's runtime keeping minutes_watched in step.
+ */
+export const setEpisodesWatched = (
+  uid: string,
+  change: { tvId: number; season: number; episodes: EpisodeRuntime[]; watched: boolean; meta?: EntryMeta },
+): Promise<void> => {
+  const now = Date.now();
+  return updateEntries(uid, entries => applyEpisodesWatched(entries, change, now));
+};
+
+/** Drops a title from the list entirely, along with whatever progress it held. */
+export const removeEntry = (uid: string, entry: Pick<WatchListEntry, 'media_type' | 'id'>): Promise<void> =>
+  updateEntries(uid, entries => {
+    const next = entries.filter(current => !(current.media_type === entry.media_type && current.id === entry.id));
+    return next.length === entries.length ? entries : next;
+  });
