@@ -1,7 +1,7 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, Direction, ThemeOptions } from '@mui/material/styles';
 import colors from './colors';
 
-const theme = createTheme({
+const themeOptions: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
@@ -222,6 +222,11 @@ const theme = createTheme({
       },
     },
   },
-});
+};
 
-export default theme;
+/**
+ * The theme for one text direction ('rtl' for Arabic). `direction` is what MUI components
+ * read to mirror themselves; it only works together with the RTL Emotion cache that
+ * `AppThemeProvider` pairs it with.
+ */
+export const createAppTheme = (direction: Direction) => createTheme({ ...themeOptions, direction });

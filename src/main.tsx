@@ -1,8 +1,7 @@
 import './index.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ThemeProvider } from '@mui/material';
-import theme from './assets/themes/theme';
+import AppThemeProvider from './assets/themes/AppThemeProvider.component';
 import colors from './assets/themes/colors';
 import { AppContextProvider } from './core/context/global/AppContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -25,9 +24,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <AppContextProvider>
         <div style={{ background: colors.background.default }}>
-          <ThemeProvider theme={theme}>
+          <AppThemeProvider>
             <App />
-          </ThemeProvider>
+          </AppThemeProvider>
         </div>
       </AppContextProvider>
     </QueryClientProvider>
