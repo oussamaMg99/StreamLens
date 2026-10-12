@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 /**
  * ApiError - consistent error wrapper returned by ApiService.
@@ -122,7 +122,9 @@ export class ApiService {
   }
 
   // --- Interceptor handlers ---
-  private async onRequest(cfg: AxiosRequestConfig) {
+  // Interceptors get axios's resolved config (InternalAxiosRequestConfig), where `headers`
+  // is always an AxiosHeaders instance — not the public AxiosRequestConfig, where it's optional.
+  private async onRequest(cfg: InternalAxiosRequestConfig) {
     /**
      * Inject TMDB Bearer token automatically
      *
@@ -135,7 +137,7 @@ export class ApiService {
     try {
       const token = this.tokenProvider ? await this.tokenProvider() : null;
       if (token) {
-        cfg.headers = { ...(cfg.headers || {}), Authorization: `Bearer ${token}` };
+        cfg.headers.set('Authorization', `Bearer ${token}`);
       }
     } catch {
       // If token retrieval fails, request still proceeds.

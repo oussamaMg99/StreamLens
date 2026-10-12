@@ -117,18 +117,8 @@ const theme = createTheme({
             boxShadow: '0px 6px 14px rgba(0, 0, 0, 0.15)',
           },
         },
-        containedPrimary: {
-          backgroundColor: '#E2A847',
-          '&:hover': {
-            backgroundColor: '#C7943E',
-          },
-        },
-        containedSecondary: {
-          backgroundColor: '#3B4CCA',
-          '&:hover': {
-            backgroundColor: '#2F3EA8',
-          },
-        },
+        // No containedPrimary/containedSecondary here: MUI 9 dropped those combined keys, and
+        // a contained primary button already uses palette.primary.main, with .dark on hover.
       },
     },
 

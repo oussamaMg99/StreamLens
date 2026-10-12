@@ -13,7 +13,7 @@ npm run dev          # start dev server (host 0.0.0.0, port 8000)
 npm run build        # vite build (no type-check step)
 npm run preview      # preview a production build
 npm run lint         # eslint --fix on src/**/*.{ts,tsx,js,jsx}
-npm run typecheck    # tsc --noEmit — 5 known pre-existing errors, see below
+npm run typecheck    # tsc --noEmit — must stay clean (0 errors)
 npm run test         # run vitest once
 npm run test:watch   # vitest in watch mode
 npm run format       # prettier --write .
@@ -23,7 +23,7 @@ Run a single test file: `npx vitest run path/to/file.test.tsx`. Run tests matchi
 
 Vitest is configured in `vite.config.ts` (`test.environment: 'node'`, no setup file). Tests sit next to the code they cover as `*.test.ts`; the first is `src/utils/insights.utils.test.ts`, for the pure `buildInsightsSummary`. Keep logic that needs testing in pure functions like that one — importing anything that pulls in `firebase.config.ts` (e.g. `watchList.service.ts`) initializes Firebase at module scope. `@testing-library/react`, `@testing-library/jest-dom` and `msw` are installed but unused: the first component test needs `environment: 'jsdom'` (or a per-file `// @vitest-environment jsdom`) and a setup file for jest-dom.
 
-**Type-checking:** `npm run typecheck` runs `tsc --noEmit` against `tsconfig.json`. `npm run build` does **not** type-check (plain `vite build`), so run typecheck yourself. Known pre-existing errors (not regressions): `theme.ts` (`containedPrimary`), `AlertDialog.component.tsx` ×2, `SnackBar.component.tsx` (`TransitionComponent`), `api.service.ts` (axios interceptor type) — anything beyond those five is new. `tsconfig.json` uses `"moduleResolution": "bundler"` and `"paths": { "src/*": ["./src/*"] }` (TypeScript 7 removed `baseUrl` and `moduleResolution: "node"`); `vite-tsconfig-paths` reads the same `paths`, so it also drives the `src/...` alias for Vite and Vitest. `tsconfig.app.json` / `tsconfig.node.json` are unused leftovers from the Vite template (nothing references them).
+**Type-checking:** `npm run typecheck` runs `tsc --noEmit` against `tsconfig.json`. `npm run build` does **not** type-check (plain `vite build`), so run typecheck yourself — it passes with zero errors, so any error is a regression. Watch for MUI 9 removals the build won't catch: system props on `Typography`/`Box` (`fontSize={…}` → `sx`), `TransitionComponent` (→ `slots={{ transition }}`), combined style-override keys like `containedPrimary` (→ `variants`). Axios interceptors take `InternalAxiosRequestConfig`, not `AxiosRequestConfig`. `tsconfig.json` uses `"moduleResolution": "bundler"` and `"paths": { "src/*": ["./src/*"] }` (TypeScript 7 removed `baseUrl` and `moduleResolution: "node"`); `vite-tsconfig-paths` reads the same `paths`, so it also drives the `src/...` alias for Vite and Vitest. `tsconfig.app.json` / `tsconfig.node.json` are unused leftovers from the Vite template (nothing references them).
 
 Deployment: `npm run deploy` (gh-pages, POSIX) or `npm run deploy-win` (runs `deployToGithubPages.bat`: build, replace `docs/` with `dist/`, commit, push to `dev`). The `docs/` directory holds a built output published via GitHub Pages — treat it as a build artifact, not source.
 
