@@ -10,7 +10,7 @@ StreamLens is a React 19 + TypeScript SPA (Vite) that browses movies and TV show
 
 ```bash
 npm run dev          # start dev server (host 0.0.0.0, port 8000)
-npm run build        # vite build (no type-check step)
+npm run build        # typecheck, then vite build (a type error fails the build)
 npm run preview      # preview a production build
 npm run lint         # eslint --fix on src/**/*.{ts,tsx,js,jsx}
 npm run typecheck    # tsc --noEmit — must stay clean (0 errors)
@@ -23,7 +23,7 @@ Run a single test file: `npx vitest run path/to/file.test.tsx`. Run tests matchi
 
 Vitest is configured in `vite.config.ts` (`test.environment: 'node'`, no setup file). Tests sit next to the code they cover as `*.test.ts`; the first is `src/utils/insights.utils.test.ts`, for the pure `buildInsightsSummary`. Keep logic that needs testing in pure functions like that one — importing anything that pulls in `firebase.config.ts` (e.g. `watchList.service.ts`) initializes Firebase at module scope. `@testing-library/react`, `@testing-library/jest-dom` and `msw` are installed but unused: the first component test needs `environment: 'jsdom'` (or a per-file `// @vitest-environment jsdom`) and a setup file for jest-dom.
 
-**Type-checking:** `npm run typecheck` runs `tsc --noEmit` against `tsconfig.json`. `npm run build` does **not** type-check (plain `vite build`), so run typecheck yourself — it passes with zero errors, so any error is a regression. Watch for MUI 9 removals the build won't catch: system props on `Typography`/`Box` (`fontSize={…}` → `sx`), `TransitionComponent` (→ `slots={{ transition }}`), combined style-override keys like `containedPrimary` (→ `variants`). Axios interceptors take `InternalAxiosRequestConfig`, not `AxiosRequestConfig`. `tsconfig.json` uses `"moduleResolution": "bundler"` and `"paths": { "src/*": ["./src/*"] }` (TypeScript 7 removed `baseUrl` and `moduleResolution: "node"`); `vite-tsconfig-paths` reads the same `paths`, so it also drives the `src/...` alias for Vite and Vitest. `tsconfig.app.json` / `tsconfig.node.json` are unused leftovers from the Vite template (nothing references them).
+**Type-checking:** `npm run typecheck` runs `tsc --noEmit` against `tsconfig.json`. `npm run build` runs it first (`npm run typecheck && vite build`), so a type error stops the build — and with it both deploy paths (`predeploy`, `deployToGithubPages.bat`), before anything is published. It passes with zero errors, so any error is a regression. `vite build` alone and the dev server still don't type-check. Typical MUI 9 removals it catches: system props on `Typography`/`Box` (`fontSize={…}` → `sx`), `TransitionComponent` (→ `slots={{ transition }}`), combined style-override keys like `containedPrimary` (→ `variants`). Axios interceptors take `InternalAxiosRequestConfig`, not `AxiosRequestConfig`. `tsconfig.json` uses `"moduleResolution": "bundler"` and `"paths": { "src/*": ["./src/*"] }` (TypeScript 7 removed `baseUrl` and `moduleResolution: "node"`); `vite-tsconfig-paths` reads the same `paths`, so it also drives the `src/...` alias for Vite and Vitest. `tsconfig.app.json` / `tsconfig.node.json` are unused leftovers from the Vite template (nothing references them).
 
 Deployment: `npm run deploy` (gh-pages, POSIX) or `npm run deploy-win` (runs `deployToGithubPages.bat`: build, replace `docs/` with `dist/`, commit, push to `dev`). The `docs/` directory holds a built output published via GitHub Pages — treat it as a build artifact, not source.
 
