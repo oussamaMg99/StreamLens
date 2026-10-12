@@ -46,7 +46,7 @@ const Navbar = (props: NavbarProps) => {
   };
 
   const handleLanguageChange = async (code: string) => {
-    // Implement language change logic here
+    // Text direction (<html dir>) follows automatically: see the languageChanged listener in i18n.js.
     try {
       await i18n.changeLanguage(code);
     } catch (error) {

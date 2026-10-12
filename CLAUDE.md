@@ -63,7 +63,7 @@ Env vars live in `.env` / `.env.local` (gitignored, not committed):
 
 **Components layout** (`src/components/`): one folder per UI area. `modal/` has one folder per modal (`summary/`, `userAuth/`, `userProfile/`) plus `shared/` for pieces used by more than one modal. A modal may import from its own folder and `shared/`, never from a sibling modal's folder — promote the piece to `shared/` (UI) or `src/core/` (logic) instead.
 
-**i18n**: `src/assets/locales/i18n.js` configures `i18next` with inline-imported JSON resources for `en`, `fr`, `ar` (no lazy-loading/backend). Add new keys to all three `translation.json` files together; no user-facing string should be hardcoded in a component.
+**i18n**: `src/assets/locales/i18n.js` configures `i18next` with inline-imported JSON resources for `en`, `fr`, `ar` (no lazy-loading/backend). i18next is the single source of truth for the language — read it with `useTranslation().i18n.language`, change it with `i18n.changeLanguage()`; don't mirror it in `AppContext`. A `languageChanged` listener in `i18n.js` sets `<html dir lang>` (so logical CSS mirrors for Arabic) and saves the choice to `localStorage` (`_language`, read back at init, validated against the resources, storage errors ignored). Add new keys to all three `translation.json` files together; no user-facing string should be hardcoded in a component.
 
 **Theming**: MUI theme built in `src/assets/themes/theme.ts` from raw values in `src/assets/themes/colors.ts`; `main.tsx` wraps the app in both a raw background `div` (from `colors`) and MUI's `ThemeProvider` (from `theme`). For text on a primary (amber) fill use `colors.onPrimary`, not `primary.contrastText` (`#fff` fails contrast there).
 
