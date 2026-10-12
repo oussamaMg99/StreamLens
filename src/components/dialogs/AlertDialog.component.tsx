@@ -44,13 +44,13 @@ export default function AlertDialog(props: Readonly<Props>) {
     <div>
       <Dialog fullWidth={true} open={open} onClose={onClose}>
         <DialogTitle>
-          <Typography color='primary' align='center' fontSize={24} fontWeight={600}>
+          <Typography color='primary' align='center' sx={{ fontSize: 24, fontWeight: 600 }}>
             {title}
           </Typography>
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <Typography align='center' fontSize={14}>
+            <Typography align='center' sx={{ fontSize: 14 }}>
               {content}
             </Typography>
           </DialogContentText>

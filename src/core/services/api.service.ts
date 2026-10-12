@@ -98,11 +98,11 @@ export type ApiServiceConfig = {
  *   const movies = await api.apiGet<MovieListResponse>('/movie/popular');
  */
 export class ApiService {
-  private axios: AxiosInstance;
-  private tokenProvider?: ApiServiceConfig['tokenProvider'];
-  private refreshTokenFn?: ApiServiceConfig['refreshTokenFn'];
+  private readonly axios: AxiosInstance;
+  private tokenProvider: ApiServiceConfig['tokenProvider'];
+  private refreshTokenFn: ApiServiceConfig['refreshTokenFn'];
 
-  constructor(private config: ApiServiceConfig = {}) {
+  constructor(private readonly config: ApiServiceConfig = {}) {
     this.axios = axios.create({
       baseURL: config.baseURL ?? '',
       headers: {
