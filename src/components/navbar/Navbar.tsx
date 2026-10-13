@@ -124,11 +124,11 @@ const Navbar = (props: NavbarProps) => {
               </Button>
               {/* Shown signed out too: the page itself handles the sign-in prompt via
                   useWatchListGate, rather than the entry point vanishing. */}
-              {!hideFeature && (
-                <Button variant='text' component={NavLink} to={RoutePaths.WATCH_LIST} end>
-                  {t('watchList')}
-                </Button>
-              )}
+
+              <Button variant='text' component={NavLink} to={RoutePaths.WATCH_LIST} end>
+                {t('watchList')}
+              </Button>
+
               <Button variant='text' component={NavLink} to={RoutePaths.INSIGHTS} end>
                 {t('insights')}
               </Button>
@@ -236,11 +236,11 @@ const Navbar = (props: NavbarProps) => {
               {t('about')}
             </Button>
           )}
-          {!hideFeature && (
-            <Button fullWidth component={NavLink} to={RoutePaths.WATCH_LIST} end onClick={() => setOpenMenu(prev => !prev)}>
-              {t('watchList')}
-            </Button>
-          )}
+
+          <Button fullWidth component={NavLink} to={RoutePaths.WATCH_LIST} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('watchList')}
+          </Button>
+
           <Button fullWidth component={NavLink} to={RoutePaths.INSIGHTS} end onClick={() => setOpenMenu(prev => !prev)}>
             {t('insights')}
           </Button>
