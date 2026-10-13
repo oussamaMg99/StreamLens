@@ -1,0 +1,1 @@
+import{Y as e}from"./AuthError.component-CVha4fZB.js";import{h as t,o as n}from"./SummaryModal.component-CnzWkniL.js";function r(r={},i){let{i18n:a}=e(),o=r.language??a.language;return t({queryKey:[`tv-shows`,{...r,language:o}],queryFn:()=>n.getTvShows({...r,language:o}),staleTime:3e5,enabled:i?.enabled})}export{r as t};
