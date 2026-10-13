@@ -125,6 +125,8 @@ const UserProfileModal = (props: UserProfileModalProps) => {
     try {
       await signOut(auth);
       onClose();
+      // Only this button confirms; other sign-outs (another tab, revoked session) stay silent.
+      setSnackBarProps({ open: true, severity: 'success', message: t('signedOutSuccessfully') });
     } catch {
       setSnackBarProps({ open: true, severity: 'error', message: t('errorOccurred') });
     } finally {
