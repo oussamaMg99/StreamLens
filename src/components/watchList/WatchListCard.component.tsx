@@ -50,7 +50,7 @@ const WatchListCard = ({ item, dense, onOpen, onMarkWatched, onRemove }: WatchLi
       color: colors.success.main,
       onClick: () => onOpen(item),
     };
-  else action = { label: t('markWatched'), icon: <CheckIcon />, color: colors.primary.main, onClick: () => onMarkWatched(item) };
+  else action = { label: t('markAsWatched'), icon: <CheckIcon />, color: colors.primary.main, onClick: () => onMarkWatched(item) };
 
   return (
     <Box
@@ -134,8 +134,10 @@ const WatchListCard = ({ item, dense, onOpen, onMarkWatched, onRemove }: WatchLi
             alignSelf: 'flex-start',
             gap: 0.75,
             minHeight: 28,
-            px: 0.5,
-            mx: -0.5,
+            px: 1,
+            mx: 0.5,
+            borderWidth: 1,
+            borderStyle: 'solid',
             borderRadius: '6px',
             fontFamily: 'inherit',
             fontWeight: 600,
