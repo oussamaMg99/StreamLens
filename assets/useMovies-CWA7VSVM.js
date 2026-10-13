@@ -1,0 +1,1 @@
+import{Y as e}from"./AuthError.component-diyVwzEl.js";import{h as t,i as n}from"./SummaryModal.component-C1YXnmwH.js";function r(r={},i){let{i18n:a}=e(),o=r.language??a.language;return t({queryKey:[`movies`,{...r,language:o}],queryFn:()=>n.getMovies({...r,language:o}),staleTime:3e5,enabled:i?.enabled})}export{r as t};
