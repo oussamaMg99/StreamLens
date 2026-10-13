@@ -251,5 +251,13 @@
   "verifyTitle": "Vérifiez d'abord votre e-mail",
   "verifyBody": "Ouvrez le lien envoyé dans votre boîte mail pour commencer à enregistrer des titres.",
   "removeConfirmTitle": "Retirer « {{title}} » ?",
-  "removeConfirmBody": "Sa progression et son historique de visionnage seront aussi supprimés."
+  "removeConfirmBody": "Sa progression et son historique de visionnage seront aussi supprimés.",
+  "summaryModalSaved": "Enregistré",
+  "more": "Plus",
+  "showLess": "Moins",
+  "trailer": "Bande-annonce",
+  "summaryModalSeasons": "Saisons",
+  "markAll": "Tout cocher",
+  "unmarkAll": "Tout décocher",
+  "episodeWatched": "Épisode {{episode}} vu"
 }

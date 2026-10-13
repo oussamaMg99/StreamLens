@@ -251,5 +251,13 @@
   "verifyTitle": "Verify your email first",
   "verifyBody": "Open the link we sent to your inbox to start saving titles.",
   "removeConfirmTitle": "Remove \"{{title}}\"?",
-  "removeConfirmBody": "Its watch progress and history will be deleted too."
+  "removeConfirmBody": "Its watch progress and history will be deleted too.",
+  "summaryModalSaved": "Saved",
+  "more": "More",
+  "showLess": "Show less",
+  "trailer": "Trailer",
+  "summaryModalSeasons": "Seasons",
+  "markAll": "Mark all",
+  "unmarkAll": "Unmark all",
+  "episodeWatched": "Episode {{episode}} watched"
 }

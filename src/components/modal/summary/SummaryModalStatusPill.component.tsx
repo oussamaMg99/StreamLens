@@ -1,13 +1,15 @@
 import Chip from '@mui/material/Chip';
-import { alpha } from '@mui/material';
+import { alpha, SxProps, Theme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 interface SummaryModalStatusPillProps {
   status: 'Returning Series' | 'In Production' | 'Ended' | 'Canceled';
+  /** Merged after the defaults, e.g. `{ mx: 0 }` to left-align it (it centres itself by default). */
+  sx?: SxProps<Theme>;
 }
 
-const SummaryModalStatusPill = ({ status }: SummaryModalStatusPillProps) => {
+const SummaryModalStatusPill = ({ status, sx }: SummaryModalStatusPillProps) => {
   const { t } = useTranslation();
 
   const STATUS = {
@@ -25,14 +27,17 @@ const SummaryModalStatusPill = ({ status }: SummaryModalStatusPillProps) => {
       variant='outlined'
       icon={<FiberManualRecordIcon sx={{ fontSize: 9, color: `${s.color} !important` }} />}
       label={t(s.key)}
-      sx={{
-        mx: 'auto',
-        fontWeight: 600,
-        color: s.color,
-        borderColor: alpha(s.color, 0.5),
-        backgroundColor: alpha(s.color, 0.16),
-        '& .MuiChip-label': { px: 1 },
-      }}
+      sx={[
+        {
+          mx: 'auto',
+          fontWeight: 600,
+          color: s.color,
+          borderColor: alpha(s.color, 0.5),
+          backgroundColor: alpha(s.color, 0.16),
+          '& .MuiChip-label': { px: 1 },
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
     />
   );
 };

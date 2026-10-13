@@ -140,6 +140,7 @@ const Insights = () => {
           px: { xs: 2, md: 6 },
           maxWidth: 1440,
           mx: 'auto',
+          minHeight: '72vh',
           display: 'flex',
           flexDirection: 'column',
           gap: { xs: 0, md: 2.5 },

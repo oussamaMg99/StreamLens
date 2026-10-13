@@ -26,6 +26,10 @@ interface SeasonOverviewProps {
   seasonDetails?: SeasonDetails;
   loading?: boolean;
   error?: boolean;
+  /** Below md: full width under the season chips, and the episode list doesn't scroll on its own. */
+  stacked?: boolean;
+  /** Mobile sheet: no panel background, 16px side padding to match the rest of the sheet. */
+  flush?: boolean;
 }
 
 /** Today as a local YYYY-MM-DD, the format TMDB air dates use. */
@@ -38,7 +42,7 @@ const localToday = () => {
 const toEpisodeRuntime = (episode: Episode) => ({ episode: episode.episode_number, runtime: episode.runtime ?? 0 });
 
 const SeasonOverview = (props: SeasonOverviewProps) => {
-  const { tvId, meta, seasonNumber, watchedEpisodes = [], seasonDetails, loading, error } = props;
+  const { tvId, meta, seasonNumber, watchedEpisodes = [], seasonDetails, loading, error, stacked, flush } = props;
   const { t } = useTranslation();
   const { setSnackBarProps } = useContext(AppContext);
   const gate = useWatchListGate();
@@ -77,10 +81,26 @@ const SeasonOverview = (props: SeasonOverviewProps) => {
   };
 
   return (
-    <Box sx={{ width: '65%', backgroundColor: 'rgba(20, 20, 20, 0.45)', borderRadius: '10px', p: 1 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 1, p: 1 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          <Typography variant='h4'>
+    <Box
+      sx={
+        flush
+          ? { width: '100%', px: 2 }
+          : { width: stacked ? '100%' : '65%', backgroundColor: 'rgba(20, 20, 20, 0.45)', borderRadius: '10px', p: 1 }
+      }
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 1.5,
+          p: flush ? 0 : 1,
+          pb: flush ? 1.5 : 1,
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
+          <Typography variant='h4' sx={flush ? { fontSize: 18, fontWeight: 700 } : undefined}>
             {t('season')} {seasonNumber}
           </Typography>
           <Typography variant='body2' color='textSecondary'>
@@ -91,20 +111,22 @@ const SeasonOverview = (props: SeasonOverviewProps) => {
         </Box>
         <Tooltip title={gate.blockedHint}>
           {/* A disabled button fires no events, so the tooltip needs a wrapper to hang on. */}
-          <span>
+          <span style={{ flex: 'none' }}>
             <Button
               size='small'
               variant='outlined'
               startIcon={allWatched ? <RemoveDoneIcon /> : <CheckIcon />}
               disabled={gate.access === 'loading' || setEpisodesWatched.isPending || loading || error || !aired.length}
               onClick={handleMarkAll}
+              sx={stacked ? { minHeight: 36, whiteSpace: 'nowrap' } : undefined}
             >
-              {t(allWatched ? 'markAllEpisodesUnwatched' : 'markAllEpisodesWatched')}
+              {/* Short label when stacked: the long one wraps beside the season title on phones. */}
+              {stacked ? t(allWatched ? 'unmarkAll' : 'markAll') : t(allWatched ? 'markAllEpisodesUnwatched' : 'markAllEpisodesWatched')}
             </Button>
           </span>
         </Tooltip>
       </Box>
-      <Divider sx={{ borderColor: 'rgba(226, 168, 71, 0.25)' }} />
+      {!flush && <Divider sx={{ borderColor: 'rgba(226, 168, 71, 0.25)' }} />}
       <EpisodesList
         episodes={seasonDetails?.episodes}
         tvId={tvId}
@@ -113,6 +135,7 @@ const SeasonOverview = (props: SeasonOverviewProps) => {
         watchedEpisodes={watchedEpisodes}
         loading={loading}
         error={error}
+        compact={stacked}
       />
     </Box>
   );

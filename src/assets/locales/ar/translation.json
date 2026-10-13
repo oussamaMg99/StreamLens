@@ -302,5 +302,13 @@
   "verifyTitle": "أكّد بريدك الإلكتروني أولًا",
   "verifyBody": "افتح الرابط الذي أرسلناه إلى بريدك لبدء حفظ العناوين.",
   "removeConfirmTitle": "إزالة «{{title}}»؟",
-  "removeConfirmBody": "سيتم حذف تقدم المشاهدة وسجلها أيضًا."
+  "removeConfirmBody": "سيتم حذف تقدم المشاهدة وسجلها أيضًا.",
+  "summaryModalSaved": "محفوظ",
+  "more": "المزيد",
+  "showLess": "عرض أقل",
+  "trailer": "الإعلان",
+  "summaryModalSeasons": "المواسم",
+  "markAll": "تحديد الكل",
+  "unmarkAll": "إلغاء تحديد الكل",
+  "episodeWatched": "تمت مشاهدة الحلقة {{episode}}"
 }

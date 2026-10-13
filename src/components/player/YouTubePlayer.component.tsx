@@ -1,7 +1,8 @@
-import { Box } from '@mui/material';
+import { Box, SxProps, Theme } from '@mui/material';
 interface YouTubePlayerProps {
   videoId: string;
-  sx?: React.CSSProperties; // Optional style prop
+  /** Wrapper styles. The iframe keeps its 850×300 default unless overridden (e.g. `'& iframe': { width: '100%' }`). */
+  sx?: SxProps<Theme>;
 }
 
 export function YouTubePlayer({ videoId, sx }: YouTubePlayerProps) {
