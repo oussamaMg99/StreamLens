@@ -17,6 +17,7 @@ import {
   setEpisodesWatched,
   setMovieWatched,
 } from 'src/core/services/watchList.service';
+import { debugErrorText } from 'src/core/services/firebase.config';
 import { EntryMeta, WatchListEntry } from 'src/core/models/watchList.model';
 import { EpisodeRuntime } from 'src/utils/watchListMeta.utils';
 
@@ -37,7 +38,7 @@ const useWatchListMutation = <TVariables>(write: (uid: string, variables: TVaria
       return write(user.uid, variables);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [WATCH_LIST_QUERY_ROOT, user?.uid] }),
-    onError: () => setSnackBarProps({ open: true, severity: 'error', message: t('errorOccurred') }),
+    onError: error => setSnackBarProps({ open: true, severity: 'error', message: debugErrorText(error) ?? t('errorOccurred') }),
   });
 };
 

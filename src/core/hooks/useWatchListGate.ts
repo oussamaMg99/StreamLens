@@ -9,7 +9,7 @@ import { useContext } from 'react';
 import { sendEmailVerification } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
 import AppContext from 'src/core/context/global/AppContext';
-import { auth, authErrorKey } from 'src/core/services/firebase.config';
+import { auth, authErrorKey, debugErrorText } from 'src/core/services/firebase.config';
 import { AlertDialogProps } from 'src/core/models/alertDialog.model';
 
 /** 'loading' while Firebase restores the session — not the same as signed out. */
@@ -37,7 +37,10 @@ export const useWatchListGate = () => {
         message: t('verificationSentTo', { email: current.email ?? '' }),
       });
     } catch (error) {
-      setSnackBarProps({ open: true, severity: 'error', message: t(authErrorKey(error) || 'errorOccurred') });
+      // Mapped codes keep their specific message; only the generic fallback is swapped in debug mode.
+      const key = authErrorKey(error);
+      const message = key && key !== 'errorOccurred' ? t(key) : (debugErrorText(error) ?? t('errorOccurred'));
+      setSnackBarProps({ open: true, severity: 'error', message });
     }
     setAlertDialogProps(new AlertDialogProps());
     return true;
