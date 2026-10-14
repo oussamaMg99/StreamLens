@@ -2,8 +2,8 @@
 // View model of the Watch list page (status board). Everything here is derived from the
 // stored WatchListEntry plus the title's TMDB details; nothing is persisted.
 
-import { MovieDetails } from './movieDetails.model';
-import { TVShowDetails } from './tvShowDetails.model';
+import { MovieDetails } from './movie.model';
+import { TVShowDetails } from './tvShow.model';
 import { WatchListEntry } from './watchList.model';
 
 /** The board's three columns. A show with some (not all) episodes watched is inProgress. */

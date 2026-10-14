@@ -2,9 +2,8 @@
 
 import { TMDB_CONFIG } from './tmdb.config';
 import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
-import { TVShowDetails } from '../models/tvShowDetails.model';
 import { SeasonDetails } from '../models/seasonDetails.model';
-import { TvShow } from '../models/tvShow.model';
+import { TvShow, TVShowDetails } from '../models/tvShow.model';
 
 export type TvListResponse = TmdbListResponse<TvShow>;
 

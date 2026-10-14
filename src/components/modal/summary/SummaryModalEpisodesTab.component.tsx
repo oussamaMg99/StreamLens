@@ -1,5 +1,5 @@
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
-import { TvShow } from 'src/core/models/tvShow.model';
+import { Season, TvShow, TVShowDetails } from 'src/core/models/tvShow.model';
 import {
   Avatar,
   Box,
@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Season, TVShowDetails } from 'src/core/models/tvShowDetails.model';
 import { useTvSeasonDetails } from 'src/core/hooks/useTvSeasonDetails';
 import { useWatchListEntry } from 'src/core/hooks/useWatchList';
 import NoPoster from 'src/assets/images/no-movie.png';

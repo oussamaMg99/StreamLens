@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MovieDetails } from 'src/core/models/movieDetails.model';
-import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
+import { MovieDetails } from 'src/core/models/movie.model';
+import { TVShowDetails } from 'src/core/models/tvShow.model';
 import { WatchListEntry, WatchListTvEntry } from 'src/core/models/watchList.model';
 import {
   applyAdd,

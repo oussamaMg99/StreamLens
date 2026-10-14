@@ -1,10 +1,9 @@
 // src/core/services/movie.service.ts
 
-import { MovieDetails } from '../models/movieDetails.model';
 import { Collection } from '../models/collection.model';
 import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TMDB_CONFIG } from './tmdb.config';
-import { Movie } from '../models/movie.model';
+import { Movie, MovieDetails } from '../models/movie.model';
 
 export type MovieListResponse = TmdbListResponse<Movie>;
 
