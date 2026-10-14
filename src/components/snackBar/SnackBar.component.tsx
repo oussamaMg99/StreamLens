@@ -1,4 +1,3 @@
-import React from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert, { AlertColor } from '@mui/material/Alert';
 import Slide, { SlideProps } from '@mui/material/Slide';
@@ -26,7 +25,7 @@ const SnackbarComponent = (props: SnackbarComponentProps) => {
       autoHideDuration={autoHideDuration ?? defaultAutoHideDuration}
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      TransitionComponent={TransitionSlide}
+      slots={{ transition: TransitionSlide }}
     >
       <Alert onClose={onClose} severity={severity} sx={{ width: '100%' }}>
         {message}

@@ -1,0 +1,26 @@
+{
+  "amber": {
+    "hex": "#E2A847",
+    "use": "Frame, LENS on dark"
+  },
+  "ivory": {
+    "hex": "#FFFFE3",
+    "use": "S, STREAM on dark"
+  },
+  "focusTeal": {
+    "hex": "#2EBFA5",
+    "use": "Focus dot in the small symbol"
+  },
+  "ember": {
+    "hex": "#1F0303",
+    "use": "App icon background, ink on amber/light"
+  },
+  "deepAmber": {
+    "hex": "#9A6812",
+    "use": "Frame, LENS on light backgrounds"
+  },
+  "surface": {
+    "hex": "#141414",
+    "use": "Theme / manifest colour"
+  }
+}

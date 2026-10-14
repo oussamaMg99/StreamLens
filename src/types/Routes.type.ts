@@ -1,5 +1,8 @@
 export enum RoutePaths {
   Default = '/',
-  HOME = '/home',
   ABOUT = '/about',
+  MOVIES = '/movies',
+  TV_SHOWS = '/tv-shows',
+  WATCH_LIST = '/watch-list',
+  INSIGHTS = '/insights',
 }

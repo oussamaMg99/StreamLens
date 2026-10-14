@@ -5,6 +5,10 @@ When you're ready, start your application by running:
 
 Your application will be available at http://localhost:8000.
 
+Source edits reach the dev server live through the bind mount. When `package-lock.json`
+changes (a dependency was added or bumped), the next start reinstalls the container's
+dependencies on its own — `docker compose restart` is enough, no rebuild needed.
+
 ### Deploying your application to the cloud
 
 First, build your image, e.g.: `docker build -t myapp .`.

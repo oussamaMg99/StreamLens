@@ -1,7 +1,13 @@
-import React from 'react';
+import Footer from 'src/components/footer/Footer.component';
+import NavBar from 'src/components/navbar/Navbar';
 
 const About = () => {
-  return <div>About</div>;
+  return (
+    <>
+      <NavBar />
+      <Footer />
+    </>
+  );
 };
 
 export default About;

@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Deploy with: npx firebase deploy --only firestore:rules
+// Without this file the database runs on whatever the console has — "test mode" leaves
+// it open to everyone until it expires (then denies everything), so keep it versioned.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // The owner, signed in with a verified email address. Provider sign-ins (Google,
+    // Facebook) arrive verified; email/password users must click the verification link
+    // the sign-up flow sends before their list works.
+    function isVerifiedOwner(uid) {
+      return request.auth != null
+        && request.auth.uid == uid
+        && request.auth.token.email_verified == true;
+    }
+
+    // Shape check on the document being written. Rules can't iterate an array, so
+    // individual entries can't be validated here — this is the whole document the
+    // client is allowed to write: exactly { uid, watch_list }, uid matching the path,
+    // and a list that can't grow without bound. Entries also carry client-written
+    // metadata for Insights (genre_ids, runtime, episode_counts, minutes_watched,
+    // updated_at); it only feeds the owner's own stats, so it needs no server check.
+    function isValidWatchList(data, uid) {
+      return data.keys().hasOnly(['uid', 'watch_list'])
+        && data.keys().hasAll(['uid', 'watch_list'])
+        && data.uid == uid
+        && data.watch_list is list
+        && data.watch_list.size() <= 2000;
+    }
+
+    // One document per user, holding that user's whole watch list.
+    match /watchLists/{uid} {
+      allow read: if isVerifiedOwner(uid);
+      allow write: if isVerifiedOwner(uid) && isValidWatchList(request.resource.data, uid);
+    }
+
+    // Anything not matched above stays closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

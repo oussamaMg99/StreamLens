@@ -1,5 +1,3 @@
-import { light } from '@mui/material/styles/createPalette';
-
 const colors = {
   whiteSmoke: '#F5F5F5',
   white: '#FFFFFF',
@@ -11,6 +9,8 @@ const colors = {
     dark: '#C7943E',
     contrastText: '#ffffff',
   },
+  /** Amber ink that actually passes contrast on the primary fill (primary.contrastText #fff → 2.12:1). */
+  onPrimary: '#1F0303',
   secondary: {
     main: '#5A431C',
     light: '#5A431C',
@@ -24,7 +24,7 @@ const colors = {
   },
   text: {
     primary: '#FFFFE3', // Soft Ivory
-    secondary: '#1E1E1E', // Graphite
+    secondary: 'rgba(255,255,255,0.6)', // muted white
   },
   error: {
     main: '#E85D5D', // Coral Red
@@ -32,5 +32,7 @@ const colors = {
   success: {
     main: '#2EBFA5', // Teal Green
   },
+  /** Ink that passes contrast on the success (teal) fill, the counterpart of onPrimary. */
+  onSuccess: '#06221D',
 };
 export default colors;

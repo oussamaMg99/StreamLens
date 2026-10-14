@@ -1,23 +1,80 @@
-import { AppBar, Toolbar, Box, Button, IconButton, Typography, InputBase, Drawer, useTheme, useMediaQuery } from '@mui/material';
+import { AppBar, Toolbar, Box, Button, IconButton, Drawer, useTheme, useMediaQuery, Link } from '@mui/material';
+import { NavLink } from 'react-router';
 import colors from 'src/assets/themes/colors';
-import { navbarHeight } from 'src/utils/constants';
-import { useEffect, useState } from 'react';
-import SearchIcon from '@mui/icons-material/Search';
+import { hideFeature, languageOptions, navbarHeight } from 'src/utils/constants';
+import { useContext, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
-// import MovieIcon from '@mui/icons-material/Movie';
-// import LiveTvIcon from '@mui/icons-material/LiveTv';
-// import InfoIcon from '@mui/icons-material/Info';
+import LanguageIcon from '@mui/icons-material/Language';
+import { useTranslation } from 'react-i18next';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import i18n from 'src/assets/locales/i18n';
+import { RoutePaths } from 'src/types/Routes.type';
+import SearchBar, { SearchResultItem } from '../search/SearchBar.component';
+import PersonIcon from '@mui/icons-material/Person';
+import UserProfileModal from '../modal/userProfile/UserProfileModal.component';
+import AppContext from 'src/core/context/global/AppContext';
+import StreamLensLogo from 'src/components/logo/StreamLensLogo.component';
 
-const Navbar = () => {
+interface NavbarProps {
+  enableSearch?: boolean;
+  onSearch?: (query: string) => void;
+  searchResults?: SearchResultItem[];
+  searchLoading?: boolean;
+  searchError?: boolean;
+  onSelectSearchResult?: (item: SearchResultItem) => void;
+}
+
+const Navbar = (props: NavbarProps) => {
+  const { enableSearch, onSearch, searchResults, searchLoading, searchError, onSelectSearchResult } = props;
   const [openMenu, setOpenMenu] = useState(false);
+  const [openProfileModal, setOpenProfileModal] = useState(false);
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const { t } = useTranslation();
+  const { user, authReady, setAuthModalOpen } = useContext(AppContext);
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLanguageChange = async (code: string) => {
+    // Text direction (<html dir>) follows automatically: see the languageChanged listener in i18n.js.
+    try {
+      await i18n.changeLanguage(code);
+    } catch (error) {
+      console.error('Error changing language:', error);
+    } finally {
+      setAnchorEl(null);
+    }
+  };
+
+  const handleProfileModalDisplay = (action: 'open' | 'close') => {
+    switch (action) {
+      case 'open':
+        setOpenProfileModal(true);
+        break;
+      case 'close':
+        setOpenProfileModal(false);
+        break;
+      default:
+        break;
+    }
+  };
 
   useEffect(() => {
     if (isMdUp && openMenu) setOpenMenu(false);
   }, [isMdUp]);
   return (
     <>
+      <UserProfileModal open={openProfileModal} onClose={() => handleProfileModalDisplay('close')} />
       <AppBar
         position='fixed'
         elevation={3}
@@ -41,10 +98,16 @@ const Navbar = () => {
               width: '100%',
             }}
           >
-            {/* Logo placeholder */}
-            <Typography variant='h4' sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' } }}>
-              StreamLens
-            </Typography>
+            <Link
+              component={NavLink}
+              to={RoutePaths.Default}
+              end
+              underline='none'
+              sx={{ cursor: 'pointer', display: { xs: 'none', sm: 'none', md: 'block' } }}
+            >
+              <StreamLensLogo title={t('appName')} />
+            </Link>
+
             {/* nav links (hide on small screens if desired) */}
             <Box
               sx={{
@@ -53,22 +116,33 @@ const Navbar = () => {
                 gap: 2,
               }}
             >
-              <Button variant='text'>{'Movies'}</Button>
-              <Button variant='text'>{'TV Shows'}</Button>
-              <Button variant='text'>{'About'}</Button>
+              <Button variant='text' component={NavLink} to={RoutePaths.MOVIES} end>
+                {t('movies')}
+              </Button>
+              <Button variant='text' component={NavLink} to={RoutePaths.TV_SHOWS} end>
+                {t('tvShows')}
+              </Button>
+              {/* Shown signed out too: the page itself handles the sign-in prompt via
+                  useWatchListGate, rather than the entry point vanishing. */}
+              {!hideFeature && (
+                <Button variant='text' component={NavLink} to={RoutePaths.WATCH_LIST} end>
+                  {t('watchList')}
+                </Button>
+              )}
+              <Button variant='text' component={NavLink} to={RoutePaths.INSIGHTS} end>
+                {t('insights')}
+              </Button>
+              {!hideFeature && (
+                <Button variant='text' component={NavLink} to={RoutePaths.ABOUT} end>
+                  {t('about')}
+                </Button>
+              )}
             </Box>
-            {/* Search Bar */}
             <Box
               sx={{
-                p: theme => theme.spacing(0.5, 1.5),
                 display: 'flex',
                 alignItems: 'center',
-                width: { xs: '100%', sm: 300, md: 300 },
-                backgroundColor: colors.phantomBlack,
-                borderColor: colors.primary.main,
-                borderWidth: 1,
-                borderStyle: 'solid',
-                borderRadius: theme => theme.spacing(1),
+                gap: 1,
               }}
             >
               <IconButton
@@ -80,11 +154,63 @@ const Navbar = () => {
               >
                 <MenuIcon color='primary' />
               </IconButton>
-
-              <InputBase placeholder='Search StreamLens' sx={{ ml: 1, flex: 1 }} />
-              <IconButton type='button' aria-label='search'>
-                <SearchIcon color='primary' />
+              {/* Language Selector */}
+              {enableSearch && (
+                <SearchBar
+                  placeholder={t('search')}
+                  onSubmit={onSearch}
+                  results={searchResults}
+                  loading={searchLoading}
+                  error={searchError}
+                  onSelectResult={onSelectSearchResult}
+                />
+              )}
+              {/* Disabled until the session is restored, so a signed-in visitor clicking during load doesn't get the sign-in modal. */}
+              <IconButton disabled={!authReady} onClick={() => (user ? handleProfileModalDisplay('open') : setAuthModalOpen(true))}>
+                <PersonIcon color='primary' />
               </IconButton>
+
+              <IconButton type='button' aria-label='language' onClick={handleClick}>
+                <LanguageIcon color='primary' />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      backgroundColor: colors.phantomBlack,
+                      backdropFilter: theme => `blur(${theme.spacing(2)})`,
+                      mt: 1,
+                    },
+                  },
+                }}
+              >
+                {languageOptions.map(option => (
+                  <MenuItem
+                    key={option.code}
+                    selected={i18n.language === option.code}
+                    onClick={() => handleLanguageChange(option.code)}
+                    sx={{
+                      color: colors.text.primary,
+                      '&.Mui-selected': {
+                        color: colors.primary.main,
+                        backgroundColor: 'rgba(226, 168, 71, 0.15)',
+                      },
+                      '&:hover': {
+                        color: colors.primary.main,
+                        backgroundColor: 'rgba(226, 168, 71, 0.1)',
+                      },
+                      '&.Mui-selected:hover': {
+                        backgroundColor: 'rgba(226, 168, 71, 0.2)',
+                      },
+                    }}
+                  >
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Menu>
             </Box>
           </Box>
         </Toolbar>
@@ -96,24 +222,28 @@ const Navbar = () => {
         slotProps={{ paper: { sx: { backgroundColor: colors.phantomBlack } } }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', p: 2, gap: 1 }}>
-          <Button fullWidth onClick={() => setOpenMenu(prev => !prev)}>
-            {'Movies'}
+          <Button fullWidth component={NavLink} to={RoutePaths.Default} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('home')}
           </Button>
-          <Button fullWidth onClick={() => setOpenMenu(prev => !prev)}>
-            {'TV Shows'}
+          <Button fullWidth component={NavLink} to={RoutePaths.MOVIES} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('movies')}
           </Button>
-          <Button fullWidth onClick={() => setOpenMenu(prev => !prev)}>
-            {'About'}
+          <Button fullWidth component={NavLink} to={RoutePaths.TV_SHOWS} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('tvShows')}
           </Button>
-          {/* <IconButton type='button' aria-label='search'>
-            <MovieIcon color='primary' />
-          </IconButton>
-          <IconButton type='button' aria-label='search'>
-            <LiveTvIcon color='primary' />
-          </IconButton>
-          <IconButton type='button' aria-label='search'>
-            <InfoIcon color='primary' />
-          </IconButton> */}
+          {!hideFeature && (
+            <Button fullWidth component={NavLink} to={RoutePaths.ABOUT} end onClick={() => setOpenMenu(prev => !prev)}>
+              {t('about')}
+            </Button>
+          )}
+          {!hideFeature && (
+            <Button fullWidth component={NavLink} to={RoutePaths.WATCH_LIST} end onClick={() => setOpenMenu(prev => !prev)}>
+              {t('watchList')}
+            </Button>
+          )}
+          <Button fullWidth component={NavLink} to={RoutePaths.INSIGHTS} end onClick={() => setOpenMenu(prev => !prev)}>
+            {t('insights')}
+          </Button>
         </Box>
       </Drawer>
     </>

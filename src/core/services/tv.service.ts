@@ -1,53 +1,24 @@
 // src/core/services/tv.service.ts
 
-import { ApiService } from './api.service';
-import { Movie } from './movie.service';
+import { TMDB_CONFIG } from './tmdb.config';
+import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
+import { TVShowDetails } from '../models/tvShowDetails.model';
+import { SeasonDetails } from '../models/seasonDetails.model';
+import { Media } from '../models/common.model';
 
 /**
- * Basic TMDB v3 TV result shapes.
- * Expand these interfaces as your UI needs more data.
+ * Basic TMDB v3 TV result shape.
+ * Expand as your UI needs more data.
  */
-export type TvShow = {
-  adult: boolean;
-  backdrop_path: string;
-  genre_ids: number[];
-  id: number;
+export interface TvShow extends Media {
+  media_type: 'tv';
   origin_country: string[];
-  original_language: string;
   original_name: string;
-  overview: string;
-  popularity: number;
-  poster_path: string;
   first_air_date: string;
   name: string;
-  vote_average: number;
-  vote_count: number;
-};
+}
 
-export type TvListResponse = {
-  page: number;
-  results: (TvShow & Movie)[];
-  total_pages: number;
-  total_results: number;
-};
-
-/**
- * More complete TV details (partial — add fields as needed)
- */
-export type TvDetails = {
-  id: number;
-  name: string;
-  overview?: string;
-  poster_path?: string | null;
-  backdrop_path?: string | null;
-  first_air_date?: string;
-  last_air_date?: string;
-  number_of_seasons?: number;
-  number_of_episodes?: number;
-  genres?: { id: number; name: string }[];
-  episode_run_time?: number[];
-  vote_average?: number;
-};
+export type TvListResponse = TmdbListResponse<TvShow>;
 
 /**
  * Options for discover & search endpoints
@@ -55,6 +26,7 @@ export type TvDetails = {
  * Notes:
  * - Authentication is performed via Authorization: Bearer <VITE_TMDB_READ_ACCESS_TOKEN>
  * - No api_key query parameter is required when using Bearer token.
+ * - Unlike movies, TMDB's /tv endpoints don't accept a `region` filter.
  */
 export type GetTvOptions = {
   page?: number;
@@ -63,7 +35,6 @@ export type GetTvOptions = {
   with_genres?: number[] | string;
   sort_by?: string; // e.g. 'popularity.desc'
   include_adult?: boolean;
-  timezone?: string; // optional for some tmdb endpoints
   retry?: number;
 };
 
@@ -73,138 +44,66 @@ export type GetTvOptions = {
  * Methods implemented:
  *  - getTvShows(options) -> smart wrapper choosing search/discover/popular
  *  - getPopularTV(page)
- *  - getTVById(tvId, appendToResponse?)
+ *  - getTVById(tvId, appendToResponse?, language?)
  *  - searchTV(query, page)
  *  - discoverTV(options)
  *
  * All requests are authenticated automatically by ApiService via tokenProvider that
  * returns VITE_TMDB_READ_ACCESS_TOKEN (Bearer token).
+ *
+ * The actual endpoint logic (discover-filter detection, param building, etc.) lives in
+ * the shared TmdbListService base — this class just wires up media-type-specific names.
  */
-export default class TvService extends ApiService {
-  /**
-   * getTvShows - flexible method that picks an endpoint:
-   *  - /search/tv when `query` provided
-   *  - /discover/tv when discover-like options provided (with_genres, sort_by)
-   *  - /tv/popular otherwise
-   */
+export default class TvService extends TmdbListService<TvShow, TVShowDetails> {
+  protected readonly mediaType = 'tv' as const;
+
   public getTvShows(options: GetTvOptions = {}): Promise<TvListResponse> {
-    const { page = 1, language = 'en-US', query, with_genres, sort_by, include_adult = false, retry = 0 } = options;
-
-    const params: Record<string, any> = {
-      page,
-      language,
-      include_adult,
-    };
-
-    // Search endpoint if query provided
-    if (query && query.trim().length > 0) {
-      params.query = query.trim();
-      return this.apiGet<TvListResponse>('/search/tv', {
-        axiosConfig: { params },
-        retry,
-      });
-    }
-
-    // Discover endpoint when filters present
-    const hasDiscoverFilters = (Array.isArray(with_genres) && with_genres.length > 0) || typeof with_genres === 'string' || !!sort_by;
-
-    if (hasDiscoverFilters) {
-      if (with_genres) {
-        params.with_genres = Array.isArray(with_genres) ? with_genres.join(',') : with_genres;
-      }
-      if (sort_by) params.sort_by = sort_by;
-
-      return this.apiGet<TvListResponse>('/discover/tv', {
-        axiosConfig: { params },
-        retry,
-      });
-    }
-
-    // Default: popular TV
-    return this.getPopularTV(page, { language, retry });
+    return this.list(options);
   }
 
-  /**
-   * getPopularTV - convenience wrapper for /tv/popular
-   */
   public getPopularTV(page = 1, opts: { language?: string; retry?: number } = {}): Promise<TvListResponse> {
-    const { language = 'en-US', retry = 0 } = opts;
-    const params = { page, language };
-    return this.apiGet<TvListResponse>('/tv/popular', {
-      axiosConfig: { params },
-      retry,
-    });
+    return this.popular(page, opts);
   }
 
-  /**
-   * getTVById - fetch TV details by id
-   *
-   * @param tvId - TMDB tv id
-   * @param appendToResponse - optional comma-separated string to append related data
-   *                            (e.g., 'videos,credits,images')
-   */
-  public getTVById(tvId: number | string, appendToResponse?: string): Promise<TvDetails> {
-    const params: Record<string, any> = {};
-    if (appendToResponse) params.append_to_response = appendToResponse;
-    return this.apiGet<TvDetails>(`/tv/${tvId}`, {
-      axiosConfig: { params },
-      retry: 0,
-    });
+  public getTVById(tvId: number | string, appendToResponse?: string, language?: string): Promise<TVShowDetails> {
+    return this.byId(tvId, appendToResponse, language);
   }
 
-  /**
-   * searchTV - direct search convenience wrapper
-   */
   public searchTV(
     query: string,
     page = 1,
     opts: { language?: string; include_adult?: boolean; retry?: number } = {},
   ): Promise<TvListResponse> {
-    const { language = 'en-US', include_adult = false, retry = 0 } = opts;
-    const params = { query: query.trim(), page, language, include_adult };
-    return this.apiGet<TvListResponse>('/search/tv', {
-      axiosConfig: { params },
-      retry,
-    });
+    return this.searchDirect(query, page, opts);
+  }
+
+  public discoverTV(options: GetTvOptions = {}): Promise<TvListResponse> {
+    return this.discoverDirect(options);
   }
 
   /**
-   * discoverTV - direct discover wrapper with flexible options
+   * getSeasonDetails - /tv/{tv_id}/season/{season_number}, TV-only (movies have no
+   * seasons), so this lives directly on TvService rather than the shared TmdbListService
+   * base.
    */
-  public discoverTV(options: GetTvOptions = {}): Promise<TvListResponse> {
-    const { page = 1, language = 'en-US', with_genres, sort_by, include_adult = false, retry = 0 } = options;
+  public getSeasonDetails(
+    tvId: number | string,
+    seasonNumber: number,
+    opts: { language?: string; retry?: number } = {},
+  ): Promise<SeasonDetails> {
+    const { language = 'en', retry = 0 } = opts;
+    return this.apiGet<SeasonDetails>(`/tv/${tvId}/season/${seasonNumber}`, { params: { language }, retry });
+  }
 
-    const params: Record<string, any> = {
-      page,
-      language,
-      include_adult,
-    };
-
-    if (with_genres) params.with_genres = Array.isArray(with_genres) ? with_genres.join(',') : with_genres;
-    if (sort_by) params.sort_by = sort_by;
-
-    return this.apiGet<TvListResponse>('/discover/tv', {
-      axiosConfig: { params },
-      retry,
-    });
+  public getTvGenres(language?: string): Promise<GenreListResponse> {
+    return this.genreList(language);
   }
 }
 
 /**
  * Default singleton instance of TvService.
- *
- * - Uses TMDB v3 base URL.
- * - Authentication handled via tokenProvider -> Authorization: Bearer <VITE_TMDB_READ_ACCESS_TOKEN>
- * - defaultParams remains empty because api_key is not used when using Bearer auth.
  */
-export const tvService = new TvService({
-  baseURL: 'https://api.themoviedb.org/3',
-  defaultParams: {},
-  tokenProvider: () => {
-    return import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN ?? null;
-  },
-  timeout: 15_000,
-});
+export const tvService = new TvService(TMDB_CONFIG);
 
 /* ---------------------------------------------------------------------------
    Usage examples

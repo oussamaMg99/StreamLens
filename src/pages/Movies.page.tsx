@@ -1,0 +1,83 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Box, Pagination, Typography } from '@mui/material';
+import SummaryModal from 'src/components/modal/summary/SummaryModal.component';
+import NavBar from 'src/components/navbar/Navbar';
+import MediaGrid from 'src/components/mediaGrid/MediaGrid.component';
+import { navbarHeight } from 'src/utils/constants';
+import { useMovies } from 'src/core/hooks/useMovies';
+import { Movie } from 'src/core/services/movie.service';
+import Footer from 'src/components/footer/Footer.component';
+import { SearchResultItem } from 'src/components/search/SearchBar.component';
+
+const Movies = () => {
+  const { t } = useTranslation();
+  const [page, setPage] = useState(1);
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Movie | null>(null);
+  const [submittedQuery, setSubmittedQuery] = useState('');
+  const { data, isLoading } = useMovies({ page }, { enabled: !submittedQuery });
+  const {
+    data: searchData,
+    isLoading: searchLoading,
+    error: searchError,
+  } = useMovies({ query: submittedQuery }, { enabled: submittedQuery.trim().length > 0 });
+
+  // movieService (via TmdbListService) already tags every result with media_type, so
+  // this mapping is purely about the MediaCardData shape MediaGrid expects.
+  const items = data?.results.map(movie => ({
+    ...movie,
+    title: movie.title,
+    posterPath: movie.poster_path,
+    year: movie.release_date?.slice(0, 4),
+    rating: movie.vote_average ? movie.vote_average.toFixed(1) : undefined,
+  }));
+
+  const searchResults = searchData?.results;
+  const searchResultItems: SearchResultItem[] =
+    searchResults?.map(movie => ({ id: movie.id, title: movie.title, posterPath: movie.poster_path })) ?? [];
+
+  const handleItemClick = (item: Movie) => {
+    setSelectedItem(item);
+    setIsSummaryModalOpen(true);
+  };
+
+  const onSearch = (query: string) => setSubmittedQuery(query);
+
+  const handleSelectSearchResult = (item: SearchResultItem) => {
+    const found = searchResults?.find(result => result.id === item.id);
+    setSelectedItem(found ?? null);
+    setIsSummaryModalOpen(true);
+  };
+
+  const pagination = data && data.total_pages > 1 && (
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Pagination count={Math.min(data.total_pages, 500)} page={page} onChange={(_, value) => setPage(value)} color='primary' />
+    </Box>
+  );
+
+  return (
+    <>
+      <SummaryModal open={isSummaryModalOpen} item={selectedItem ?? undefined} onClose={() => setIsSummaryModalOpen(false)} />
+      <NavBar
+        enableSearch={true}
+        onSearch={onSearch}
+        searchResults={searchResultItems}
+        searchLoading={searchLoading}
+        searchError={!!searchError}
+        onSelectSearchResult={handleSelectSearchResult}
+      />
+      <Box sx={{ pt: theme => `calc(${navbarHeight} + ${theme.spacing(4)})`, px: { xs: 2, md: 6 } }}>
+        <Typography variant='h2' sx={{ fontWeight: 800 }}>
+          {t('movies')}
+        </Typography>
+      </Box>
+      {pagination}
+      <MediaGrid loading={isLoading} items={items} onItemClick={handleItemClick} />
+      {pagination && <Box sx={{ pb: 6 }}>{pagination}</Box>}
+      <Footer />
+    </>
+  );
+};
+
+export default Movies;
