@@ -2,7 +2,7 @@
 
 Browse and search movies and TV shows from [TMDB](https://www.themoviedb.org/), keep a watch list synced across devices, track watched episodes and see insights about your viewing habits. The app is available in English, French and Arabic (with full right-to-left layout).
 
-**Live:** https://mangoub99.github.io/StreamLens/
+**Live:** https://oussamamg99.github.io/StreamLens/
 
 ## Tech stack
 
