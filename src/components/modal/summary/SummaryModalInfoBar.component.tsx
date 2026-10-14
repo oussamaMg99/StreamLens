@@ -49,31 +49,31 @@ const SummaryModalInfoBar = (props: SummaryModalInfoBarProps) => {
         <Box sx={itemSx}>
           <AvTimerIcon />
           <Typography variant={textVariant} sx={compact ? { fontWeight: 500 } : undefined}>
-            {movieDetails.runtime ? `${movieDetails.runtime} ${t('minute(s)')}` : 'N/A'}
+            {movieDetails.runtime ? `${movieDetails.runtime} ${t('minute(s)')}` : t('notAvailable')}
           </Typography>
         </Box>
       )}
       <Box sx={itemSx}>
         <CalendarMonthIcon />
         <Typography variant={textVariant} sx={compact ? { fontWeight: 500 } : undefined}>
-          {movieDetails?.release_date ?? tvDetails?.first_air_date ?? 'N/A'}
+          {movieDetails?.release_date || tvDetails?.first_air_date || t('notAvailable')}
         </Typography>
       </Box>
       <Box sx={itemSx}>
         <StarIcon />
         <Typography variant={textVariant} sx={compact ? { fontWeight: 500 } : undefined}>
-          {`${itemDetails?.vote_average ?? 'N/A'} / 10 (${itemDetails?.vote_count ?? 0} ${t('votes')})`}
+          {itemDetails?.vote_count ? `${itemDetails.vote_average} / 10 (${itemDetails.vote_count} ${t('votes')})` : t('notAvailable')}
         </Typography>
       </Box>
       {tvDetails && (
         <Box sx={itemSx}>
           <LayersIcon />
           <Typography variant={textVariant} sx={compact ? { fontWeight: 500 } : undefined}>
-            {tvDetails.number_of_seasons ? t('seasonCount', { count: tvDetails.number_of_seasons }) : 'N/A'}
+            {tvDetails.number_of_seasons ? t('seasonCount', { count: tvDetails.number_of_seasons }) : t('notAvailable')}
           </Typography>{' '}
           {'•'}
           <Typography variant={textVariant} sx={compact ? { fontWeight: 500 } : undefined}>
-            {tvDetails.number_of_episodes ? t('episodeCount', { count: tvDetails.number_of_episodes }) : 'N/A'}
+            {tvDetails.number_of_episodes ? t('episodeCount', { count: tvDetails.number_of_episodes }) : t('notAvailable')}
           </Typography>
         </Box>
       )}

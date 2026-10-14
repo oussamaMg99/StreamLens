@@ -310,5 +310,6 @@
   "summaryModalSeasons": "المواسم",
   "markAll": "تحديد الكل",
   "unmarkAll": "إلغاء تحديد الكل",
-  "episodeWatched": "تمت مشاهدة الحلقة {{episode}}"
+  "episodeWatched": "تمت مشاهدة الحلقة {{episode}}",
+  "notAvailable": "غير متاح"
 }

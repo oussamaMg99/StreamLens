@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { createContext, useEffect, useMemo, useReducer } from 'react';
+import { createContext, ReactNode, useEffect, useMemo, useReducer } from 'react';
 import { getRedirectResult, onAuthStateChanged } from 'firebase/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { AppContextType, ThemeMode } from './types';
@@ -31,7 +31,7 @@ const initialState: AppContextType = {
 
 const AppContext = createContext(initialState);
 
-export const AppContextProvider = ({ children }: any) => {
+export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(AppReducer, initialState);
   // Available because main.tsx nests this provider inside QueryClientProvider.
   const queryClient = useQueryClient();

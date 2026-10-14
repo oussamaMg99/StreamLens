@@ -259,5 +259,6 @@
   "summaryModalSeasons": "Seasons",
   "markAll": "Mark all",
   "unmarkAll": "Unmark all",
-  "episodeWatched": "Episode {{episode}} watched"
+  "episodeWatched": "Episode {{episode}} watched",
+  "notAvailable": "N/A"
 }

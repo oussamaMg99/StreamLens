@@ -67,7 +67,7 @@ export interface Season {
 export interface TVShowDetails extends MediaDetails {
   media_type: 'tv';
   created_by: CreatedBy[];
-  episode_run_time: any[];
+  episode_run_time: number[];
   first_air_date: string;
   in_production: boolean;
   languages: string[];
