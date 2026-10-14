@@ -4,7 +4,7 @@
 
 import { Collection } from 'src/core/models/collection.model';
 import { WatchListEntry } from 'src/core/models/watchList.model';
-import type { Movie } from 'src/core/services/movie.service';
+import type { Movie } from 'src/core/models/movie.model';
 
 /** Cards shown at most, like "Pick up where you left off". */
 const MAX_COLLECTIONS = 4;

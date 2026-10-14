@@ -4,19 +4,7 @@ import { MovieDetails } from '../models/movieDetails.model';
 import { Collection } from '../models/collection.model';
 import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TMDB_CONFIG } from './tmdb.config';
-import { Media } from '../models/common.model';
-
-/**
- * Basic TMDB v3 movie result shape.
- * Expand as your UI needs more data.
- */
-export interface Movie extends Media {
-  media_type: 'movie';
-  original_title: string;
-  release_date: string;
-  title: string;
-  video: boolean;
-}
+import { Movie } from '../models/movie.model';
 
 export type MovieListResponse = TmdbListResponse<Movie>;
 

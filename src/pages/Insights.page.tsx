@@ -19,8 +19,8 @@ import { useInsightsSummary } from 'src/core/hooks/useInsightsSummary';
 import { useWatchList } from 'src/core/hooks/useWatchList';
 import { useWatchListGate } from 'src/core/hooks/useWatchListGate';
 import { watchListEntryId } from 'src/core/services/watchList.service';
-import { Movie } from 'src/core/services/movie.service';
-import { TvShow } from 'src/core/services/tv.service';
+import { Movie } from 'src/core/models/movie.model';
+import { TvShow } from 'src/core/models/tvShow.model';
 import { MediaType } from 'src/types/global.type';
 import { navbarHeight } from 'src/utils/constants';
 

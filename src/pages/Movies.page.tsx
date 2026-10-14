@@ -6,7 +6,7 @@ import NavBar from 'src/components/navbar/Navbar';
 import MediaGrid from 'src/components/mediaGrid/MediaGrid.component';
 import { navbarHeight } from 'src/utils/constants';
 import { useMovies } from 'src/core/hooks/useMovies';
-import { Movie } from 'src/core/services/movie.service';
+import { Movie } from 'src/core/models/movie.model';
 import Footer from 'src/components/footer/Footer.component';
 import { SearchResultItem } from 'src/components/search/SearchBar.component';
 

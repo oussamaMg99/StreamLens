@@ -14,7 +14,7 @@ import {
 } from 'src/core/models/watchListBoard.model';
 import { MovieDetails } from 'src/core/models/movieDetails.model';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
-import { GenreNameLookup } from './insights.utils';
+import { GenreNameLookup } from 'src/types/global.type';
 import { watchListEntryId } from './watchListMeta.utils';
 
 export const BOARD_COLUMNS: BoardStatus[] = ['notStarted', 'inProgress', 'watched'];

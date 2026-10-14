@@ -3,7 +3,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { useTranslation } from 'react-i18next';
 import colors from 'src/assets/themes/colors';
 import NoPoster from 'src/assets/images/no-movie.png';
-import type { Movie } from 'src/core/services/movie.service';
+import type { Movie } from 'src/core/models/movie.model';
 import { UnfinishedCollection } from 'src/utils/collections.utils';
 import { TMDB_IMG, faintText, focusRing, partStatusLabel, stripParts, yearOf } from './collection.helpers';
 

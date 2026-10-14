@@ -4,19 +4,7 @@ import { TMDB_CONFIG } from './tmdb.config';
 import { GenreListResponse, TmdbListService, TmdbListResponse } from './tmdbList.service';
 import { TVShowDetails } from '../models/tvShowDetails.model';
 import { SeasonDetails } from '../models/seasonDetails.model';
-import { Media } from '../models/common.model';
-
-/**
- * Basic TMDB v3 TV result shape.
- * Expand as your UI needs more data.
- */
-export interface TvShow extends Media {
-  media_type: 'tv';
-  origin_country: string[];
-  original_name: string;
-  first_air_date: string;
-  name: string;
-}
+import { TvShow } from '../models/tvShow.model';
 
 export type TvListResponse = TmdbListResponse<TvShow>;
 

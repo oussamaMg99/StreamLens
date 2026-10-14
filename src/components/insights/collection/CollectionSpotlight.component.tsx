@@ -2,7 +2,7 @@ import { Box, useTheme } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useTranslation } from 'react-i18next';
 import colors from 'src/assets/themes/colors';
-import type { Movie } from 'src/core/services/movie.service';
+import type { Movie } from 'src/core/models/movie.model';
 import { UnfinishedCollection } from 'src/utils/collections.utils';
 import CollectionPartsStrip from './CollectionPartsStrip.component';
 import { TMDB_IMG, dimText, focusRing, leftText, yearOf } from './collection.helpers';

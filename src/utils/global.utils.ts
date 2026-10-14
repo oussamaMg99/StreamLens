@@ -1,7 +1,7 @@
 import { MovieDetails } from 'src/core/models/movieDetails.model';
 import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
-import { Movie } from 'src/core/services/movie.service';
-import { TvShow } from 'src/core/services/tv.service';
+import { Movie } from 'src/core/models/movie.model';
+import { TvShow } from 'src/core/models/tvShow.model';
 import { MediaType } from 'src/types/global.type';
 
 // These guards' parameter type covers both the "list item" (Movie/TvShow) and "details"

@@ -1,5 +1,5 @@
 import SummaryModalInfoBar from './SummaryModalInfoBar.component';
-import { TvShow } from 'src/core/services/tv.service';
+import { TvShow } from 'src/core/models/tvShow.model';
 import {
   Avatar,
   Box,
