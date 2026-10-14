@@ -74,13 +74,17 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       if (!current || current.emailVerified || document.visibilityState === 'hidden') return;
       try {
         await current.reload();
+        if (!current.emailVerified) return;
+        // reload() updates the profile but not the cached ID token, and firestore.rules
+        // reads email_verified from the token — until it's refreshed (hourly on its own),
+        // every watch-list request is still denied. Force it before announcing anything.
+        await current.getIdToken(true);
       } catch {
         // Offline, or the session was revoked/deleted — in the latter case the auth
         // listener reports the sign-out. Either way this is a background poll, so it
         // must not surface an error or reject unhandled.
         return;
       }
-      if (!current.emailVerified) return;
       dispatch({ type: 'SET_USER', payload: toUser(current) });
       dispatch({
         type: 'SET_SNACKBAR_PROPS',
