@@ -1,8 +1,6 @@
 import { InsightGenre, InsightsSummary, ResumeShow } from 'src/core/models/insights.model';
 import { WatchListEntry, WatchListTvEntry } from 'src/core/models/watchList.model';
-
-/** Localized genre name for a TMDB id; undefined when the genre list doesn't have it. */
-export type GenreNameLookup = (type: 'movie' | 'tv', id: number) => string | undefined;
+import { GenreNameLookup } from 'src/types/global.type';
 
 const TOP_GENRES = 3;
 const MAX_RESUME = 4;

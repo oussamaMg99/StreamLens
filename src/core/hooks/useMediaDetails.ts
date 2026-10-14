@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { movieService } from 'src/core/services/movie.service';
 import { tvService } from 'src/core/services/tv.service';
-import { MovieDetails } from 'src/core/models/movieDetails.model';
-import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
+import { MovieDetails } from 'src/core/models/movie.model';
+import { TVShowDetails } from 'src/core/models/tvShow.model';
 import { Media } from 'src/core/models/common.model';
 
 export type MediaDetailsResult = MovieDetails | TVShowDetails | undefined;

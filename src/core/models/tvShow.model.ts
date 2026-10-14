@@ -1,4 +1,16 @@
-import { Crew, MediaDetails } from './common.model';
+import { Crew, Media, MediaDetails } from './common.model';
+
+/**
+ * Basic TMDB v3 TV result shape.
+ * Expand as your UI needs more data.
+ */
+export interface TvShow extends Media {
+  media_type: 'tv';
+  origin_country: string[];
+  original_name: string;
+  first_air_date: string;
+  name: string;
+}
 
 export interface CreatedBy {
   id: number;
@@ -67,7 +79,7 @@ export interface Season {
 export interface TVShowDetails extends MediaDetails {
   media_type: 'tv';
   created_by: CreatedBy[];
-  episode_run_time: any[];
+  episode_run_time: number[];
   first_air_date: string;
   in_production: boolean;
   languages: string[];
@@ -85,7 +97,7 @@ export interface TVShowDetails extends MediaDetails {
 }
 
 // TV-specific: TMDB's TV cast entries don't carry a `cast_id` the way movie cast entries
-// do, and `profile_path` isn't marked optional here (see the movie model's Cast for the
+// do, and `profile_path` isn't marked optional here (see movie.model.ts's Cast for the
 // difference) — see common.model.ts for the fragments (Videos/Result/Crew/Images/
 // Backdrop/Logo/Poster) that are identical between the two.
 export interface Credits {

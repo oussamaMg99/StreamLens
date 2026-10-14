@@ -1,6 +1,6 @@
 import { TFunction } from 'i18next';
 import colors from 'src/assets/themes/colors';
-import type { Movie } from 'src/core/services/movie.service';
+import type { Movie } from 'src/core/models/movie.model';
 import { UnfinishedCollection } from 'src/utils/collections.utils';
 
 export const TMDB_IMG = 'https://image.tmdb.org/t/p';

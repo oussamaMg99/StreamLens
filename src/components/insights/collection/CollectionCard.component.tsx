@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import colors from 'src/assets/themes/colors';
 import NoPoster from 'src/assets/images/no-movie.png';
-import type { Movie } from 'src/core/services/movie.service';
+import type { Movie } from 'src/core/models/movie.model';
 import { UnfinishedCollection } from 'src/utils/collections.utils';
 import { TMDB_IMG, cardBorder, dimText, focusRing, leftText, stripParts, yearOf } from './collection.helpers';
 

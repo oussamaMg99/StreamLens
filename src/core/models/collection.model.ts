@@ -3,7 +3,7 @@
 // the Rings Collection") and its movies. Which collection a movie belongs to comes from
 // MovieDetails.belongs_to_collection, stored on watch-list entries as collection_id.
 
-import type { Movie } from 'src/core/services/movie.service';
+import type { Movie } from './movie.model';
 
 export interface Collection {
   id: number;

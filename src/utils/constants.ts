@@ -25,6 +25,12 @@ export const FACEBOOK_AUTH_ENABLED = envFlag(import.meta.env.VITE_AUTH_FACEBOOK_
 export const APPLE_AUTH_ENABLED = envFlag(import.meta.env.VITE_AUTH_APPLE_ENABLED);
 
 /**
+ * VITE_DEBUG_MODE: error snackbars show the raw error behind the generic "An error
+ * occurred" (see debugErrorText). Inlined at build time — keep it off for deploys.
+ */
+export const DEBUG_MODE = envFlag(import.meta.env.VITE_DEBUG_MODE);
+
+/**
  * Hides UI for features that are built but not finished, so half-working controls stay
  * out of the way without their code being deleted. Flip to false to reveal them.
  *

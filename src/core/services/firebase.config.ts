@@ -18,6 +18,7 @@ import { FirebaseError, initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { DEBUG_MODE } from 'src/utils/constants';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -80,4 +81,15 @@ export const authErrorKey = (error: unknown) => {
     default:
       return 'errorOccurred';
   }
+};
+
+/**
+ * The raw error text, in debug mode only (VITE_DEBUG_MODE=true); undefined otherwise.
+ * Callers use it in place of the generic message: `debugErrorText(error) ?? t('errorOccurred')`.
+ */
+export const debugErrorText = (error: unknown) => {
+  if (!DEBUG_MODE) return undefined;
+  // Auth messages already embed the code ("Firebase: Error (auth/…)."); Firestore's don't.
+  if (error instanceof FirebaseError) return error.message.includes(error.code) ? error.message : `${error.code}: ${error.message}`;
+  return error instanceof Error ? error.message : String(error);
 };
