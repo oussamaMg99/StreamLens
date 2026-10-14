@@ -9,7 +9,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LinkIcon from '@mui/icons-material/Link';
 import { sendEmailVerification, sendPasswordResetEmail, signOut, updateProfile } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
-import { auth, authErrorKey } from 'src/core/services/firebase.config';
+import { auth, authErrorKey, debugErrorText } from 'src/core/services/firebase.config';
 import colors from 'src/assets/themes/colors';
 
 import AuthError from 'src/components/modal/shared/AuthError.component';
@@ -125,8 +125,10 @@ const UserProfileModal = (props: UserProfileModalProps) => {
     try {
       await signOut(auth);
       onClose();
-    } catch {
-      setSnackBarProps({ open: true, severity: 'error', message: t('errorOccurred') });
+      // Only this button confirms; other sign-outs (another tab, revoked session) stay silent.
+      setSnackBarProps({ open: true, severity: 'success', message: t('signedOutSuccessfully') });
+    } catch (error) {
+      setSnackBarProps({ open: true, severity: 'error', message: debugErrorText(error) ?? t('errorOccurred') });
     } finally {
       setSigningOut(false);
     }

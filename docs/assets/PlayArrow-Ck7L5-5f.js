@@ -1,0 +1,1 @@
+import{K as e}from"./Box-CqygeKYl.js";import{Rt as t}from"./AuthError.component-CXux9TiU.js";var n=e(),r=t((0,n.jsx)(`path`,{d:`M8 5v14l11-7z`}),`PlayArrow`);export{r as t};

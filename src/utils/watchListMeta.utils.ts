@@ -6,8 +6,8 @@
 // Firestore rejects `undefined` field values, so every helper here builds objects that
 // simply omit a field rather than set it to undefined.
 
-import { MovieDetails } from 'src/core/models/movieDetails.model';
-import { TVShowDetails } from 'src/core/models/tvShowDetails.model';
+import { MovieDetails } from 'src/core/models/movie.model';
+import { TVShowDetails } from 'src/core/models/tvShow.model';
 import { Episode } from 'src/core/models/seasonDetails.model';
 import { EntryMeta, WatchListEntry, WatchListMovieEntry, WatchListTvEntry } from 'src/core/models/watchList.model';
 

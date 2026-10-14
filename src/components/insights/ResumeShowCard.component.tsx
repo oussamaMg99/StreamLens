@@ -4,7 +4,7 @@ import colors from 'src/assets/themes/colors';
 import NoPoster from 'src/assets/images/no-movie.png';
 import { ResumeShow } from 'src/core/models/insights.model';
 import { useMediaDetails } from 'src/core/hooks/useMediaDetails';
-import { TvShow } from 'src/core/services/tv.service';
+import { TvShow } from 'src/core/models/tvShow.model';
 
 interface ResumeShowCardProps {
   show: ResumeShow;

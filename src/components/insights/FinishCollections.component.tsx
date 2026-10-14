@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useUnfinishedCollections } from 'src/core/hooks/useUnfinishedCollections';
 import { WatchListEntry } from 'src/core/models/watchList.model';
-import { Movie } from 'src/core/services/movie.service';
+import { Movie } from 'src/core/models/movie.model';
 import InsightSection from './InsightSection.component';
 import CollectionSpotlight from './collection/CollectionSpotlight.component';
 import CollectionCard from './collection/CollectionCard.component';

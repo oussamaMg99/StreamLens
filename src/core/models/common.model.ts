@@ -4,7 +4,6 @@ export interface Genre {
   id: number;
   name: string;
 }
-
 export interface ProductionCompany {
   id: number;
   logo_path?: string;

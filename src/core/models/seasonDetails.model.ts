@@ -1,7 +1,7 @@
 // src/core/models/seasonDetails.model.ts
 // Response shape for TMDB's /tv/{tv_id}/season/{season_number} — the per-episode data
 // that isn't included in the season summaries on /tv/{id} itself (see Season in
-// tvShowDetails.model.ts, which only has id/name/poster_path/episode_count/air_date).
+// tvShow.model.ts, which only has id/name/poster_path/episode_count/air_date).
 
 export interface SeasonDetails {
   id: number;

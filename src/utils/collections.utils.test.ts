@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Collection } from 'src/core/models/collection.model';
 import { WatchListEntry } from 'src/core/models/watchList.model';
-import type { Movie } from 'src/core/services/movie.service';
+import type { Movie } from 'src/core/models/movie.model';
 import { unfinishedCollections, watchedCollectionIds } from './collections.utils';
 
 const TODAY = '2026-10-11';

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY_INSIGHTS } from 'src/core/models/insights.model';
 import { WatchListMovieEntry, WatchListTvEntry } from 'src/core/models/watchList.model';
-import { GenreNameLookup, buildInsightsSummary } from './insights.utils';
+import { GenreNameLookup } from 'src/types/global.type';
+import { buildInsightsSummary } from './insights.utils';
 
 const GENRES: Record<number, string> = { 18: 'Drama', 27: 'Horror', 28: 'Action', 35: 'Comedy', 53: 'Thriller' };
 const genreName: GenreNameLookup = (_type, id) => GENRES[id];
