@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { createContext, ReactNode, useEffect, useMemo, useReducer } from 'react';
+import { createContext, ReactNode, useCallback, useEffect, useMemo, useReducer } from 'react';
 import { getRedirectResult, onAuthStateChanged } from 'firebase/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { AppContextType, ThemeMode } from './types';
@@ -101,40 +101,43 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [queryClient]);
 
-  const setThemeMode = (mode: ThemeMode) => {
+  // Stable setters: `dispatch` never changes identity, so these never need to either, and
+  // the memoized context value below only changes when a state field does. Keep them
+  // free of `state` reads — anything derived from state belongs in AppReducer.
+  const setThemeMode = useCallback((mode: ThemeMode) => {
     dispatch({
       type: 'SET_THEME_MODE',
       payload: mode,
     });
-  };
+  }, []);
 
-  const setUser = (user?: User) => {
+  const setUser = useCallback((user?: User) => {
     dispatch({
       type: 'SET_USER',
       payload: user,
     });
-  };
+  }, []);
 
-  const setAuthModalOpen = (open: boolean) => {
+  const setAuthModalOpen = useCallback((open: boolean) => {
     dispatch({
       type: 'SET_AUTH_MODAL_OPEN',
       payload: open,
     });
-  };
+  }, []);
 
-  const setAlertDialogProps = (dialog?: AlertDialogProps) => {
+  const setAlertDialogProps = useCallback((dialog?: AlertDialogProps) => {
     dispatch({
       type: 'SET_ALERT_DIALOG_PROPS',
       payload: dialog,
     });
-  };
+  }, []);
 
-  const setSnackBarProps = (dialog?: SnackBarProps) => {
+  const setSnackBarProps = useCallback((dialog?: SnackBarProps) => {
     dispatch({
       type: 'SET_SNACKBAR_PROPS',
       payload: dialog,
     });
-  };
+  }, []);
 
   const contextValue = useMemo(
     () => ({
