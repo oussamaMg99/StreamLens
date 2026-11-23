@@ -35,7 +35,7 @@
     "stylis-plugin-rtl": "^2.1.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.36.0",
+    "@eslint/js": "^10.0.1",
     "@tanstack/eslint-plugin-query": "^5.106.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
